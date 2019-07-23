@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "package": "com.github.gamepiaynmo.custommodel.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+  ],
+  "client": [
+    "MixinEntityRenderDispatcher",
+    "MixinPlayerEntityRenderer"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
