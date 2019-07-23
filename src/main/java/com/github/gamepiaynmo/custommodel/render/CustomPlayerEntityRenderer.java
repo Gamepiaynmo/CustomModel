@@ -34,18 +34,18 @@ public class CustomPlayerEntityRenderer extends PlayerEntityRenderer {
     public void tick(AbstractClientPlayerEntity playerEntity) {
         ModelPack model = CustomModelClient.getModelForPlayer(playerEntity);
         if (model != null) {
-            this.model.handSwingProgress = this.getHandSwingProgress(playerEntity, 0);
+            this.model.handSwingProgress = this.getHandSwingProgress(playerEntity, 1);
             this.model.isRiding = playerEntity.hasVehicle();
             this.model.isChild = playerEntity.isBaby();
 
             try {
-                float float_3 = playerEntity.field_6220;
-                float float_4 = playerEntity.prevHeadYaw;
+                float float_3 = playerEntity.field_6283;
+                float float_4 = playerEntity.headYaw;
                 float float_5 = float_4 - float_3;
                 float float_8;
                 if (playerEntity.hasVehicle() && playerEntity.getVehicle() instanceof LivingEntity) {
                     LivingEntity livingEntity_2 = (LivingEntity)playerEntity.getVehicle();
-                    float_3 = livingEntity_2.field_6220;
+                    float_3 = livingEntity_2.field_6283;
                     float_5 = float_4 - float_3;
                     float_8 = MathHelper.wrapDegrees(float_5);
                     if (float_8 < -85.0F) {
@@ -64,13 +64,13 @@ public class CustomPlayerEntityRenderer extends PlayerEntityRenderer {
                     float_5 = float_4 - float_3;
                 }
 
-                float float_7 = playerEntity.prevPitch;
-                float_8 = this.getAge(playerEntity, 0);
+                float float_7 = playerEntity.pitch;
+                float_8 = this.getAge(playerEntity, 1);
                 float float_10 = 0.0F;
                 float float_11 = 0.0F;
                 if (!playerEntity.hasVehicle() && playerEntity.isAlive()) {
-                    float_10 = playerEntity.lastLimbDistance;
-                    float_11 = playerEntity.limbAngle - playerEntity.limbDistance;
+                    float_10 = playerEntity.limbDistance;
+                    float_11 = playerEntity.limbAngle;
                     if (playerEntity.isBaby()) {
                         float_11 *= 3.0F;
                     }
@@ -80,10 +80,10 @@ public class CustomPlayerEntityRenderer extends PlayerEntityRenderer {
                     }
                 }
 
-                this.model.animateModel(playerEntity, float_11, float_10, 0);
+                GlStateManager.enableAlphaTest();
+                this.model.animateModel(playerEntity, float_11, float_10, 1);
                 this.model.setAngles(playerEntity, float_11, float_10, float_8, float_5, float_7, 0.0625f);
             } catch (Exception var19) {
-
             }
 
             model.getModel().tick(playerEntity, getModel());
@@ -105,9 +105,9 @@ public class CustomPlayerEntityRenderer extends PlayerEntityRenderer {
             else this.setModelPose(playerEntity);
             this.partial = partial;
 
-            GlStateManager.setProfile(GlStateManager.RenderMode.field_5128);
+            GlStateManager.setProfile(GlStateManager.RenderMode.PLAYER_SKIN);
             super.render(playerEntity, offX, newOffY, offZ, rotYaw, partial);
-            GlStateManager.unsetProfile(GlStateManager.RenderMode.field_5128);
+            GlStateManager.unsetProfile(GlStateManager.RenderMode.PLAYER_SKIN);
         }
     }
 
@@ -121,7 +121,7 @@ public class CustomPlayerEntityRenderer extends PlayerEntityRenderer {
             }
 
             if (boolean_2) {
-                GlStateManager.setProfile(GlStateManager.RenderMode.field_5125);
+                GlStateManager.setProfile(GlStateManager.RenderMode.TRANSPARENT_MODEL);
             }
 
             this.model.render(playerEntity, float_1, float_2, float_3, float_4, float_5, float_6);
@@ -131,7 +131,7 @@ public class CustomPlayerEntityRenderer extends PlayerEntityRenderer {
                 model.getModel().render(playerEntity, this, getModel(), float_6, partial);
 
             if (boolean_2) {
-                GlStateManager.unsetProfile(GlStateManager.RenderMode.field_5125);
+                GlStateManager.unsetProfile(GlStateManager.RenderMode.TRANSPARENT_MODEL);
             }
         }
 

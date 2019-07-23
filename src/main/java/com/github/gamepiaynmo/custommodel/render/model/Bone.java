@@ -71,7 +71,7 @@ public class Bone implements IBone {
 
         JsonElement positionArray = jsonObj.get(CustomJsonModel.POSITION);
         if (positionArray != null)
-            bone.position = new Vector3(Json.parseFloatArray(positionArray, 3)).scl(-1);
+            bone.position = new Vector3(Json.parseFloatArray(positionArray, 3)).scl(-1, -1, 1);
         bone.length = bone.position.len() * 0.0625f;
 
         JsonElement rotationArray = jsonObj.get(CustomJsonModel.ROTATION);
@@ -119,7 +119,7 @@ public class Bone implements IBone {
             float[] arr = Json.parseFloatArray(coordArray, 6);
             xMin = -arr[0];
             yMin = -arr[1];
-            zMin = -arr[2];
+            zMin = arr[2];
             width = arr[3];
             height = arr[4];
             depth = arr[5];
@@ -148,7 +148,7 @@ public class Bone implements IBone {
             float[] arr = Json.parseFloatArray(coordArray, 5);
             xMin = -arr[0];
             yMin = -arr[1];
-            zMin = -arr[2];
+            zMin = arr[2];
             width = arr[3];
             height = arr[4];
         }
@@ -219,10 +219,10 @@ public class Bone implements IBone {
     }
 
     public Matrix4 getSelfTransform(PlayerEntityModel model, float partial) {
-        Matrix4 res = new Matrix4().setToScaling(getScale(model)).rotate(getQuaternion(model));
+        Matrix4 res = new Matrix4().setToScaling(getScale(model));
         if (physicalize)
             res.rotate(lastDirection.cpy().slerp(direction, partial));
-        return res;
+        return res.rotate(getQuaternion(model));
     }
 
     public void render(AbstractClientPlayerEntity playerEntity, PlayerEntityModel playerModel, float scale, float partial) {

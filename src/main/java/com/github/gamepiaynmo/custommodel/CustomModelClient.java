@@ -64,7 +64,7 @@ public class CustomModelClient implements ClientModInitializer {
     public void onInitializeClient() {
         WorldTickCallback.EVENT.register(world -> {
             MinecraftClient client = MinecraftClient.getInstance();
-            if (customRenderer != null && client.world != null) {
+            if (world == client.world) {
                 for (AbstractClientPlayerEntity player : client.world.getPlayers())
                     customRenderer.tick(player);
             }

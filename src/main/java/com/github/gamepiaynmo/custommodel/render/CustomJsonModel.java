@@ -115,27 +115,22 @@ public class CustomJsonModel {
     }
 
     public void render(AbstractClientPlayerEntity entity, CustomPlayerEntityRenderer renderer, PlayerEntityModel model, float scale, float partial) {
-        Matrix4 baseMat = new Matrix4();
-        if (entity.isInSneakingPose())
-            baseMat.translate(0, 0.2f, 0);
-
-        for (PlayerBones playerBone : PlayerBones.values()) {
-            IBone bone = playerBone.getBone();
-            tmpBoneMats.put(playerBone.getId(), bone.getTransform(model).mulLeft(baseMat));
-        }
+        //if (entity.isInSneakingPose())
+        //    GlStateManager.translatef(0, 0.2f, 0);
+        GlStateManager.rotatef(-entity.field_6283, 0, 1, 0);
+        GlStateManager.translatef((float) -MathHelper.lerp(partial, entity.x, entity.prevX),
+                (float) -MathHelper.lerp(partial, entity.y, entity.prevY),
+                (float) -MathHelper.lerp(partial, entity.z, entity.prevZ));
 
         for (Bone bone : bones) {
             renderer.bindTexture(bone.getTexture().getTexture(entity));
             GlStateManager.pushMatrix();
-            Matrix4 transform = tmpBoneMats.get(bone.getParent().getId()).cpy();
-            transform.mul(bone.getSelfTransform(model, partial));
-            buffer.put(transform.val);
+            Matrix4 transform = lastBoneMats.get(bone.getId()).cpy().avg(boneMats.get(bone.getId()), partial);
+            buffer.put(transform.translate(bone.getPosition(model).scl(-0.0625f)).val);
             buffer.rewind();
             GlStateManager.multMatrix(buffer);
             bone.render(entity, model, scale, partial);
             GlStateManager.popMatrix();
-            tmpBoneMats.put(bone.getId(), tmpBoneMats.get(bone.getParent().getId()).cpy()
-                    .mul(bone.getTransform(model, partial)));
         }
     }
 
@@ -144,7 +139,7 @@ public class CustomJsonModel {
         if (entity.isInSneakingPose())
             baseMat.translate(0, 0.2f, 0);
         baseMat.translate((float) entity.x, (float) entity.y, (float) entity.z);
-        baseMat.rotate(Vector3.Y, -entity.field_6283);
+        baseMat.rotate(Vector3.Y, -PlayerBones.BODY.getBone().getTransform(model).getRotation(new Quaternion()).getYaw());
 
         if (lastBoneMats.isEmpty()) {
             for (PlayerBones playerBone : PlayerBones.values()) {
@@ -188,12 +183,12 @@ public class CustomJsonModel {
 
                     Vector3 curEnd = lastEnd.cpy().add(bone.velocity.cpy().scl(1 / 20.0f));
                     curEnd.sub(curStart).nor().scl(bone.getLength()).add(curStart);
-                    bone.lastDirection = bone.direction.cpy();
-                    //bone.direction = new Quaternion().setFromCross(curEnd.sub(curStart).nor(), lastEnd.sub(lastStart).nor()).mul(bone.direction);
-                    bone.direction = new Quaternion().setFromCross(curEnd.sub(curStart).nor(), bone.position.cpy().mul(curParTrans.cpy().mul(bone.getSelfTransform(model, 1))).sub(curStart).nor());
-                    curTrans = curParTrans.cpy().mul(bone.getTransform(model, 1));
 
-                    System.out.println(lastStart.toString() + curStart.toString() + lastEnd.toString() + curEnd.toString());
+                    Quaternion deltaDir = new Quaternion().setFromCross(lastEnd.cpy().sub(lastStart).nor(), curEnd.cpy().sub(curStart).nor());
+                    Quaternion direction = lastTrans.cpy().rotate(deltaDir).getRotation(new Quaternion());
+                    direction.setEulerAngles(direction.getYaw(), direction.getPitch(), 0);
+                    curTrans = new Matrix4(curEnd, direction, curTrans.getScale(new Vector3()));
+                    System.out.println(lastStart.toString() + curStart.toString() + lastEnd.toString() + curEnd.toString() + curTrans.getTranslation(new Vector3()).toString());
                 }
 
                 boneMats.put(bone.getId(), curTrans);
