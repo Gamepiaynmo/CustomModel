@@ -215,14 +215,7 @@ public class Bone implements IBone {
     public float getLength() { return length; }
 
     public Matrix4 getTransform(PlayerEntityModel model, float partial) {
-        return getSelfTransform(model, partial).translate(getPosition(model).scl(0.0625f));
-    }
-
-    public Matrix4 getSelfTransform(PlayerEntityModel model, float partial) {
-        Matrix4 res = new Matrix4().setToScaling(getScale(model));
-        if (physicalize)
-            res.rotate(lastDirection.cpy().slerp(direction, partial));
-        return res.rotate(getQuaternion(model));
+        return new Matrix4().setToScaling(getScale(model)).rotate(getQuaternion(model)).translate(getPosition(model).scl(0.0625f));
     }
 
     public void render(AbstractClientPlayerEntity playerEntity, PlayerEntityModel playerModel, float scale, float partial) {
