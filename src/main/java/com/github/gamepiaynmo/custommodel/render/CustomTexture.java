@@ -10,11 +10,11 @@ import net.minecraft.util.Identifier;
 import java.io.IOException;
 import java.util.concurrent.Executor;
 
-public class ModelTexture extends AbstractTexture {
+public class CustomTexture extends AbstractTexture {
 
     private NativeImage image;
 
-    public ModelTexture(NativeImage image) {
+    public CustomTexture(NativeImage image) {
         this.image = image;
     }
 

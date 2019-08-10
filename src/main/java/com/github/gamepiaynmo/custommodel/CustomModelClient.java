@@ -28,7 +28,10 @@ public class CustomModelClient implements ClientModInitializer {
     public static boolean needToReload = false;
 
     public static void reloadModels() {
+        for (ModelPack pack : modelPacks.values())
+            pack.release();
         modelPacks.clear();
+
         File modelFolder = new File("custom-models");
         if (modelFolder.isDirectory()) {
             for (File modelPackFile : modelFolder.listFiles()) {
