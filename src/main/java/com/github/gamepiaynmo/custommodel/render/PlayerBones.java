@@ -4,6 +4,7 @@ import com.github.gamepiaynmo.custommodel.render.model.IBone;
 import com.github.gamepiaynmo.custommodel.util.ModelPack;
 import com.github.gamepiaynmo.custommodel.util.Vector3;
 import com.google.common.collect.Maps;
+import com.sun.javafx.geom.Vec2d;
 import net.fabricmc.loader.util.sat4j.core.Vec;
 import net.minecraft.client.model.Cuboid;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
@@ -59,7 +60,7 @@ public enum PlayerBones {
         private PlayerBones playerBone;
 
         private static final Vector3 One = new Vector3(1, 1, 1);
-        private static final Vec2f TexSize = new Vec2f(64, 64);
+        private static final Vec2d TexSize = new Vec2d(64, 64);
 
         public OriginalBone(PlayerBones playerBone, PlayerCuboidGetter cuboidGetter) {
             this.playerBone = playerBone;
@@ -89,7 +90,7 @@ public enum PlayerBones {
         }
 
         @Override
-        public Vec2f getTextureSize() {
+        public Vec2d getTextureSize() {
             return TexSize;
         }
 

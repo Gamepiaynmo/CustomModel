@@ -20,7 +20,7 @@ public class ReloadModelCommand {
     }
 
     private static int execute(ServerCommandSource serverCommandSource) {
-        CustomModelClient.reloadModels();
+        CustomModelClient.needToReload = true;
         return 1;
     }
 }

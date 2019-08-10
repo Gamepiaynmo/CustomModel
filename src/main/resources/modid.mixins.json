@@ -6,7 +6,8 @@
   ],
   "client": [
     "MixinEntityRenderDispatcher",
-    "MixinPlayerEntityRenderer"
+    "MixinPlayerEntityRenderer",
+    "MixinParticleManager"
   ],
   "injectors": {
     "defaultRequire": 1

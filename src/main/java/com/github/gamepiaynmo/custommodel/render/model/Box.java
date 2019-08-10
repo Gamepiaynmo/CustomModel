@@ -1,5 +1,9 @@
 package com.github.gamepiaynmo.custommodel.render.model;
 
+import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
+import com.github.gamepiaynmo.custommodel.util.Json;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.Cuboid;
@@ -17,7 +21,7 @@ public class Box {
     public final float yMax;
     public final float zMax;
 
-    public Box(int int_1, int int_2, float float_1, float float_2, float float_3, float int_3, float int_4, float int_5, float float_4, float texWidth, float texHeight) {
+    private Box(int int_1, int int_2, float float_1, float float_2, float float_3, float int_3, float int_4, float int_5, float float_4, float texWidth, float texHeight) {
         this.xMin = float_1 - int_3;
         this.yMin = float_2 - int_4;
         this.zMin = float_3 - int_5;
@@ -70,5 +74,34 @@ public class Box {
             quad_1.render(bufferBuilder_1, float_1);
         }
 
+    }
+
+    public static Box getBoxFromJson(Bone bone, JsonObject jsonObj) {
+        int uMin = 0, vMin = 0;
+        float xMin = 0, yMin = 0, zMin = 0, width = 0, height = 0, depth = 0, size = 0;
+
+        JsonElement uvArray = jsonObj.get(CustomJsonModel.TEXTURE_OFFSET);
+        if (uvArray != null) {
+            int[] arr = Json.parseIntArray(uvArray, 2);
+            uMin = arr[0];
+            vMin = arr[1];
+        }
+
+        JsonElement coordArray = jsonObj.get(CustomJsonModel.COORDINATES);
+        if (coordArray != null) {
+            float[] arr = Json.parseFloatArray(coordArray, 6);
+            xMin = -arr[0];
+            yMin = -arr[1];
+            zMin = arr[2];
+            width = arr[3];
+            height = arr[4];
+            depth = arr[5];
+        }
+
+        JsonElement sizeVal = jsonObj.get(CustomJsonModel.SIZE_ADD);
+        if (sizeVal != null)
+            size = sizeVal.getAsFloat();
+
+        return new Box(uMin, vMin, xMin, yMin, zMin, width, height, depth, size, (float) bone.getTextureSize().x, (float) bone.getTextureSize().y);
     }
 }

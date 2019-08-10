@@ -5,6 +5,7 @@ import com.github.gamepiaynmo.custommodel.util.Matrix4;
 import com.github.gamepiaynmo.custommodel.util.ModelPack;
 import com.github.gamepiaynmo.custommodel.util.Quaternion;
 import com.github.gamepiaynmo.custommodel.util.Vector3;
+import com.sun.javafx.geom.Vec2d;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.util.math.Vec2f;
 
@@ -12,7 +13,7 @@ public interface IBone {
     public Vector3 getPosition(PlayerEntityModel model);
     public Vector3 getRotation(PlayerEntityModel model);
     public Vector3 getScale(PlayerEntityModel model);
-    public Vec2f getTextureSize();
+    public Vec2d getTextureSize();
     public ModelPack.TextureGetter getTexture();
     public IBone getParent();
     public PlayerBones getPlayerBone();
@@ -23,6 +24,6 @@ public interface IBone {
         return new Quaternion().setEulerAnglesRad(rotation.x, rotation.y, rotation.z);
     }
     default public Matrix4 getTransform(PlayerEntityModel model) {
-        return new Matrix4().setToScaling(getScale(model)).rotate(getQuaternion(model)).translate(getPosition(model).scl(0.0625f));
+        return new Matrix4().setToScaling(getScale(model)).rotate(getQuaternion(model)).translate(getPosition(model).scl(0.0625));
     }
 }

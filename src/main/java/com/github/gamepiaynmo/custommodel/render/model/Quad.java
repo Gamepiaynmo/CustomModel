@@ -1,5 +1,9 @@
 package com.github.gamepiaynmo.custommodel.render.model;
 
+import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
+import com.github.gamepiaynmo.custommodel.util.Json;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.Vertex;
@@ -12,7 +16,7 @@ import net.minecraft.util.math.Vec3d;
 public class Quad {
     public Vertex[] vertices;
 
-    public Quad(Vertex[] vertexs_1, float int_1, float int_2, float int_3, float int_4, float float_1, float float_2) {
+    protected Quad(Vertex[] vertexs_1, float int_1, float int_2, float int_3, float int_4, float float_1, float float_2) {
         vertexs_1[0] = vertexs_1[0].remap(int_3 / float_1, int_2 / float_2);
         vertexs_1[1] = vertexs_1[1].remap(int_1 / float_1, int_2 / float_2);
         vertexs_1[2] = vertexs_1[2].remap(int_1 / float_1, int_4 / float_2);
@@ -20,7 +24,7 @@ public class Quad {
         this.vertices = vertexs_1;
     }
 
-    public Quad(float xMin, float yMin, float zMin, float width, float height, float uMin, float vMin, float sizeAdd, float texWidth, float texHeight) {
+    protected Quad(float xMin, float yMin, float zMin, float width, float height, float uMin, float vMin, float sizeAdd, float texWidth, float texHeight) {
         vertices = new Vertex[4];
         vertices[0] = new Vertex(xMin + sizeAdd, yMin - height - sizeAdd, zMin, (uMin + width) / texWidth, vMin / texHeight);
         vertices[1] = new Vertex(xMin - width - sizeAdd, yMin - height - sizeAdd, zMin, uMin / texWidth, vMin / texHeight);
@@ -44,5 +48,33 @@ public class Quad {
         }
 
         Tessellator.getInstance().draw();
+    }
+
+    public static Quad getQuadFromJson(Bone bone, JsonObject jsonObj) {
+        int uMin = 0, vMin = 0;
+        float xMin = 0, yMin = 0, zMin = 0, width = 0, height = 0, size = 0;
+
+        JsonElement uvArray = jsonObj.get(CustomJsonModel.TEXTURE_OFFSET);
+        if (uvArray != null) {
+            int[] arr = Json.parseIntArray(uvArray, 2);
+            uMin = arr[0];
+            vMin = arr[1];
+        }
+
+        JsonElement coordArray = jsonObj.get(CustomJsonModel.COORDINATES);
+        if (coordArray != null) {
+            float[] arr = Json.parseFloatArray(coordArray, 5);
+            xMin = -arr[0];
+            yMin = -arr[1];
+            zMin = arr[2];
+            width = arr[3];
+            height = arr[4];
+        }
+
+        JsonElement sizeVal = jsonObj.get(CustomJsonModel.SIZE_ADD);
+        if (sizeVal != null)
+            size = sizeVal.getAsFloat();
+
+        return new Quad(xMin, yMin, zMin, width, height, uMin, vMin, size, (float) bone.getTextureSize().x, (float) bone.getTextureSize().y);
     }
 }

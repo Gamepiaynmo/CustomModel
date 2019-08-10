@@ -11,6 +11,11 @@ public class Json {
       return elem == null ? def : elem.getAsFloat();
    }
 
+   public static double getDouble(JsonObject obj, String field, double def) {
+      JsonElement elem = obj.get(field);
+      return elem == null ? def : elem.getAsDouble();
+   }
+
    public static boolean getBoolean(JsonObject obj, String field, boolean def) {
       JsonElement elem = obj.get(field);
       return elem == null ? def : elem.getAsBoolean();
@@ -38,6 +43,29 @@ public class Json {
             throw new JsonParseException("Wrong array length: " + arr.size() + ", should be: " + len + ", array: " + arr);
          } else {
             float[] floatArr = new float[arr.size()];
+
+            for(int i = 0; i < floatArr.length; ++i) {
+               floatArr[i] = arr.get(i).getAsFloat();
+            }
+
+            return floatArr;
+         }
+      }
+   }
+
+   public static double[] parseDoubleArray(JsonElement jsonElement, int len) {
+      return parseDoubleArray(jsonElement, len, (double[])null);
+   }
+
+   public static double[] parseDoubleArray(JsonElement jsonElement, int len, double[] def) {
+      if (jsonElement == null) {
+         return def;
+      } else {
+         JsonArray arr = jsonElement.getAsJsonArray();
+         if (arr.size() != len) {
+            throw new JsonParseException("Wrong array length: " + arr.size() + ", should be: " + len + ", array: " + arr);
+         } else {
+            double[] floatArr = new double[arr.size()];
 
             for(int i = 0; i < floatArr.length; ++i) {
                floatArr[i] = arr.get(i).getAsFloat();

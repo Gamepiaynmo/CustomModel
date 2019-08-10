@@ -46,7 +46,7 @@ public class ModelPack {
         pack.modelJson = new JsonParser().parse(new InputStreamReader(modelInputStream)).getAsJsonObject();
         IOUtils.closeQuietly(modelInputStream);
         for (File texture : textureFiles) {
-            Identifier identifier = new Identifier("custommodel/" + dir.getName() + "/" + texture.getName());
+            Identifier identifier = new Identifier(("custommodel/" + dir.getName() + "/" + texture.getName()).toLowerCase());
             pack.textureIds.put(texture.getName(), identifier);
             NativeImage image = NativeImage.read(new FileInputStream(texture));
             textureManager.registerTexture(identifier, new ModelTexture(image));

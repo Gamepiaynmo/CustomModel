@@ -18,11 +18,16 @@ import net.minecraft.client.util.math.Matrix4f;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import org.lwjgl.opengl.GL11;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 public class CustomJsonModel {
     public static final String HIDE = "hide";
@@ -42,6 +47,22 @@ public class CustomJsonModel {
     public static final String COORDINATES = "coordinates";
     public static final String SIZE_ADD = "sizeAdd";
     public static final String PHYSICS = "physics";
+
+    public static final String POS_RANGE = "posRange";
+    public static final String DIR_RANGE = "dirRange";
+    public static final String ANGLE = "angle";
+    public static final String SPEED = "speed";
+    public static final String ROT_SPEED = "rotSpeed";
+    public static final String LIFE_SPAN = "lifeSpan";
+    public static final String DENSITY = "density";
+    public static final String ANIMATION = "animation";
+    public static final String COLOR_R = "colorR";
+    public static final String COLOR_G = "colorG";
+    public static final String COLOR_B = "colorB";
+    public static final String COLOR_A = "colorA";
+    public static final String SIZE = "size";
+    public static final String GRAVITY = "gravity";
+    public static final String COLLIDE = "collide";
 
     public static CustomJsonModel fromJson(ModelPack pack, JsonObject jsonObj) {
         CustomJsonModel model = new CustomJsonModel();
@@ -71,7 +92,7 @@ public class CustomJsonModel {
         return model;
     }
 
-    private static FloatBuffer buffer = GlAllocationUtils.allocateFloatBuffer(16);
+//    private static DoubleBuffer buffer = ByteBuffer.allocate(128).order(ByteOrder.nativeOrder()).asDoubleBuffer();
 
     private List<PlayerBones> hideList = Lists.newArrayList();
     private Map<PlayerBones, Boolean> visibleBones = Maps.newEnumMap(PlayerBones.class);
@@ -119,9 +140,9 @@ public class CustomJsonModel {
 //            GlStateManager.translatef(0, 0.2f, 0);
 //        GlStateManager.scalef(-1.0f, -1.0f, 1.0f);
         GlStateManager.rotatef(-MathHelper.lerp(partial, entity.field_6220, entity.field_6283), 0, 1, 0);
-        GlStateManager.translatef((float) -MathHelper.lerp(partial, entity.x, entity.prevX),
-                (float) MathHelper.lerp(partial, entity.y, entity.prevY),
-                (float) MathHelper.lerp(partial, entity.z, entity.prevZ));
+        GlStateManager.translated(-MathHelper.lerp(partial, entity.prevX, entity.x),
+                MathHelper.lerp(partial, entity.prevY, entity.y),
+                MathHelper.lerp(partial, entity.prevZ, entity.z));
 
         if (lastBoneMats.isEmpty())
             tick(entity, model);
@@ -129,10 +150,12 @@ public class CustomJsonModel {
         for (Bone bone : bones) {
             renderer.bindTexture(bone.getTexture().getTexture(entity));
             GlStateManager.pushMatrix();
-            Matrix4 transform = lastBoneMats.get(bone.getId()).cpy().avg(boneMats.get(bone.getId()), partial);
-            buffer.put(transform.val);
-            buffer.rewind();
-            GlStateManager.multMatrix(buffer);
+
+            Matrix4 lastMat = lastBoneMats.get(bone.getId());
+            Matrix4 curMat = boneMats.get(bone.getId());
+            Matrix4 transform = lastMat.cpy().lerp(curMat, partial);
+
+            GL11.glMultMatrixd(transform.val);
             bone.render(entity, model, scale, partial);
             GlStateManager.popMatrix();
         }
@@ -142,7 +165,7 @@ public class CustomJsonModel {
         Matrix4 baseMat = new Matrix4();
         if (entity.isInSneakingPose())
             baseMat.translate(0, 0.2f, 0);
-        baseMat.translate((float) entity.x, (float) -entity.y, (float) -entity.z);
+        baseMat.translate(entity.x, -entity.y, -entity.z);
         baseMat.rotate(Vector3.Y, entity.field_6283);
 
         if (lastBoneMats.isEmpty()) {
@@ -194,6 +217,7 @@ public class CustomJsonModel {
                 }
 
                 boneMats.put(bone.getId(), curTrans);
+                bone.tick(entity, curTrans);
             }
         }
     }

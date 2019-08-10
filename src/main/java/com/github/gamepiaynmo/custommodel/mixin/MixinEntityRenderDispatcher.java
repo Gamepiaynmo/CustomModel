@@ -23,7 +23,7 @@ public class MixinEntityRenderDispatcher {
     @Shadow
     private PlayerEntityRenderer playerRenderer;
 
-    @Inject(method = "<init>(Lnet/minecraft/client/texture/TextureManager;Lnet/minecraft/client/render/item/ItemRenderer;Lnet/minecraft/resource/ReloadableResourceManager;)V", at = @At("RETURN"), require = 0)
+    @Inject(method = "<init>(Lnet/minecraft/client/texture/TextureManager;Lnet/minecraft/client/render/item/ItemRenderer;Lnet/minecraft/resource/ReloadableResourceManager;)V", at = @At("RETURN"))
     public void init(TextureManager textureManager, ItemRenderer itemRenderer, ReloadableResourceManager manager, CallbackInfo info) {
         CustomModelClient.customRenderer = new CustomPlayerEntityRenderer((EntityRenderDispatcher) (Object) this);
         this.playerRenderer = CustomModelClient.customRenderer;

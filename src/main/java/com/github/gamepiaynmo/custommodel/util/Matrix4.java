@@ -43,8 +43,8 @@ public class Matrix4 {
     /** WW: Typically the value one. On Vector3 multiplication this value is ignored. */
     public static final int M33 = 15;
 
-    private static final float tmp[] = new float[16];
-    public final float val[] = new float[16];
+    private static final double tmp[] = new double[16];
+    public final double val[] = new double[16];
 
     /** Constructs an identity matrix */
     public Matrix4 () {
@@ -61,10 +61,10 @@ public class Matrix4 {
         this.set(matrix);
     }
 
-    /** Constructs a matrix from the given float array. The array must have at least 16 elements; the first 16 will be copied.
-     * @param values The float array to copy. Remember that this matrix is in <a
-     *           href="http://en.wikipedia.org/wiki/Row-major_order">column major</a> order. (The float array is not modified) */
-    public Matrix4 (float[] values) {
+    /** Constructs a matrix from the given double array. The array must have at least 16 elements; the first 16 will be copied.
+     * @param values The double array to copy. Remember that this matrix is in <a
+     *           href="http://en.wikipedia.org/wiki/Row-major_order">column major</a> order. (The double array is not modified) */
+    public Matrix4 (double[] values) {
         this.set(values);
     }
 
@@ -90,13 +90,13 @@ public class Matrix4 {
         return this.set(matrix.val);
     }
 
-    /** Sets the matrix to the given matrix as a float array. The float array must have at least 16 elements; the first 16 will be
+    /** Sets the matrix to the given matrix as a double array. The double array must have at least 16 elements; the first 16 will be
      * copied.
      *
-     * @param values The matrix, in float form, that is to be copied. Remember that this matrix is in <a
+     * @param values The matrix, in double form, that is to be copied. Remember that this matrix is in <a
      *           href="http://en.wikipedia.org/wiki/Row-major_order">column major</a> order.
      * @return This matrix for the purpose of chaining methods together. */
-    public Matrix4 set (float[] values) {
+    public Matrix4 set (double[] values) {
         System.arraycopy(values, 0, val, 0, val.length);
         return this;
     }
@@ -116,7 +116,7 @@ public class Matrix4 {
      * @param quaternionZ The Z component of the quaternion that is to be used to set this matrix.
      * @param quaternionW The W component of the quaternion that is to be used to set this matrix.
      * @return This matrix for the purpose of chaining methods together. */
-    public Matrix4 set (float quaternionX, float quaternionY, float quaternionZ, float quaternionW) {
+    public Matrix4 set (double quaternionX, double quaternionY, double quaternionZ, double quaternionW) {
         return set(0f, 0f, 0f, quaternionX, quaternionY, quaternionZ, quaternionW);
     }
 
@@ -138,12 +138,12 @@ public class Matrix4 {
      * @param quaternionZ The Z component of the quaternion that is to be used to set this matrix.
      * @param quaternionW The W component of the quaternion that is to be used to set this matrix.
      * @return This matrix for the purpose of chaining methods together. */
-    public Matrix4 set (float translationX, float translationY, float translationZ, float quaternionX, float quaternionY,
-                        float quaternionZ, float quaternionW) {
-        final float xs = quaternionX * 2f, ys = quaternionY * 2f, zs = quaternionZ * 2f;
-        final float wx = quaternionW * xs, wy = quaternionW * ys, wz = quaternionW * zs;
-        final float xx = quaternionX * xs, xy = quaternionX * ys, xz = quaternionX * zs;
-        final float yy = quaternionY * ys, yz = quaternionY * zs, zz = quaternionZ * zs;
+    public Matrix4 set (double translationX, double translationY, double translationZ, double quaternionX, double quaternionY,
+                        double quaternionZ, double quaternionW) {
+        final double xs = quaternionX * 2f, ys = quaternionY * 2f, zs = quaternionZ * 2f;
+        final double wx = quaternionW * xs, wy = quaternionW * ys, wz = quaternionW * zs;
+        final double xx = quaternionX * xs, xy = quaternionX * ys, xz = quaternionX * zs;
+        final double yy = quaternionY * ys, yz = quaternionY * zs, zz = quaternionZ * zs;
 
         val[M00] = (1.0f - (yy + zz));
         val[M01] = (xy - wz);
@@ -190,12 +190,12 @@ public class Matrix4 {
      * @param scaleY The Y component of the scaling that is to be used to set this matrix.
      * @param scaleZ The Z component of the scaling that is to be used to set this matrix.
      * @return This matrix for the purpose of chaining methods together. */
-    public Matrix4 set (float translationX, float translationY, float translationZ, float quaternionX, float quaternionY,
-                        float quaternionZ, float quaternionW, float scaleX, float scaleY, float scaleZ) {
-        final float xs = quaternionX * 2f, ys = quaternionY * 2f, zs = quaternionZ * 2f;
-        final float wx = quaternionW * xs, wy = quaternionW * ys, wz = quaternionW * zs;
-        final float xx = quaternionX * xs, xy = quaternionX * ys, xz = quaternionX * zs;
-        final float yy = quaternionY * ys, yz = quaternionY * zs, zz = quaternionZ * zs;
+    public Matrix4 set (double translationX, double translationY, double translationZ, double quaternionX, double quaternionY,
+                        double quaternionZ, double quaternionW, double scaleX, double scaleY, double scaleZ) {
+        final double xs = quaternionX * 2f, ys = quaternionY * 2f, zs = quaternionZ * 2f;
+        final double wx = quaternionW * xs, wy = quaternionW * ys, wz = quaternionW * zs;
+        final double xx = quaternionX * xs, xy = quaternionX * ys, xz = quaternionX * zs;
+        final double yy = quaternionY * ys, yz = quaternionY * zs, zz = quaternionZ * zs;
 
         val[M00] = scaleX * (1.0f - (yy + zz));
         val[M01] = scaleY * (xy - wz);
@@ -268,15 +268,15 @@ public class Matrix4 {
      * @param y The y-component of the translation vector.
      * @param z The z-component of the translation vector.
      * @return This matrix for the purpose of chaining methods together. */
-    public Matrix4 trn (float x, float y, float z) {
+    public Matrix4 trn (double x, double y, double z) {
         val[M03] += x;
         val[M13] += y;
         val[M23] += z;
         return this;
     }
 
-    /** @return the backing float array */
-    public float[] getValues () {
+    /** @return the backing double array */
+    public double[] getValues () {
         return val;
     }
 
@@ -358,7 +358,7 @@ public class Matrix4 {
      * @return This matrix for the purpose of chaining methods together.
      * @throws RuntimeException if the matrix is singular (not invertible) */
     public Matrix4 inv () {
-        float l_det = val[M30] * val[M21] * val[M12] * val[M03] - val[M20] * val[M31] * val[M12] * val[M03] - val[M30] * val[M11]
+        double l_det = val[M30] * val[M21] * val[M12] * val[M03] - val[M20] * val[M31] * val[M12] * val[M03] - val[M30] * val[M11]
                 * val[M22] * val[M03] + val[M10] * val[M31] * val[M22] * val[M03] + val[M20] * val[M11] * val[M32] * val[M03] - val[M10]
                 * val[M21] * val[M32] * val[M03] - val[M30] * val[M21] * val[M02] * val[M13] + val[M20] * val[M31] * val[M02] * val[M13]
                 + val[M30] * val[M01] * val[M22] * val[M13] - val[M00] * val[M31] * val[M22] * val[M13] - val[M20] * val[M01] * val[M32]
@@ -368,7 +368,7 @@ public class Matrix4 {
                 + val[M10] * val[M21] * val[M02] * val[M33] + val[M20] * val[M01] * val[M12] * val[M33] - val[M00] * val[M21] * val[M12]
                 * val[M33] - val[M10] * val[M01] * val[M22] * val[M33] + val[M00] * val[M11] * val[M22] * val[M33];
         if (l_det == 0f) throw new RuntimeException("non-invertible matrix");
-        float inv_det = 1.0f / l_det;
+        double inv_det = 1.0f / l_det;
         tmp[M00] = val[M12] * val[M23] * val[M31] - val[M13] * val[M22] * val[M31] + val[M13] * val[M21] * val[M32] - val[M11]
                 * val[M23] * val[M32] - val[M12] * val[M21] * val[M33] + val[M11] * val[M22] * val[M33];
         tmp[M01] = val[M03] * val[M22] * val[M31] - val[M02] * val[M23] * val[M31] - val[M03] * val[M21] * val[M32] + val[M01]
@@ -421,7 +421,7 @@ public class Matrix4 {
     }
 
     /** @return The determinant of this matrix */
-    public float det () {
+    public double det () {
         return val[M30] * val[M21] * val[M12] * val[M03] - val[M20] * val[M31] * val[M12] * val[M03] - val[M30] * val[M11]
                 * val[M22] * val[M03] + val[M10] * val[M31] * val[M22] * val[M03] + val[M20] * val[M11] * val[M32] * val[M03] - val[M10]
                 * val[M21] * val[M32] * val[M03] - val[M30] * val[M21] * val[M02] * val[M13] + val[M20] * val[M31] * val[M02] * val[M13]
@@ -434,7 +434,7 @@ public class Matrix4 {
     }
 
     /** @return The determinant of the 3x3 upper left matrix */
-    public float det3x3 () {
+    public double det3x3 () {
         return val[M00] * val[M11] * val[M22] + val[M01] * val[M12] * val[M20] + val[M02] * val[M10] * val[M21] - val[M00]
                 * val[M12] * val[M21] - val[M01] * val[M10] * val[M22] - val[M02] * val[M11] * val[M20];
     }
@@ -448,11 +448,11 @@ public class Matrix4 {
      * @param fovy The field of view of the height in degrees
      * @param aspectRatio The "width over height" aspect ratio
      * @return This matrix for the purpose of chaining methods together. */
-    public Matrix4 setToProjection (float near, float far, float fovy, float aspectRatio) {
+    public Matrix4 setToProjection (double near, double far, double fovy, double aspectRatio) {
         idt();
-        float l_fd = (float)(1.0 / Math.tan((fovy * (Math.PI / 180)) / 2.0));
-        float l_a1 = (far + near) / (near - far);
-        float l_a2 = (2 * far * near) / (near - far);
+        double l_fd = (double)(1.0 / Math.tan((fovy * (Math.PI / 180)) / 2.0));
+        double l_a1 = (far + near) / (near - far);
+        double l_a2 = (2 * far * near) / (near - far);
         val[M00] = l_fd / aspectRatio;
         val[M10] = 0;
         val[M20] = 0;
@@ -484,13 +484,13 @@ public class Matrix4 {
      * @param near The near plane
      * @param far The far plane
      * @return This matrix for the purpose of chaining methods together. */
-    public Matrix4 setToProjection (float left, float right, float bottom, float top, float near, float far) {
-        float x = 2.0f * near / (right - left);
-        float y = 2.0f * near / (top - bottom);
-        float a = (right + left) / (right - left);
-        float b = (top + bottom) / (top - bottom);
-        float l_a1 = (far + near) / (near - far);
-        float l_a2 = (2 * far * near) / (near - far);
+    public Matrix4 setToProjection (double left, double right, double bottom, double top, double near, double far) {
+        double x = 2.0f * near / (right - left);
+        double y = 2.0f * near / (top - bottom);
+        double a = (right + left) / (right - left);
+        double b = (top + bottom) / (top - bottom);
+        double l_a1 = (far + near) / (near - far);
+        double l_a2 = (2 * far * near) / (near - far);
         val[M00] = x;
         val[M10] = 0;
         val[M20] = 0;
@@ -519,7 +519,7 @@ public class Matrix4 {
      * @param width The width
      * @param height The height
      * @return This matrix for the purpose of chaining methods together. */
-    public Matrix4 setToOrtho2D (float x, float y, float width, float height) {
+    public Matrix4 setToOrtho2D (double x, double y, double width, double height) {
         setToOrtho(x, x + width, y, y + height, 0, 1);
         return this;
     }
@@ -534,7 +534,7 @@ public class Matrix4 {
      * @param near The near plane
      * @param far The far plane
      * @return This matrix for the purpose of chaining methods together. */
-    public Matrix4 setToOrtho2D (float x, float y, float width, float height, float near, float far) {
+    public Matrix4 setToOrtho2D (double x, double y, double width, double height, double near, double far) {
         setToOrtho(x, x + width, y, y + height, near, far);
         return this;
     }
@@ -549,16 +549,16 @@ public class Matrix4 {
      * @param near The near clipping plane
      * @param far The far clipping plane
      * @return This matrix for the purpose of chaining methods together. */
-    public Matrix4 setToOrtho (float left, float right, float bottom, float top, float near, float far) {
+    public Matrix4 setToOrtho (double left, double right, double bottom, double top, double near, double far) {
 
         this.idt();
-        float x_orth = 2 / (right - left);
-        float y_orth = 2 / (top - bottom);
-        float z_orth = -2 / (far - near);
+        double x_orth = 2 / (right - left);
+        double y_orth = 2 / (top - bottom);
+        double z_orth = -2 / (far - near);
 
-        float tx = -(right + left) / (right - left);
-        float ty = -(top + bottom) / (top - bottom);
-        float tz = -(far + near) / (far - near);
+        double tx = -(right + left) / (right - left);
+        double ty = -(top + bottom) / (top - bottom);
+        double tz = -(far + near) / (far - near);
 
         val[M00] = x_orth;
         val[M10] = 0;
@@ -597,7 +597,7 @@ public class Matrix4 {
      * @param y The Y coordinate of the translation vector
      * @param z The Z coordinate of the translation vector
      * @return This matrix for the purpose of chaining methods together. */
-    public Matrix4 setTranslation (float x, float y, float z) {
+    public Matrix4 setTranslation (double x, double y, double z) {
         val[M03] = x;
         val[M13] = y;
         val[M23] = z;
@@ -624,7 +624,7 @@ public class Matrix4 {
      * @param y The y-component of the translation vector.
      * @param z The z-component of the translation vector.
      * @return This matrix for the purpose of chaining methods together. */
-    public Matrix4 setToTranslation (float x, float y, float z) {
+    public Matrix4 setToTranslation (double x, double y, double z) {
         idt();
         val[M03] = x;
         val[M13] = y;
@@ -659,8 +659,8 @@ public class Matrix4 {
      * @param scalingY The x-component of the scaling vector
      * @param scalingZ The x-component of the scaling vector
      * @return This matrix for the purpose of chaining methods together. */
-    public Matrix4 setToTranslationAndScaling (float translationX, float translationY, float translationZ, float scalingX,
-                                               float scalingY, float scalingZ) {
+    public Matrix4 setToTranslationAndScaling (double translationX, double translationY, double translationZ, double scalingX,
+                                               double scalingY, double scalingZ) {
         idt();
         val[M03] = translationX;
         val[M13] = translationY;
@@ -679,7 +679,7 @@ public class Matrix4 {
      * @param axis The axis
      * @param degrees The angle in degrees
      * @return This matrix for the purpose of chaining methods together. */
-    public Matrix4 setToRotation (Vector3 axis, float degrees) {
+    public Matrix4 setToRotation (Vector3 axis, double degrees) {
         if (degrees == 0) {
             idt();
             return this;
@@ -692,7 +692,7 @@ public class Matrix4 {
      * @param axis The axis
      * @param radians The angle in radians
      * @return This matrix for the purpose of chaining methods together. */
-    public Matrix4 setToRotationRad (Vector3 axis, float radians) {
+    public Matrix4 setToRotationRad (Vector3 axis, double radians) {
         if (radians == 0) {
             idt();
             return this;
@@ -707,7 +707,7 @@ public class Matrix4 {
      * @param axisZ The z-component of the axis
      * @param degrees The angle in degrees
      * @return This matrix for the purpose of chaining methods together. */
-    public Matrix4 setToRotation (float axisX, float axisY, float axisZ, float degrees) {
+    public Matrix4 setToRotation (double axisX, double axisY, double axisZ, double degrees) {
         if (degrees == 0) {
             idt();
             return this;
@@ -722,7 +722,7 @@ public class Matrix4 {
      * @param axisZ The z-component of the axis
      * @param radians The angle in radians
      * @return This matrix for the purpose of chaining methods together. */
-    public Matrix4 setToRotationRad (float axisX, float axisY, float axisZ, float radians) {
+    public Matrix4 setToRotationRad (double axisX, double axisY, double axisZ, double radians) {
         if (radians == 0) {
             idt();
             return this;
@@ -746,7 +746,7 @@ public class Matrix4 {
      * @param y2 The target vector y value
      * @param z2 The target vector z value
      * @return This matrix for the purpose of chaining methods together */
-    public Matrix4 setToRotation (final float x1, final float y1, final float z1, final float x2, final float y2, final float z2) {
+    public Matrix4 setToRotation (final double x1, final double y1, final double z1, final double x2, final double y2, final double z2) {
         return set(quat.setFromCross(x1, y1, z1, x2, y2, z2));
     }
 
@@ -755,7 +755,7 @@ public class Matrix4 {
      * @param pitch the pitch in degrees
      * @param roll the roll in degrees
      * @return This matrix */
-    public Matrix4 setFromEulerAngles (float yaw, float pitch, float roll) {
+    public Matrix4 setFromEulerAngles (double yaw, double pitch, double roll) {
         quat.setEulerAngles(yaw, pitch, roll);
         return set(quat);
     }
@@ -765,7 +765,7 @@ public class Matrix4 {
      * @param pitch the pitch in radians
      * @param roll the roll in radians
      * @return This matrix */
-    public Matrix4 setFromEulerAnglesRad (float yaw, float pitch, float roll) {
+    public Matrix4 setFromEulerAnglesRad (double yaw, double pitch, double roll) {
         quat.setEulerAnglesRad(yaw, pitch, roll);
         return set(quat);
     }
@@ -788,7 +788,7 @@ public class Matrix4 {
      * @param y The y-component of the scaling vector
      * @param z The z-component of the scaling vector
      * @return This matrix for chaining. */
-    public Matrix4 setToScaling (float x, float y, float z) {
+    public Matrix4 setToScaling (double x, double y, double z) {
         idt();
         val[M00] = x;
         val[M11] = y;
@@ -865,7 +865,7 @@ public class Matrix4 {
      * @param matrix the matrix
      * @param alpha the alpha value in the range [0,1]
      * @return This matrix for the purpose of chaining methods together. */
-    public Matrix4 lerp (Matrix4 matrix, float alpha) {
+    public Matrix4 lerp (Matrix4 matrix, double alpha) {
         for (int i = 0; i < 16; i++)
             this.val[i] = this.val[i] * (1 - alpha) + matrix.val[i] * alpha;
         return this;
@@ -876,7 +876,7 @@ public class Matrix4 {
      * @param other The other transform
      * @param w Weight of this transform; weight of the other transform is (1 - w)
      * @return This matrix for chaining */
-    public Matrix4 avg (Matrix4 other, float w) {
+    public Matrix4 avg (Matrix4 other, double w) {
         getScale(tmpVec);
         other.getScale(tmpForward);
 
@@ -898,7 +898,7 @@ public class Matrix4 {
      * @param t List of transforms
      * @return This matrix for chaining */
     public Matrix4 avg (Matrix4[] t) {
-        final float w = 1.0f / t.length;
+        final double w = 1.0f / t.length;
 
         tmpVec.set(t[0].getScale(tmpUp).scl(w));
         quat.set(t[0].getRotation(quat2).exp(w));
@@ -924,7 +924,7 @@ public class Matrix4 {
      * @param t List of transforms
      * @param w List of weights
      * @return This matrix for chaining */
-    public Matrix4 avg (Matrix4[] t, float[] w) {
+    public Matrix4 avg (Matrix4[] t, double[] w) {
         tmpVec.set(t[0].getScale(tmpUp).scl(w[0]));
         quat.set(t[0].getRotation(quat2).exp(w[0]));
         tmpForward.set(t[0].getTranslation(tmpUp).scl(w[0]));
@@ -970,14 +970,14 @@ public class Matrix4 {
         return this;
     }
 
-    public Matrix4 scl (float x, float y, float z) {
+    public Matrix4 scl (double x, double y, double z) {
         val[M00] *= x;
         val[M11] *= y;
         val[M22] *= z;
         return this;
     }
 
-    public Matrix4 scl (float scale) {
+    public Matrix4 scl (double scale) {
         val[M00] *= scale;
         val[M11] *= scale;
         val[M22] *= scale;
@@ -1007,33 +1007,33 @@ public class Matrix4 {
     }
 
     /** @return the squared scale factor on the X axis */
-    public float getScaleXSquared () {
+    public double getScaleXSquared () {
         return val[Matrix4.M00] * val[Matrix4.M00] + val[Matrix4.M01] * val[Matrix4.M01] + val[Matrix4.M02] * val[Matrix4.M02];
     }
 
     /** @return the squared scale factor on the Y axis */
-    public float getScaleYSquared () {
+    public double getScaleYSquared () {
         return val[Matrix4.M10] * val[Matrix4.M10] + val[Matrix4.M11] * val[Matrix4.M11] + val[Matrix4.M12] * val[Matrix4.M12];
     }
 
     /** @return the squared scale factor on the Z axis */
-    public float getScaleZSquared () {
+    public double getScaleZSquared () {
         return val[Matrix4.M20] * val[Matrix4.M20] + val[Matrix4.M21] * val[Matrix4.M21] + val[Matrix4.M22] * val[Matrix4.M22];
     }
 
     /** @return the scale factor on the X axis (non-negative) */
-    public float getScaleX () {
-        return (float)Math.sqrt(getScaleXSquared());
+    public double getScaleX () {
+        return (double)Math.sqrt(getScaleXSquared());
     }
 
     /** @return the scale factor on the Y axis (non-negative) */
-    public float getScaleY () {
-        return (float)Math.sqrt(getScaleYSquared());
+    public double getScaleY () {
+        return (double)Math.sqrt(getScaleYSquared());
     }
 
     /** @return the scale factor on the X axis (non-negative) */
-    public float getScaleZ () {
-        return (float)Math.sqrt(getScaleZSquared());
+    public double getScaleZ () {
+        return (double)Math.sqrt(getScaleZSquared());
     }
 
     /** @param scale The vector which will receive the (non-negative) scale components on each axis.
@@ -1050,8 +1050,8 @@ public class Matrix4 {
         return inv().tra();
     }
 
-	static void matrix4_mul(float[] mata, float[] matb) {
-        float[] tmp = new float[16];
+	static void matrix4_mul(double[] mata, double[] matb) {
+        double[] tmp = new double[16];
 		tmp[M00] = mata[M00] * matb[M00] + mata[M01] * matb[M10] + mata[M02] * matb[M20] + mata[M03] * matb[M30];
 		tmp[M01] = mata[M00] * matb[M01] + mata[M01] * matb[M11] + mata[M02] * matb[M21] + mata[M03] * matb[M31];
 		tmp[M02] = mata[M00] * matb[M02] + mata[M01] * matb[M12] + mata[M02] * matb[M22] + mata[M03] * matb[M32];
@@ -1071,7 +1071,7 @@ public class Matrix4 {
 		System.arraycopy(tmp, 0, mata, 0, 16);
 	}
 
-	static float matrix4_det(float[] val) {
+	static double matrix4_det(double[] val) {
 		return val[M30] * val[M21] * val[M12] * val[M03] - val[M20] * val[M31] * val[M12] * val[M03] - val[M30] * val[M11]
 				* val[M22] * val[M03] + val[M10] * val[M31] * val[M22] * val[M03] + val[M20] * val[M11] * val[M32] * val[M03] - val[M10]
 				* val[M21] * val[M32] * val[M03] - val[M30] * val[M21] * val[M02] * val[M13] + val[M20] * val[M31] * val[M02] * val[M13]
@@ -1083,10 +1083,10 @@ public class Matrix4 {
 				* val[M33] - val[M10] * val[M01] * val[M22] * val[M33] + val[M00] * val[M11] * val[M22] * val[M33];
 	}
 
-	static boolean matrix4_inv(float[] val) {
-		float l_det = matrix4_det(val);
+	static boolean matrix4_inv(double[] val) {
+		double l_det = matrix4_det(val);
 		if (l_det == 0) return false;
-        float[] tmp = new float[16];
+        double[] tmp = new double[16];
 		tmp[M00] = val[M12] * val[M23] * val[M31] - val[M13] * val[M22] * val[M31] + val[M13] * val[M21] * val[M32] - val[M11]
 			* val[M23] * val[M32] - val[M12] * val[M21] * val[M33] + val[M11] * val[M22] * val[M33];
 		tmp[M01] = val[M03] * val[M22] * val[M31] - val[M02] * val[M23] * val[M31] - val[M03] * val[M21] * val[M32] + val[M01]
@@ -1120,7 +1120,7 @@ public class Matrix4 {
 		tmp[M33] = val[M01] * val[M12] * val[M20] - val[M02] * val[M11] * val[M20] + val[M02] * val[M10] * val[M21] - val[M00]
 			* val[M12] * val[M21] - val[M01] * val[M10] * val[M22] + val[M00] * val[M11] * val[M22];
 
-		float inv_det = 1.0f / l_det;
+		double inv_det = 1.0f / l_det;
 		val[M00] = tmp[M00] * inv_det;
 		val[M01] = tmp[M01] * inv_det;
 		val[M02] = tmp[M02] * inv_det;
@@ -1140,29 +1140,29 @@ public class Matrix4 {
 		return true;
 	}
 
-	static void matrix4_mulVec(float[] mat, float[] vec) {
-		float x = vec[0] * mat[M00] + vec[1] * mat[M01] + vec[2] * mat[M02] + mat[M03];
-		float y = vec[0] * mat[M10] + vec[1] * mat[M11] + vec[2] * mat[M12] + mat[M13];
-		float z = vec[0] * mat[M20] + vec[1] * mat[M21] + vec[2] * mat[M22] + mat[M23];
+	static void matrix4_mulVec(double[] mat, double[] vec) {
+		double x = vec[0] * mat[M00] + vec[1] * mat[M01] + vec[2] * mat[M02] + mat[M03];
+		double y = vec[0] * mat[M10] + vec[1] * mat[M11] + vec[2] * mat[M12] + mat[M13];
+		double z = vec[0] * mat[M20] + vec[1] * mat[M21] + vec[2] * mat[M22] + mat[M23];
 		vec[0] = x;
 		vec[1] = y;
 		vec[2] = z;
 	}
 
-	static void matrix4_proj(float[] mat, float[] vec) {
-		float inv_w = 1.0f / (vec[0] * mat[M30] + vec[1] * mat[M31] + vec[2] * mat[M32] + mat[M33]);
-		float x = (vec[0] * mat[M00] + vec[1] * mat[M01] + vec[2] * mat[M02] + mat[M03]) * inv_w;
-		float y = (vec[0] * mat[M10] + vec[1] * mat[M11] + vec[2] * mat[M12] + mat[M13]) * inv_w;
-		float z = (vec[0] * mat[M20] + vec[1] * mat[M21] + vec[2] * mat[M22] + mat[M23]) * inv_w;
+	static void matrix4_proj(double[] mat, double[] vec) {
+		double inv_w = 1.0f / (vec[0] * mat[M30] + vec[1] * mat[M31] + vec[2] * mat[M32] + mat[M33]);
+		double x = (vec[0] * mat[M00] + vec[1] * mat[M01] + vec[2] * mat[M02] + mat[M03]) * inv_w;
+		double y = (vec[0] * mat[M10] + vec[1] * mat[M11] + vec[2] * mat[M12] + mat[M13]) * inv_w;
+		double z = (vec[0] * mat[M20] + vec[1] * mat[M21] + vec[2] * mat[M22] + mat[M23]) * inv_w;
 		vec[0] = x;
 		vec[1] = y;
 		vec[2] = z;
 	}
 
-	static void matrix4_rot(float[] mat, float[] vec) {
-		float x = vec[0] * mat[M00] + vec[1] * mat[M01] + vec[2] * mat[M02];
-		float y = vec[0] * mat[M10] + vec[1] * mat[M11] + vec[2] * mat[M12];
-		float z = vec[0] * mat[M20] + vec[1] * mat[M21] + vec[2] * mat[M22];
+	static void matrix4_rot(double[] mat, double[] vec) {
+		double x = vec[0] * mat[M00] + vec[1] * mat[M01] + vec[2] * mat[M02];
+		double y = vec[0] * mat[M10] + vec[1] * mat[M11] + vec[2] * mat[M12];
+		double z = vec[0] * mat[M20] + vec[1] * mat[M21] + vec[2] * mat[M22];
 		vec[0] = x;
 		vec[1] = y;
 		vec[2] = z;
@@ -1173,7 +1173,7 @@ public class Matrix4 {
      *
      * @param mata the first matrix.
      * @param matb the second matrix. */
-    public static void mul (float[] mata, float[] matb) {
+    public static void mul (double[] mata, double[] matb) {
         matrix4_mul(mata, matb);
     }
 
@@ -1183,7 +1183,7 @@ public class Matrix4 {
      * {@link Vector3#mul(Matrix4)}.
      * @param mat the matrix
      * @param vec the vector. */
-    public static void mulVec (float[] mat, float[] vec) {
+    public static void mulVec (double[] mat, double[] vec) {
         matrix4_mulVec(mat, vec);
     }
 
@@ -1193,7 +1193,7 @@ public class Matrix4 {
      * same as {@link Vector3#prj(Matrix4)}.
      * @param mat the matrix
      * @param vec the vector. */
-    public static void prj (float[] mat, float[] vec) {
+    public static void prj (double[] mat, double[] vec) {
         matrix4_proj(mat, vec);
     }
 
@@ -1203,7 +1203,7 @@ public class Matrix4 {
      * same as {@link Vector3#rot(Matrix4)}.
      * @param mat the matrix
      * @param vec the vector. */
-    public static void rot (float[] mat, float[] vec) {
+    public static void rot (double[] mat, double[] vec) {
         matrix4_rot(mat, vec);
     }
 
@@ -1211,7 +1211,7 @@ public class Matrix4 {
      * {@link Matrix4#val}.
      * @param values the matrix values.
      * @return false in case the inverse could not be calculated, true otherwise. */
-    public static boolean inv (float[] values) {
+    public static boolean inv (double[] values) {
         return matrix4_inv(values);
     }
 
@@ -1219,7 +1219,7 @@ public class Matrix4 {
      * from {@link Matrix4#val}.
      * @param values the matrix values.
      * @return the determinante. */
-    public static float det (float[] values) {
+    public static double det (double[] values) {
         return matrix4_det(values);
     }
 
@@ -1238,7 +1238,7 @@ public class Matrix4 {
      * @param y Translation in the y-axis.
      * @param z Translation in the z-axis.
      * @return This matrix for the purpose of chaining methods together. */
-    public Matrix4 translate (float x, float y, float z) {
+    public Matrix4 translate (double x, double y, double z) {
         tmp[M00] = 1;
         tmp[M01] = 0;
         tmp[M02] = 0;
@@ -1266,7 +1266,7 @@ public class Matrix4 {
      * @param axis The vector axis to rotate around.
      * @param degrees The angle in degrees.
      * @return This matrix for the purpose of chaining methods together. */
-    public Matrix4 rotate (Vector3 axis, float degrees) {
+    public Matrix4 rotate (Vector3 axis, double degrees) {
         if (degrees == 0) return this;
         quat.set(axis, degrees);
         return rotate(quat);
@@ -1278,7 +1278,7 @@ public class Matrix4 {
      * @param axis The vector axis to rotate around.
      * @param radians The angle in radians.
      * @return This matrix for the purpose of chaining methods together. */
-    public Matrix4 rotateRad (Vector3 axis, float radians) {
+    public Matrix4 rotateRad (Vector3 axis, double radians) {
         if (radians == 0) return this;
         quat.setFromAxisRad(axis, radians);
         return rotate(quat);
@@ -1291,7 +1291,7 @@ public class Matrix4 {
      * @param axisZ The z-axis component of the vector to rotate around.
      * @param degrees The angle in degrees
      * @return This matrix for the purpose of chaining methods together. */
-    public Matrix4 rotate (float axisX, float axisY, float axisZ, float degrees) {
+    public Matrix4 rotate (double axisX, double axisY, double axisZ, double degrees) {
         if (degrees == 0) return this;
         quat.setFromAxis(axisX, axisY, axisZ, degrees);
         return rotate(quat);
@@ -1304,7 +1304,7 @@ public class Matrix4 {
      * @param axisZ The z-axis component of the vector to rotate around.
      * @param radians The angle in radians
      * @return This matrix for the purpose of chaining methods together. */
-    public Matrix4 rotateRad (float axisX, float axisY, float axisZ, float radians) {
+    public Matrix4 rotateRad (double axisX, double axisY, double axisZ, double radians) {
         if (radians == 0) return this;
         quat.setFromAxisRad(axisX, axisY, axisZ, radians);
         return rotate(quat);
@@ -1335,7 +1335,7 @@ public class Matrix4 {
      * @param scaleY The scale in the y-axis.
      * @param scaleZ The scale in the z-axis.
      * @return This matrix for the purpose of chaining methods together. */
-    public Matrix4 scale (float scaleX, float scaleY, float scaleZ) {
+    public Matrix4 scale (double scaleX, double scaleY, double scaleZ) {
         tmp[M00] = scaleX;
         tmp[M01] = 0;
         tmp[M02] = 0;
@@ -1357,9 +1357,9 @@ public class Matrix4 {
         return this;
     }
 
-    /** Copies the 4x3 upper-left sub-matrix into float array. The destination array is supposed to be a column major matrix.
+    /** Copies the 4x3 upper-left sub-matrix into double array. The destination array is supposed to be a column major matrix.
      * @param dst the destination matrix */
-    public void extract4x3Matrix (float[] dst) {
+    public void extract4x3Matrix (double[] dst) {
         dst[0] = val[M00];
         dst[1] = val[M10];
         dst[2] = val[M20];

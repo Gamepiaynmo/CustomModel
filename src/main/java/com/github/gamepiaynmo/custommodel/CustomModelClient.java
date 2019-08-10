@@ -25,6 +25,7 @@ public class CustomModelClient implements ClientModInitializer {
 
     public static TextureManager textureManager;
     public static CustomPlayerEntityRenderer customRenderer;
+    public static boolean needToReload = false;
 
     public static void reloadModels() {
         modelPacks.clear();
@@ -67,6 +68,11 @@ public class CustomModelClient implements ClientModInitializer {
             if (world == client.world) {
                 for (AbstractClientPlayerEntity player : client.world.getPlayers())
                     customRenderer.tick(player);
+
+                if (needToReload) {
+                    reloadModels();
+                    needToReload = false;
+                }
             }
         });
     }
