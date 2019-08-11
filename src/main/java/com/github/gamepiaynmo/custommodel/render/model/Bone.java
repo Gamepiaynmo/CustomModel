@@ -100,7 +100,7 @@ public class Bone implements IBone {
         JsonElement physical = jsonObj.get(CustomJsonModel.PHYSICS);
         if (physical != null) {
             bone.physicalize = true;
-            bone.physicsParams = Json.parseDoubleArray(physical, 3);
+            bone.physicsParams = Json.parseDoubleArray(physical, 5);
         }
 
         return bone;
@@ -159,10 +159,6 @@ public class Bone implements IBone {
     public boolean isPhysicalized() { return physicalize; }
     public double[] getPhysicsParams() { return physicsParams; }
     public double getLength() { return length; }
-
-    public Matrix4 getTransform(PlayerEntityModel model, float partial) {
-        return new Matrix4().setToScaling(getScale(model)).rotate(getQuaternion(model)).translate(getPosition(model).scl(0.0625));
-    }
 
     public void render(AbstractClientPlayerEntity playerEntity, PlayerEntityModel playerModel, float scale, float partial) {
         BufferBuilder bufferBuilder = Tessellator.getInstance().getBufferBuilder();

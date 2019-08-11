@@ -7,6 +7,7 @@ import net.minecraft.client.particle.BillboardParticle;
 import net.minecraft.client.particle.ParticleTextureSheet;
 import net.minecraft.client.texture.TextureManager;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 public class CustomParticle extends BillboardParticle {
@@ -60,6 +61,7 @@ public class CustomParticle extends BillboardParticle {
     public void setTexture(Identifier texture) { this.texture = texture; }
 
     public Identifier getTexture() { return texture; }
+    public Vec3d getPos() { return new Vec3d(x, y, z); }
 
     private void calcUV() {
         int cnt = emitter.animation[0] * emitter.animation[1];

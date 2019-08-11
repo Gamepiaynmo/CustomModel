@@ -1,6 +1,7 @@
 package com.github.gamepiaynmo.custommodel.render;
 
 import com.github.gamepiaynmo.custommodel.render.model.IBone;
+import com.github.gamepiaynmo.custommodel.util.Matrix4;
 import com.github.gamepiaynmo.custommodel.util.ModelPack;
 import com.github.gamepiaynmo.custommodel.util.Vector3;
 import com.google.common.collect.Maps;
@@ -82,6 +83,11 @@ public enum PlayerBones {
         public Vector3 getRotation(PlayerEntityModel model) {
             Cuboid cuboid = cuboidGetter.getCuboid(model);
             return new Vector3(cuboid.yaw, cuboid.pitch, cuboid.roll);
+        }
+
+        @Override
+        public Matrix4 getTransform(PlayerEntityModel model) {
+            return new Matrix4().translate(getPosition(model).scl(0.0625)).rotate(getQuaternion(model));
         }
 
         @Override

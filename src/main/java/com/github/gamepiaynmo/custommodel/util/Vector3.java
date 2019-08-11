@@ -1,5 +1,7 @@
 package com.github.gamepiaynmo.custommodel.util;
 
+import net.minecraft.util.math.Vec3d;
+
 public class Vector3 {
     /** the x-component of this vector **/
     public double x;
@@ -31,6 +33,12 @@ public class Vector3 {
      * @param vector The vector */
     public Vector3 (final Vector3 vector) {
         this.set(vector);
+    }
+
+    /** Creates a vector from the given vector
+     * @param vector The vector */
+    public Vector3 (final Vec3d vector) {
+        this.set(vector.x, vector.y, vector.z);
     }
 
     /** Creates a vector from the given array. The array must have at least 3 elements.

@@ -1,5 +1,6 @@
 package com.github.gamepiaynmo.custommodel.util;
 
+import com.github.gamepiaynmo.custommodel.CustomModel;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
 import com.github.gamepiaynmo.custommodel.render.CustomTexture;
 import com.google.common.collect.Lists;
@@ -7,6 +8,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.sun.org.apache.xpath.internal.operations.Mod;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.TextureManager;
@@ -14,9 +16,13 @@ import net.minecraft.util.Identifier;
 import org.apache.commons.io.IOUtils;
 
 import java.io.*;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 public class ModelPack {
 
@@ -27,27 +33,141 @@ public class ModelPack {
     private List<CustomTexture> textures = Lists.newArrayList();
     private CustomJsonModel model;
     private boolean success = false;
+    private String dirName;
 
     private ModelPack() {}
 
     public static ModelPack fromDirectory(TextureManager textureManager, File dir) throws FileNotFoundException, IOException {
-        File modelFile = null;
-        List<File> textureFiles = Lists.newArrayList();
-        for (File modelPackItem : dir.listFiles()) {
-            if (modelPackItem.getName().equals("model.json"))
-                modelFile = modelPackItem;
-            else if (modelPackItem.getName().endsWith(".png"))
-                textureFiles.add(modelPackItem);
+        IModelResource modelFile = null;
+        List<IModelResource> textureFiles = Lists.newArrayList();
+
+        class FileResource implements IModelResource {
+            private final File file;
+
+            public FileResource(File file) {
+                this.file = file;
+            }
+
+            @Override
+            public String getName() {
+                return file.getName();
+            }
+
+            @Override
+            public InputStream getInputStream() throws IOException {
+                return new FileInputStream(file);
+            }
         }
 
+        for (File modelPackItem : dir.listFiles()) {
+            if (modelPackItem.isDirectory())
+                continue;
+
+            if (modelPackItem.getName().equals("model.json"))
+                modelFile = new FileResource(modelPackItem);
+            else if (modelPackItem.getName().endsWith(".png"))
+                textureFiles.add(new FileResource(modelPackItem));
+        }
+
+        if (modelFile == null)
+            throw new RuntimeException("model.json not found.");
+        return fromResource(textureManager, dir.getName(), modelFile, textureFiles);
+    }
+
+    public static ModelPack fromZipFile(TextureManager textureManager, File zipFile) throws IOException {
+        ZipInputStream zip = new ZipInputStream(new BufferedInputStream(new FileInputStream(zipFile)));
+        ZipFile file = new ZipFile(zipFile);
+        ZipEntry entry;
+
+        class ZipResource implements IModelResource {
+            private final ZipEntry entry;
+
+            public ZipResource(ZipEntry entry) {
+                this.entry = entry;
+            }
+
+            @Override
+            public String getName() {
+                return entry.getName();
+            }
+
+            @Override
+            public InputStream getInputStream() throws IOException {
+                return file.getInputStream(entry);
+            }
+        }
+
+        IModelResource modelFile = null;
+        List<IModelResource> textureFiles = Lists.newArrayList();
+        while ((entry = zip.getNextEntry()) != null) {
+            if (entry.isDirectory())
+                continue;
+
+            if (entry.getName().equals("model.json"))
+                modelFile = new ZipResource(entry);
+            else if (entry.getName().endsWith(".png"))
+                textureFiles.add(new ZipResource(entry));
+        }
+
+        if (modelFile == null)
+            throw new RuntimeException("model.json not found.");
+        return fromResource(textureManager, zipFile.getName(), modelFile, textureFiles);
+    }
+
+    public static ModelPack fromZipMemory(TextureManager textureManager, String name, byte[] data) throws IOException {
+        ZipInputStream zip = new ZipInputStream(new ByteArrayInputStream(data));
+        ZipEntry entry;
+
+        class MemoryResource implements IModelResource {
+            private final String name;
+            private final byte[] data;
+
+            public MemoryResource(ZipEntry zipEntry) throws IOException {
+                name = zipEntry.getName();
+                data = new byte[(int) zipEntry.getSize()];
+                int cnt = 0, pos = 0;
+                while ((cnt = zip.read(data, pos, data.length - pos)) > 0)
+                    pos += cnt;
+            }
+
+            @Override
+            public String getName() {
+                return name;
+            }
+
+            @Override
+            public InputStream getInputStream() throws IOException {
+                return new ByteArrayInputStream(data);
+            }
+        }
+
+        IModelResource modelFile = null;
+        List<IModelResource> textureFiles = Lists.newArrayList();
+        while ((entry = zip.getNextEntry()) != null) {
+            if (entry.isDirectory())
+                continue;
+
+            if (entry.getName().equals("model.json"))
+                modelFile = new MemoryResource(entry);
+            else if (entry.getName().endsWith(".png"))
+                textureFiles.add(new MemoryResource(entry));
+        }
+
+        if (modelFile == null)
+            throw new RuntimeException("model.json not found.");
+        return fromResource(textureManager, name, modelFile, textureFiles);
+    }
+
+    public static ModelPack fromResource(TextureManager textureManager, String name, IModelResource model, Collection<IModelResource> textures) throws IOException {
         ModelPack pack = new ModelPack();
-        InputStream modelInputStream = new FileInputStream(modelFile);
+        pack.dirName = getFileName(name);
+        InputStream modelInputStream = model.getInputStream();
         pack.modelJson = new JsonParser().parse(new InputStreamReader(modelInputStream)).getAsJsonObject();
         IOUtils.closeQuietly(modelInputStream);
-        for (File texture : textureFiles) {
-            Identifier identifier = new Identifier(("custommodel/" + dir.getName() + "/" + texture.getName()).toLowerCase());
+        for (IModelResource texture : textures) {
+            Identifier identifier = new Identifier(CustomModel.MODID, (pack.dirName + "/" + texture.getName()).toLowerCase());
             pack.textureIds.put(texture.getName(), identifier);
-            NativeImage image = NativeImage.read(new FileInputStream(texture));
+            NativeImage image = NativeImage.read(texture.getInputStream());
             CustomTexture customTexture = new CustomTexture(image);
             pack.textures.add(customTexture);
             textureManager.registerTexture(identifier, customTexture);
@@ -56,6 +176,13 @@ public class ModelPack {
         pack.model = CustomJsonModel.fromJson(pack, pack.modelJson);
         pack.success = true;
         return pack;
+    }
+
+    private static String getFileName(String path) {
+        int idx1 = Math.max(0, Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\')));
+        int idx2 = path.indexOf('.', idx1);
+        if (idx2 < 0) idx2 = path.length() - 1;
+        return path.substring(idx1, idx2);
     }
 
     public JsonObject getModelJson() {
@@ -88,7 +215,16 @@ public class ModelPack {
             texture.clearGlId();
     }
 
+    public String getDirName() {
+        return dirName;
+    }
+
     public static interface TextureGetter {
         public Identifier getTexture(AbstractClientPlayerEntity player);
+    }
+
+    public static interface IModelResource {
+        public String getName();
+        public InputStream getInputStream() throws IOException;
     }
 }

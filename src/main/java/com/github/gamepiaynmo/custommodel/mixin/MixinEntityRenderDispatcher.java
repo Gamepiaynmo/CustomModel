@@ -30,6 +30,5 @@ public class MixinEntityRenderDispatcher {
         this.modelRenderers.put("default", this.playerRenderer);
         this.modelRenderers.put("slim", new CustomPlayerEntityRenderer((EntityRenderDispatcher) (Object) this, true));
         CustomModelClient.textureManager = textureManager;
-        CustomModelClient.reloadModels();
     }
 }

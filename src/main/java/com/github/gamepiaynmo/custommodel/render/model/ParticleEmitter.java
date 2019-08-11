@@ -1,10 +1,7 @@
 package com.github.gamepiaynmo.custommodel.render.model;
 
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
-import com.github.gamepiaynmo.custommodel.util.Json;
-import com.github.gamepiaynmo.custommodel.util.Matrix4;
-import com.github.gamepiaynmo.custommodel.util.ModelPack;
-import com.github.gamepiaynmo.custommodel.util.Vector3;
+import com.github.gamepiaynmo.custommodel.util.*;
 import com.google.gson.JsonObject;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
@@ -17,6 +14,8 @@ import java.util.Random;
 
 public class ParticleEmitter {
     private static double EPS = 1e-4;
+    private static float R2D = 180 / (float) Math.PI;
+    private static float D2R = (float) Math.PI / 180;
 
     protected Vector3 posRange = Vector3.Zero;
     protected double dirRange;
@@ -95,9 +94,8 @@ public class ParticleEmitter {
                     dir.rotate(edir[1], MathHelper.lerp(random.nextDouble(), -dirRange, dirRange));
                     dir.scl(MathHelper.lerp(random.nextDouble(), speed[0], speed[1]));
 
-//                    world.addParticle(ParticleTypes.BARRIER, pos.x, -pos.y, -pos.z, dir.x, -dir.y, -dir.z);
                     CustomParticle particle = new CustomParticle(world, this, pos, dir);
-                    particle.setAngle((float) MathHelper.lerp(random.nextDouble(), angle[0], angle[1]));
+                    particle.setAngle(D2R * (float) MathHelper.lerp(random.nextDouble(), angle[0], angle[1]));
                     particle.setRotSpeed((float) MathHelper.lerp(random.nextDouble(), rotSpeed[0], rotSpeed[1]));
                     particle.setMaxAge((int) MathHelper.lerp(random.nextDouble(), lifeSpan[0], lifeSpan[1]));
                     particle.setSize((float) MathHelper.lerp(random.nextDouble(), size[0], size[1]));

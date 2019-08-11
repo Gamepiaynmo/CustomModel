@@ -10,6 +10,7 @@ import net.minecraft.client.particle.ParticleTextureSheet;
 import net.minecraft.client.render.*;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.texture.TextureManager;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.crash.CrashException;
 import net.minecraft.util.crash.CrashReport;
 import net.minecraft.util.crash.CrashReportSection;
@@ -57,13 +58,17 @@ public class MixinParticleManager {
 
             while(var13.hasNext()) {
                 CustomParticle particle_1 = (CustomParticle)var13.next();
+                if (camera_1.getPos().squaredDistanceTo(particle_1.getPos()) < 1)
+                    continue;
+                Identifier texture = particle_1.getTexture();
 
                 try {
-                    textureManager.bindTexture(particle_1.getTexture());
-//                    textureManager.bindTexture(SpriteAtlasTexture.PARTICLE_ATLAS_TEX);
-                    bufferBuilder_1.begin(7, VertexFormats.POSITION_UV_COLOR_LMAP);
-                    particle_1.buildGeometry(bufferBuilder_1, camera_1, float_1, float_2, float_6, float_3, float_4, float_5);
-                    tessellator_1.draw();
+                    if (textureManager.getTexture(texture).getGlId() >= 0) {
+                        textureManager.bindTexture(texture);
+                        bufferBuilder_1.begin(7, VertexFormats.POSITION_UV_COLOR_LMAP);
+                        particle_1.buildGeometry(bufferBuilder_1, camera_1, float_1, float_2, float_6, float_3, float_4, float_5);
+                        tessellator_1.draw();
+                    }
                 } catch (Throwable var18) {
                     CrashReport crashReport_1 = CrashReport.create(var18, "Rendering Particle");
                     CrashReportSection crashReportSection_1 = crashReport_1.addElement("Particle being rendered");

@@ -92,8 +92,6 @@ public class CustomJsonModel {
         return model;
     }
 
-//    private static DoubleBuffer buffer = ByteBuffer.allocate(128).order(ByteOrder.nativeOrder()).asDoubleBuffer();
-
     private List<PlayerBones> hideList = Lists.newArrayList();
     private Map<PlayerBones, Boolean> visibleBones = Maps.newEnumMap(PlayerBones.class);
 
@@ -104,8 +102,6 @@ public class CustomJsonModel {
     private Map<String, Matrix4> boneMats = Maps.newHashMap();
     private Map<String, Matrix4> lastBoneMats = Maps.newHashMap();
     private Map<String, Matrix4> tmpBoneMats = Maps.newHashMap();
-
-    private String modelType = "";
 
     private CustomJsonModel() {}
 
@@ -136,9 +132,6 @@ public class CustomJsonModel {
     }
 
     public void render(AbstractClientPlayerEntity entity, CustomPlayerEntityRenderer renderer, PlayerEntityModel model, float scale, float partial) {
-//        if (entity.isInSneakingPose())
-//            GlStateManager.translatef(0, 0.2f, 0);
-//        GlStateManager.scalef(-1.0f, -1.0f, 1.0f);
         GlStateManager.rotatef(-MathHelper.lerp(partial, entity.field_6220, entity.field_6283), 0, 1, 0);
         GlStateManager.translated(-MathHelper.lerp(partial, entity.prevX, entity.x),
                 MathHelper.lerp(partial, entity.prevY, entity.y),
@@ -146,18 +139,47 @@ public class CustomJsonModel {
 
         if (lastBoneMats.isEmpty())
             tick(entity, model);
+        update(entity, model, partial);
 
         for (Bone bone : bones) {
             renderer.bindTexture(bone.getTexture().getTexture(entity));
             GlStateManager.pushMatrix();
-
-            Matrix4 lastMat = lastBoneMats.get(bone.getId());
-            Matrix4 curMat = boneMats.get(bone.getId());
-            Matrix4 transform = lastMat.cpy().lerp(curMat, partial);
+            Matrix4 transform = tmpBoneMats.get(bone.getId());
 
             GL11.glMultMatrixd(transform.val);
             bone.render(entity, model, scale, partial);
             GlStateManager.popMatrix();
+        }
+    }
+
+    private void update(AbstractClientPlayerEntity entity, PlayerEntityModel model, float partial) {
+        Matrix4 baseMat = new Matrix4();
+        if (entity.isInSneakingPose())
+            baseMat.translate(0, 0.2f, 0);
+        baseMat.translate(MathHelper.lerp(partial, entity.prevX, entity.x),
+                -MathHelper.lerp(partial, entity.prevY, entity.y),
+                -MathHelper.lerp(partial, entity.prevZ, entity.z));
+        baseMat.rotate(Vector3.Y, MathHelper.lerp(partial, entity.field_6220, entity.field_6283));
+
+        for (PlayerBones playerBone : PlayerBones.values()) {
+            IBone bone = playerBone.getBone();
+            tmpBoneMats.put(bone.getId(), bone.getTransform(model).mulLeft(baseMat));
+        }
+
+        for (Bone bone : bones) {
+            IBone parent = bone.getParent();
+            Matrix4 curTrans;
+
+            if (bone.isPhysicalized()) {
+                Matrix4 lastMat = lastBoneMats.get(bone.getId());
+                Matrix4 curMat = boneMats.get(bone.getId());
+                curTrans = lastMat.cpy().lerp(curMat, partial);
+            } else {
+                Matrix4 curParTrans = tmpBoneMats.get(parent.getId());
+                curTrans = curParTrans.cpy().mul(bone.getTransform(model));
+            }
+
+            tmpBoneMats.put(bone.getId(), curTrans);
         }
     }
 
@@ -195,7 +217,7 @@ public class CustomJsonModel {
                 IBone parent = bone.getParent();
                 Matrix4 lastParTrans = lastBoneMats.get(parent.getId());
                 Matrix4 curParTrans = boneMats.get(parent.getId());
-                Matrix4 curTrans = curParTrans.cpy().mul(bone.getTransform(model, 1));
+                Matrix4 curTrans = curParTrans.cpy().mul(bone.getTransform(model));
 
                 if (bone.isPhysicalized()) {
                     Vector3 lastStart = lastParTrans.getTranslation(new Vector3());
@@ -203,17 +225,18 @@ public class CustomJsonModel {
                     Vector3 lastEnd = lastTrans.getTranslation(new Vector3());
                     Vector3 targetEnd = curTrans.getTranslation(new Vector3());
 
-                    Vector3 curEnd = lastEnd.cpy().add(bone.velocity.cpy()); // .add(targetEnd.cpy().sub(curStart).nor().scl(bone.getPhysicsParams()[1]));
+                    Vector3 curEnd = lastEnd.cpy().add(bone.velocity.cpy());
                     curEnd.sub(curStart).nor().scl(bone.getLength()).add(curStart);
 
                     bone.velocity.add(targetEnd.cpy().sub(curEnd).scl(bone.getPhysicsParams()[0]));
+                    bone.velocity.add(new Vector3(entity.getVelocity()).scl(-1, 1, 1).scl(bone.getPhysicsParams()[3]));
+                    bone.velocity.y += bone.getPhysicsParams()[4];
                     bone.velocity.scl(bone.getPhysicsParams()[2]);
 
                     Quaternion direction = new Quaternion().setFromCross(lastEnd.cpy().sub(lastStart).nor(), curEnd.cpy().sub(curStart).nor());
                     direction.mul(lastTrans.cpy().getRotation(new Quaternion())).nor();
-//                    direction.setEulerAngles(direction.getYaw(), direction.getPitch(), 0);
-                    curTrans = new Matrix4(curEnd, direction.slerp(curTrans.getRotation(new Quaternion()), bone.getPhysicsParams()[1]), bone.getScale(model));
-//                    System.out.println(lastStart.toString() + curStart.toString() + lastEnd.toString() + curEnd.toString() + curTrans.getTranslation(new Vector3()).toString());
+                    curTrans = new Matrix4(curStart, direction.slerp(curTrans.getRotation(new Quaternion()), bone.getPhysicsParams()[1]), bone.getScale(model));
+                    curTrans.translate(bone.getPosition(model).scl(0.0625));
                 }
 
                 boneMats.put(bone.getId(), curTrans);

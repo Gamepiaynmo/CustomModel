@@ -1,67 +1,114 @@
 package com.github.gamepiaynmo.custommodel;
 
-import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
+import com.github.gamepiaynmo.custommodel.network.PacketModel;
+import com.github.gamepiaynmo.custommodel.network.PacketQuery;
+import com.github.gamepiaynmo.custommodel.network.PacketReload;
 import com.github.gamepiaynmo.custommodel.render.CustomPlayerEntityRenderer;
 import com.github.gamepiaynmo.custommodel.util.ModelPack;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import com.google.common.collect.*;
+import com.mojang.authlib.GameProfile;
+import io.netty.buffer.Unpooled;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.event.client.ClientTickCallback;
 import net.fabricmc.fabric.api.event.world.WorldTickCallback;
+import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
+import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.client.render.entity.PlayerEntityRenderer;
 import net.minecraft.client.texture.TextureManager;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.Packet;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.PacketByteBuf;
 
 import java.io.*;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.zip.ZipInputStream;
+import java.util.*;
 
 public class CustomModelClient implements ClientModInitializer {
     private static Map<String, ModelPack> modelPacks = Maps.newHashMap();
 
     public static TextureManager textureManager;
     public static CustomPlayerEntityRenderer customRenderer;
-    public static boolean needToReload = false;
 
-    public static void reloadModels() {
-        for (ModelPack pack : modelPacks.values())
-            pack.release();
-        modelPacks.clear();
+    private static Set<GameProfile> queried = Sets.newHashSet();
+    private static Queue<GameProfile> reloadQueue = Queues.newArrayDeque();
 
-        File modelFolder = new File("custom-models");
-        if (modelFolder.isDirectory()) {
-            for (File modelPackFile : modelFolder.listFiles()) {
-                try {
-                    if (modelPackFile.isDirectory()) {
-                        ModelPack pack = ModelPack.fromDirectory(textureManager, modelPackFile);
-                        if (pack.successfulLoaded())
-                            modelPacks.put(modelPackFile.getName(), pack);
-                    } else if (modelPackFile.getName().endsWith(".zip")) {
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+    private static void sendPacket(Identifier id, Packet<?> packet) {
+        PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
+        try {
+            packet.write(buf);
+            ClientSidePacketRegistry.INSTANCE.sendToServer(id, buf);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void clearModel(GameProfile profile) {
+        String nameEntry = profile.getName().toLowerCase();
+        UUID uuid = PlayerEntity.getUuidFromProfile(profile);
+        String uuidEntry = uuid.toString().toLowerCase();
+        List<String> files = ImmutableList.of(nameEntry, uuidEntry);
+        queried.remove(profile);
+
+        for (String entry : files) {
+            ModelPack pack = modelPacks.get(nameEntry);
+            if (pack != null) {
+                modelPacks.remove(nameEntry);
+                pack.release();
             }
         }
     }
 
-    public static ModelPack getModelForPlayer(AbstractClientPlayerEntity playerEntity) {
-        ModelPack pack = modelPacks.get(playerEntity.getGameProfile().getName());
-        if (pack == null)
-            pack = modelPacks.get(PlayerEntity.getUuidFromProfile(playerEntity.getGameProfile()));
-        return pack;
+    private static void reloadModel(GameProfile profile) {
+        String nameEntry = profile.getName().toLowerCase();
+        UUID uuid = PlayerEntity.getUuidFromProfile(profile);
+        String uuidEntry = uuid.toString().toLowerCase();
+        List<String> files = ImmutableList.of(nameEntry, uuidEntry);
+        queried.add(profile);
+
+        ModelPack pack = null;
+        for (String entry : files) {
+            File modelFile = new File(CustomModel.MODEL_DIR + "/" + entry);
+
+            try {
+                if (modelFile.isDirectory())
+                    pack = ModelPack.fromDirectory(textureManager, modelFile);
+                if (modelFile.isFile())
+                    pack = ModelPack.fromZipFile(textureManager, modelFile);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            if (pack != null && pack.successfulLoaded()) {
+                modelPacks.put(pack.getDirName(), pack);
+                break;
+            }
+        }
+
+        if (ClientSidePacketRegistry.INSTANCE.canServerReceive(PacketQuery.ID));
+            sendPacket(PacketQuery.ID, new PacketQuery(profile));
     }
 
-    public static Collection<String> getAvailableModelPacks() {
-        return modelPacks.keySet();
+    public static ModelPack getModelForPlayer(AbstractClientPlayerEntity player) {
+        GameProfile profile = player.getGameProfile();
+        String nameEntry = profile.getName().toLowerCase();
+        UUID uuid = PlayerEntity.getUuidFromProfile(profile);
+        String uuidEntry = uuid.toString().toLowerCase();
+        List<String> names = ImmutableList.of(nameEntry, uuidEntry);
+
+        for (String name : names) {
+            ModelPack pack = modelPacks.get(nameEntry);
+            if (pack != null)
+                return pack;
+        }
+
+        if (!queried.contains(profile))
+            reloadModel(profile);
+        return null;
     }
 
-    public static ModelPack getModelForName(String name) {
-        return modelPacks.get(name);
+    public static void reloadModelForPlayer(AbstractClientPlayerEntity player) {
+        reloadQueue.add(player.getGameProfile());
     }
 
     @Override
@@ -72,10 +119,46 @@ public class CustomModelClient implements ClientModInitializer {
                 for (AbstractClientPlayerEntity player : client.world.getPlayers())
                     customRenderer.tick(player);
 
-                if (needToReload) {
-                    reloadModels();
-                    needToReload = false;
+                while (!reloadQueue.isEmpty()) {
+                    clearModel(reloadQueue.remove());
                 }
+            }
+        });
+
+        ClientSidePacketRegistry.INSTANCE.register(PacketReload.ID, (context, buffer) -> {
+            PacketReload packet = new PacketReload();
+            try {
+                packet.read(buffer);
+                context.getTaskQueue().execute(() -> {
+                    ClientWorld world = MinecraftClient.getInstance().world;
+                    if (world != null) {
+                        for (UUID uuid : packet.getUUIDs()) {
+                            AbstractClientPlayerEntity player = (AbstractClientPlayerEntity) world.getPlayerByUuid(uuid);
+                            reloadModelForPlayer(player);
+                        }
+                    }
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+
+        ClientSidePacketRegistry.INSTANCE.register(PacketModel.ID, (context, buffer) -> {
+            PacketModel packet = new PacketModel();
+            try {
+                packet.read(buffer);
+                context.getTaskQueue().execute(() -> {
+                    ModelPack pack = null;
+                    try {
+                        pack = ModelPack.fromZipMemory(textureManager, packet.getName(), packet.getData());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    if (pack != null && pack.successfulLoaded())
+                        modelPacks.put(pack.getDirName(), pack);
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
     }
