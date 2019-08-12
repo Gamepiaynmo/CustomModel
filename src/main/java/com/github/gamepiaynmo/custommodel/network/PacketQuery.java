@@ -1,6 +1,6 @@
 package com.github.gamepiaynmo.custommodel.network;
 
-import com.github.gamepiaynmo.custommodel.CustomModel;
+import com.github.gamepiaynmo.custommodel.server.CustomModel;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.Packet;

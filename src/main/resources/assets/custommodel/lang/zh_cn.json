@@ -1,0 +1,17 @@
+{
+  "text.autoconfig.custommodel.title": "自定义模型设置",
+  "text.autoconfig.custommodel.category.default": "自定义模型设置",
+
+  "text.autoconfig.custommodel.option.clientFirst": "优先使用客户端模型",
+  "text.autoconfig.custommodel.option.clientFirst.@Tooltip": "如果同时在服务端和客户端存在某个玩家的可用模型，则优先使用客户端模型",
+
+  "error.custommodel.loadmodelpack": "加载模型包失败：%s",
+  "error.custommodel.loadmodelpack.nomodel": "未找到model.json",
+  "error.custommodel.loadmodelpack.nohidebone": "未找到骨骼%s",
+  "error.custommodel.loadmodelpack.noboneid": "骨骼必须拥有ID",
+  "error.custommodel.loadmodelpack.noparent": "骨骼必须拥有父骨骼",
+  "error.custommodel.loadmodelpack.noparentid": "未找到父骨骼%s",
+  "error.custommodel.loadmodelpack.notexture": "未找到贴图文件%s",
+  "error.custommodel.loadmodelpack.notexturesize": "贴图%s必须指明大小",
+  "error.custommodel.loadmodelpack.jsonarraylen": "数组%s的长度不正确：应为%d"
+}

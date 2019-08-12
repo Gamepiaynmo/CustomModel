@@ -1,8 +1,7 @@
 package com.github.gamepiaynmo.custommodel.render;
 
-import com.github.gamepiaynmo.custommodel.CustomModelClient;
-import com.github.gamepiaynmo.custommodel.util.ModelPack;
-import com.mojang.blaze3d.platform.GLX;
+import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
+import com.github.gamepiaynmo.custommodel.client.ModelPack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;

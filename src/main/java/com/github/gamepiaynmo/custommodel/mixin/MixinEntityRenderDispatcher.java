@@ -1,7 +1,6 @@
 package com.github.gamepiaynmo.custommodel.mixin;
 
-import com.github.gamepiaynmo.custommodel.CustomModel;
-import com.github.gamepiaynmo.custommodel.CustomModelClient;
+import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.render.CustomPlayerEntityRenderer;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;

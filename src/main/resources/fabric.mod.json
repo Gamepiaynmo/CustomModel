@@ -4,36 +4,34 @@
   "version": "${version}",
 
   "name": "Custom Model",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "description": "Customize your player model in Minecraft using JSON.",
   "authors": [
-    "Me!"
+    "Gamepiaynmo"
   ],
   "contact": {
-    "homepage": "https://fabricmc.net/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
+    "homepage": "https://github.com/Gamepiaynmo",
+    "sources": "https://github.com/Gamepiaynmo/CustomModel"
   },
 
   "license": "CC0-1.0",
-  "icon": "assets/modid/icon.png",
+  "icon": "assets/custommodel/icon.png",
 
   "environment": "*",
   "entrypoints": {
-    "main": [
-      "com.github.gamepiaynmo.custommodel.CustomModel"
-    ],
-    "client": [
-      "com.github.gamepiaynmo.custommodel.CustomModelClient"
-    ]
+    "main": [ "com.github.gamepiaynmo.custommodel.server.CustomModel" ],
+    "client": [ "com.github.gamepiaynmo.custommodel.client.CustomModelClient" ],
+    "modmenu": [ "com.github.gamepiaynmo.custommodel.client.ModMenu" ]
   },
   "mixins": [
-    "modid.mixins.json"
+    "custommodel.mixins.json"
   ],
 
   "depends": {
     "fabricloader": ">=0.4.0",
-    "fabric": "*"
+    "fabric": "*",
+    "autoconfig1": "*"
   },
   "suggests": {
-    "flamingo": "*"
+    "modmenu": "*"
   }
 }

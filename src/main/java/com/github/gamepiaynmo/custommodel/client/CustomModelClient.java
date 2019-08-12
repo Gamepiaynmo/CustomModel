@@ -1,23 +1,26 @@
-package com.github.gamepiaynmo.custommodel;
+package com.github.gamepiaynmo.custommodel.client;
 
+import com.github.gamepiaynmo.custommodel.server.CustomModel;
 import com.github.gamepiaynmo.custommodel.network.PacketModel;
 import com.github.gamepiaynmo.custommodel.network.PacketQuery;
 import com.github.gamepiaynmo.custommodel.network.PacketReload;
 import com.github.gamepiaynmo.custommodel.render.CustomPlayerEntityRenderer;
-import com.github.gamepiaynmo.custommodel.util.ModelPack;
 import com.google.common.collect.*;
 import com.mojang.authlib.GameProfile;
 import io.netty.buffer.Unpooled;
+import me.sargunvohra.mcmods.autoconfig1.AutoConfig;
+import me.sargunvohra.mcmods.autoconfig1.serializer.GsonConfigSerializer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.event.world.WorldTickCallback;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
-import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.texture.TextureManager;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.MessageType;
 import net.minecraft.network.Packet;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.PacketByteBuf;
 
@@ -76,6 +79,8 @@ public class CustomModelClient implements ClientModInitializer {
                 if (modelFile.isFile())
                     pack = ModelPack.fromZipFile(textureManager, modelFile);
             } catch (Exception e) {
+                MinecraftClient.getInstance().inGameHud.addChatMessage(MessageType.CHAT,
+                        new TranslatableText("error.custommodel.loadmodelpack", e.getMessage()));
                 e.printStackTrace();
             }
 
@@ -85,7 +90,7 @@ public class CustomModelClient implements ClientModInitializer {
             }
         }
 
-        if (ClientSidePacketRegistry.INSTANCE.canServerReceive(PacketQuery.ID));
+        if (!ModConfig.isClientFirst() && ClientSidePacketRegistry.INSTANCE.canServerReceive(PacketQuery.ID));
             sendPacket(PacketQuery.ID, new PacketQuery(profile));
     }
 
@@ -95,6 +100,7 @@ public class CustomModelClient implements ClientModInitializer {
         UUID uuid = PlayerEntity.getUuidFromProfile(profile);
         String uuidEntry = uuid.toString().toLowerCase();
         List<String> names = ImmutableList.of(nameEntry, uuidEntry);
+//        List<String> names = ImmutableList.of(nameEntry, nameEntry + ".zip", uuidEntry, uuidEntry + ".zip");
 
         for (String name : names) {
             ModelPack pack = modelPacks.get(nameEntry);
@@ -152,6 +158,8 @@ public class CustomModelClient implements ClientModInitializer {
                     try {
                         pack = ModelPack.fromZipMemory(textureManager, packet.getName(), packet.getData());
                     } catch (Exception e) {
+                        MinecraftClient.getInstance().inGameHud.addChatMessage(MessageType.CHAT,
+                                new TranslatableText("error.custommodel.loadmodelpack", e.getMessage()));
                         e.printStackTrace();
                     }
                     if (pack != null && pack.successfulLoaded())
@@ -161,5 +169,7 @@ public class CustomModelClient implements ClientModInitializer {
                 e.printStackTrace();
             }
         });
+
+        AutoConfig.register(ModConfig.class, GsonConfigSerializer::new);
     }
 }

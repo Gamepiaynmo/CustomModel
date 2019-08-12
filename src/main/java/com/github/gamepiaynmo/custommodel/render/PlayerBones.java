@@ -2,14 +2,12 @@ package com.github.gamepiaynmo.custommodel.render;
 
 import com.github.gamepiaynmo.custommodel.render.model.IBone;
 import com.github.gamepiaynmo.custommodel.util.Matrix4;
-import com.github.gamepiaynmo.custommodel.util.ModelPack;
+import com.github.gamepiaynmo.custommodel.client.ModelPack;
 import com.github.gamepiaynmo.custommodel.util.Vector3;
 import com.google.common.collect.Maps;
 import com.sun.javafx.geom.Vec2d;
-import net.fabricmc.loader.util.sat4j.core.Vec;
 import net.minecraft.client.model.Cuboid;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
-import net.minecraft.util.math.Vec2f;
 
 import java.util.Map;
 

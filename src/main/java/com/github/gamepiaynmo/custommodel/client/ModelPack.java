@@ -1,17 +1,16 @@
-package com.github.gamepiaynmo.custommodel.util;
+package com.github.gamepiaynmo.custommodel.client;
 
-import com.github.gamepiaynmo.custommodel.CustomModel;
+import com.github.gamepiaynmo.custommodel.server.CustomModel;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
 import com.github.gamepiaynmo.custommodel.render.CustomTexture;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.sun.org.apache.xpath.internal.operations.Mod;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.TextureManager;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import org.apache.commons.io.IOUtils;
 
@@ -19,7 +18,6 @@ import java.io.*;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
@@ -69,8 +67,6 @@ public class ModelPack {
                 textureFiles.add(new FileResource(modelPackItem));
         }
 
-        if (modelFile == null)
-            throw new RuntimeException("model.json not found.");
         return fromResource(textureManager, dir.getName(), modelFile, textureFiles);
     }
 
@@ -109,8 +105,6 @@ public class ModelPack {
                 textureFiles.add(new ZipResource(entry));
         }
 
-        if (modelFile == null)
-            throw new RuntimeException("model.json not found.");
         return fromResource(textureManager, zipFile.getName(), modelFile, textureFiles);
     }
 
@@ -153,14 +147,14 @@ public class ModelPack {
                 textureFiles.add(new MemoryResource(entry));
         }
 
-        if (modelFile == null)
-            throw new RuntimeException("model.json not found.");
         return fromResource(textureManager, name, modelFile, textureFiles);
     }
 
     public static ModelPack fromResource(TextureManager textureManager, String name, IModelResource model, Collection<IModelResource> textures) throws IOException {
         ModelPack pack = new ModelPack();
         pack.dirName = getFileName(name);
+        if (model == null)
+            throw new RuntimeException(new TranslatableText("error.custommodel.loadmodelpack.nomodel").asString());
         InputStream modelInputStream = model.getInputStream();
         pack.modelJson = new JsonParser().parse(new InputStreamReader(modelInputStream)).getAsJsonObject();
         IOUtils.closeQuietly(modelInputStream);

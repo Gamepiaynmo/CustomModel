@@ -2,12 +2,11 @@ package com.github.gamepiaynmo.custommodel.render.model;
 
 import com.github.gamepiaynmo.custommodel.render.PlayerBones;
 import com.github.gamepiaynmo.custommodel.util.Matrix4;
-import com.github.gamepiaynmo.custommodel.util.ModelPack;
+import com.github.gamepiaynmo.custommodel.client.ModelPack;
 import com.github.gamepiaynmo.custommodel.util.Quaternion;
 import com.github.gamepiaynmo.custommodel.util.Vector3;
 import com.sun.javafx.geom.Vec2d;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
-import net.minecraft.util.math.Vec2f;
 
 public interface IBone {
     public Vector3 getPosition(PlayerEntityModel model);

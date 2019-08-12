@@ -1,6 +1,6 @@
 package com.github.gamepiaynmo.custommodel.network;
 
-import com.github.gamepiaynmo.custommodel.CustomModel;
+import com.github.gamepiaynmo.custommodel.server.CustomModel;
 import net.minecraft.network.Packet;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.util.Identifier;

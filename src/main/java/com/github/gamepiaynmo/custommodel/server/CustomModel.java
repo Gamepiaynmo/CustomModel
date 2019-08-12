@@ -1,9 +1,8 @@
-package com.github.gamepiaynmo.custommodel;
+package com.github.gamepiaynmo.custommodel.server;
 
 import com.github.gamepiaynmo.custommodel.network.PacketModel;
 import com.github.gamepiaynmo.custommodel.network.PacketQuery;
 import com.github.gamepiaynmo.custommodel.network.PacketReload;
-import com.github.gamepiaynmo.custommodel.util.ModelPack;
 import com.google.common.collect.ImmutableList;
 import com.mojang.authlib.GameProfile;
 import io.netty.buffer.Unpooled;
@@ -19,7 +18,6 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.PacketByteBuf;
 
 import java.io.File;
-import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;

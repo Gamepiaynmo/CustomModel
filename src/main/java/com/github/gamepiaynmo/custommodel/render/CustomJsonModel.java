@@ -1,33 +1,23 @@
 package com.github.gamepiaynmo.custommodel.render;
 
+import com.github.gamepiaynmo.custommodel.client.ModelPack;
 import com.github.gamepiaynmo.custommodel.render.model.Bone;
 import com.github.gamepiaynmo.custommodel.render.model.IBone;
 import com.github.gamepiaynmo.custommodel.util.*;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.platform.GlStateManager;
-import net.fabricmc.loader.util.sat4j.core.Vec;
-import net.minecraft.client.model.Cuboid;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
-import net.minecraft.client.util.GlAllocationUtils;
-import net.minecraft.client.util.math.Matrix4f;
-import net.minecraft.util.Identifier;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 import org.lwjgl.opengl.GL11;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.DoubleBuffer;
-import java.nio.FloatBuffer;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 public class CustomJsonModel {
     public static final String HIDE = "hide";
@@ -74,7 +64,7 @@ public class CustomJsonModel {
                 String boneId = element.getAsString();
                 PlayerBones bone = PlayerBones.getById(boneId);
                 if (bone == null)
-                    throw new RuntimeException("Hide element " + boneId + " not found.");
+                    throw new RuntimeException(new TranslatableText("error.custommodel.loadmodelpack.nohidebone", boneId).asString());
                 model.hideList.add(bone);
             }
         }

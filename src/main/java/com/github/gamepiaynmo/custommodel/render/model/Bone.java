@@ -1,18 +1,18 @@
 package com.github.gamepiaynmo.custommodel.render.model;
 
+import com.github.gamepiaynmo.custommodel.client.ModelPack;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
 import com.github.gamepiaynmo.custommodel.render.PlayerBones;
 import com.github.gamepiaynmo.custommodel.util.*;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.ibm.icu.text.MessagePattern;
 import com.sun.javafx.geom.Vec2d;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
-import net.minecraft.util.math.Vec2f;
+import net.minecraft.text.TranslatableText;
 
 import java.util.List;
 
@@ -44,24 +44,24 @@ public class Bone implements IBone {
 
         bone.id = Json.getString(jsonObj, CustomJsonModel.ID);
         if (bone.id == null)
-            throw new RuntimeException("ID is required.");
+            throw new RuntimeException(new TranslatableText("error.custommodel.loadmodelpack.noboneid").asString());
 
         String parentId = Json.getString(jsonObj, CustomJsonModel.PARENT);
         if (parentId == null)
-            throw new RuntimeException("Parent is required.");
+            throw new RuntimeException(new TranslatableText("error.custommodel.loadmodelpack.noparent").asString());
         bone.parent = model.getBone(parentId);
         if (bone.parent == null)
-            throw new RuntimeException("Bone " + parentId + " not found.");
+            throw new RuntimeException(new TranslatableText("error.custommodel.loadmodelpack.noparentid", parentId).asString());
 
         String textureId = Json.getString(jsonObj, CustomJsonModel.TEXTURE);
         if (textureId != null) {
             bone.texture = pack.getTexture(textureId);
             if (bone.texture == null)
-                throw new RuntimeException("Texture " + textureId + " not found.");
+                throw new RuntimeException(new TranslatableText("error.custommodel.loadmodelpack.notexture", textureId).asString());
 
             JsonElement texSizeArray = jsonObj.get(CustomJsonModel.TEXTURE_SIZE);
             if (texSizeArray == null)
-                throw new RuntimeException("Texture size is required.");
+                throw new RuntimeException(new TranslatableText("error.custommodel.loadmodelpack.notexturesize", textureId).asString());
             double[] texSize = Json.parseDoubleArray(texSizeArray, 2);
             bone.textureSize = new Vec2d(texSize[0], texSize[1]);
         }

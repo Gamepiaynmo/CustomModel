@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import net.minecraft.text.TranslatableText;
 
 public class Json {
    public static float getFloat(JsonObject obj, String field, float def) {
@@ -40,7 +41,7 @@ public class Json {
       } else {
          JsonArray arr = jsonElement.getAsJsonArray();
          if (arr.size() != len) {
-            throw new JsonParseException("Wrong array length: " + arr.size() + ", should be: " + len + ", array: " + arr);
+            throw new JsonParseException(new TranslatableText("error.custommodel.loadmodelpack.jsonarraylen", arr, len).asString());
          } else {
             float[] floatArr = new float[arr.size()];
 
@@ -63,7 +64,7 @@ public class Json {
       } else {
          JsonArray arr = jsonElement.getAsJsonArray();
          if (arr.size() != len) {
-            throw new JsonParseException("Wrong array length: " + arr.size() + ", should be: " + len + ", array: " + arr);
+            throw new JsonParseException(new TranslatableText("error.custommodel.loadmodelpack.jsonarraylen", arr, len).asString());
          } else {
             double[] floatArr = new double[arr.size()];
 
@@ -86,7 +87,7 @@ public class Json {
       } else {
          JsonArray arr = jsonElement.getAsJsonArray();
          if (arr.size() != len) {
-            throw new JsonParseException("Wrong array length: " + arr.size() + ", should be: " + len + ", array: " + arr);
+            throw new JsonParseException(new TranslatableText("error.custommodel.loadmodelpack.jsonarraylen", arr, len).asString());
          } else {
             int[] intArr = new int[arr.size()];
 
