@@ -34,7 +34,6 @@ public class CustomModelClient implements ClientModInitializer {
     public static CustomPlayerEntityRenderer customRenderer;
 
     private static Set<GameProfile> queried = Sets.newHashSet();
-    private static Queue<GameProfile> reloadQueue = Queues.newArrayDeque();
 
     private static void sendPacket(Identifier id, Packet<?> packet) {
         PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
@@ -113,10 +112,6 @@ public class CustomModelClient implements ClientModInitializer {
         return null;
     }
 
-    public static void reloadModelForPlayer(AbstractClientPlayerEntity player) {
-        reloadQueue.add(player.getGameProfile());
-    }
-
     @Override
     public void onInitializeClient() {
         WorldTickCallback.EVENT.register(world -> {
@@ -124,10 +119,6 @@ public class CustomModelClient implements ClientModInitializer {
             if (world == client.world) {
                 for (AbstractClientPlayerEntity player : client.world.getPlayers())
                     customRenderer.tick(player);
-
-                while (!reloadQueue.isEmpty()) {
-                    clearModel(reloadQueue.remove());
-                }
             }
         });
 
@@ -140,7 +131,7 @@ public class CustomModelClient implements ClientModInitializer {
                     if (world != null) {
                         for (UUID uuid : packet.getUUIDs()) {
                             AbstractClientPlayerEntity player = (AbstractClientPlayerEntity) world.getPlayerByUuid(uuid);
-                            reloadModelForPlayer(player);
+                            clearModel(player.getGameProfile());
                         }
                     }
                 });

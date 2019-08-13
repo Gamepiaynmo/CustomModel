@@ -3,6 +3,7 @@ package com.github.gamepiaynmo.custommodel.client;
 import com.github.gamepiaynmo.custommodel.server.CustomModel;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
 import com.github.gamepiaynmo.custommodel.render.CustomTexture;
+import com.github.gamepiaynmo.custommodel.util.TranslatableException;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonObject;
@@ -28,7 +29,6 @@ public class ModelPack {
 
     private JsonObject modelJson;
     private Map<String, Identifier> textureIds = Maps.newHashMap();
-    private List<CustomTexture> textures = Lists.newArrayList();
     private CustomJsonModel model;
     private boolean success = false;
     private String dirName;
@@ -154,7 +154,7 @@ public class ModelPack {
         ModelPack pack = new ModelPack();
         pack.dirName = getFileName(name);
         if (model == null)
-            throw new RuntimeException(new TranslatableText("error.custommodel.loadmodelpack.nomodel").asString());
+            throw new TranslatableException("error.custommodel.loadmodelpack.nomodel");
         InputStream modelInputStream = model.getInputStream();
         pack.modelJson = new JsonParser().parse(new InputStreamReader(modelInputStream)).getAsJsonObject();
         IOUtils.closeQuietly(modelInputStream);
@@ -162,9 +162,7 @@ public class ModelPack {
             Identifier identifier = new Identifier(CustomModel.MODID, (pack.dirName + "/" + texture.getName()).toLowerCase());
             pack.textureIds.put(texture.getName(), identifier);
             NativeImage image = NativeImage.read(texture.getInputStream());
-            CustomTexture customTexture = new CustomTexture(image);
-            pack.textures.add(customTexture);
-            textureManager.registerTexture(identifier, customTexture);
+            textureManager.registerTexture(identifier, new CustomTexture(image));
         }
 
         pack.model = CustomJsonModel.fromJson(pack, pack.modelJson);
@@ -205,8 +203,9 @@ public class ModelPack {
     }
 
     public void release() {
-        for (CustomTexture texture : textures)
-            texture.clearGlId();
+        for (Identifier texture : textureIds.values())
+            CustomModelClient.textureManager.destroyTexture(texture);
+        model.release();
     }
 
     public String getDirName() {

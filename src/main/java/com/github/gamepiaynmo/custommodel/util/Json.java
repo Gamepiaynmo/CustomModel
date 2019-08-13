@@ -41,7 +41,7 @@ public class Json {
       } else {
          JsonArray arr = jsonElement.getAsJsonArray();
          if (arr.size() != len) {
-            throw new JsonParseException(new TranslatableText("error.custommodel.loadmodelpack.jsonarraylen", arr, len).asString());
+            throw new TranslatableException("error.custommodel.loadmodelpack.jsonarraylen", arr, len);
          } else {
             float[] floatArr = new float[arr.size()];
 
@@ -64,7 +64,7 @@ public class Json {
       } else {
          JsonArray arr = jsonElement.getAsJsonArray();
          if (arr.size() != len) {
-            throw new JsonParseException(new TranslatableText("error.custommodel.loadmodelpack.jsonarraylen", arr, len).asString());
+            throw new TranslatableException("error.custommodel.loadmodelpack.jsonarraylen", arr, len);
          } else {
             double[] floatArr = new double[arr.size()];
 
@@ -87,7 +87,7 @@ public class Json {
       } else {
          JsonArray arr = jsonElement.getAsJsonArray();
          if (arr.size() != len) {
-            throw new JsonParseException(new TranslatableText("error.custommodel.loadmodelpack.jsonarraylen", arr, len).asString());
+            throw new TranslatableException("error.custommodel.loadmodelpack.jsonarraylen", arr, len);
          } else {
             int[] intArr = new int[arr.size()];
 

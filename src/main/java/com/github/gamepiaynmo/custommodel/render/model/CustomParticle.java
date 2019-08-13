@@ -63,6 +63,8 @@ public class CustomParticle extends BillboardParticle {
     public Identifier getTexture() { return texture; }
     public Vec3d getPos() { return new Vec3d(x, y, z); }
 
+    public boolean isReleased() { return emitter.released; }
+
     private void calcUV() {
         int cnt = emitter.animation[0] * emitter.animation[1];
         if (cnt <= 1) {
@@ -91,5 +93,8 @@ public class CustomParticle extends BillboardParticle {
         this.angle += this.rotSpeed;
 
         calcUV();
+
+        if (isReleased())
+            markDead();
     }
 }

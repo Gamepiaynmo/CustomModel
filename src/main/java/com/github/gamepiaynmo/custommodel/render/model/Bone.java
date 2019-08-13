@@ -44,24 +44,24 @@ public class Bone implements IBone {
 
         bone.id = Json.getString(jsonObj, CustomJsonModel.ID);
         if (bone.id == null)
-            throw new RuntimeException(new TranslatableText("error.custommodel.loadmodelpack.noboneid").asString());
+            throw new TranslatableException("error.custommodel.loadmodelpack.noboneid");
 
         String parentId = Json.getString(jsonObj, CustomJsonModel.PARENT);
         if (parentId == null)
-            throw new RuntimeException(new TranslatableText("error.custommodel.loadmodelpack.noparent").asString());
+            throw new TranslatableException("error.custommodel.loadmodelpack.noparent");
         bone.parent = model.getBone(parentId);
         if (bone.parent == null)
-            throw new RuntimeException(new TranslatableText("error.custommodel.loadmodelpack.noparentid", parentId).asString());
+            throw new TranslatableException("error.custommodel.loadmodelpack.noparentid", parentId);
 
         String textureId = Json.getString(jsonObj, CustomJsonModel.TEXTURE);
         if (textureId != null) {
             bone.texture = pack.getTexture(textureId);
             if (bone.texture == null)
-                throw new RuntimeException(new TranslatableText("error.custommodel.loadmodelpack.notexture", textureId).asString());
+                throw new TranslatableException("error.custommodel.loadmodelpack.notexture", textureId);
 
             JsonElement texSizeArray = jsonObj.get(CustomJsonModel.TEXTURE_SIZE);
             if (texSizeArray == null)
-                throw new RuntimeException(new TranslatableText("error.custommodel.loadmodelpack.notexturesize", textureId).asString());
+                throw new TranslatableException("error.custommodel.loadmodelpack.notexturesize", textureId);
             double[] texSize = Json.parseDoubleArray(texSizeArray, 2);
             bone.textureSize = new Vec2d(texSize[0], texSize[1]);
         }
@@ -171,5 +171,10 @@ public class Bone implements IBone {
     public void tick(AbstractClientPlayerEntity playerEntity, Matrix4 transform) {
         for (ParticleEmitter emitter : particles)
             emitter.tick(playerEntity, transform);
+    }
+
+    public void release() {
+        for (ParticleEmitter emitter : particles)
+            emitter.release();
     }
 }

@@ -64,7 +64,7 @@ public class CustomJsonModel {
                 String boneId = element.getAsString();
                 PlayerBones bone = PlayerBones.getById(boneId);
                 if (bone == null)
-                    throw new RuntimeException(new TranslatableText("error.custommodel.loadmodelpack.nohidebone", boneId).asString());
+                    throw new TranslatableException("error.custommodel.loadmodelpack.nohidebone", boneId);
                 model.hideList.add(bone);
             }
         }
@@ -232,6 +232,12 @@ public class CustomJsonModel {
                 boneMats.put(bone.getId(), curTrans);
                 bone.tick(entity, curTrans);
             }
+        }
+    }
+
+    public void release() {
+        for (Bone bone : bones) {
+            bone.release();
         }
     }
 

@@ -60,11 +60,10 @@ public class MixinParticleManager {
                 CustomParticle particle_1 = (CustomParticle)var13.next();
                 if (camera_1.getPos().squaredDistanceTo(particle_1.getPos()) < 1)
                     continue;
-                Identifier texture = particle_1.getTexture();
 
                 try {
-                    if (textureManager.getTexture(texture).getGlId() >= 0) {
-                        textureManager.bindTexture(texture);
+                    if (!particle_1.isReleased()) {
+                        textureManager.bindTexture(particle_1.getTexture());
                         bufferBuilder_1.begin(7, VertexFormats.POSITION_UV_COLOR_LMAP);
                         particle_1.buildGeometry(bufferBuilder_1, camera_1, float_1, float_2, float_6, float_3, float_4, float_5);
                         tessellator_1.draw();

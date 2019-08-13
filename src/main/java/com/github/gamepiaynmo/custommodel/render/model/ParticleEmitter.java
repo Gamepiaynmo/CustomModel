@@ -34,6 +34,7 @@ public class ParticleEmitter {
     private Random random = new Random();
     private ModelPack.TextureGetter texture;
     protected final Bone bone;
+    protected boolean released = false;
 
     private ParticleEmitter(Bone parent) { bone = parent; }
 
@@ -111,6 +112,10 @@ public class ParticleEmitter {
                 }
             }
         }
+    }
+
+    public void release() {
+        released = true;
     }
 
 }
