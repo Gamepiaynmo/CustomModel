@@ -1,5 +1,6 @@
 package com.github.gamepiaynmo.custommodel.client;
 
+import com.github.gamepiaynmo.custommodel.expression.ParseException;
 import com.github.gamepiaynmo.custommodel.server.CustomModel;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
 import com.github.gamepiaynmo.custommodel.render.CustomTexture;
@@ -19,13 +20,15 @@ import java.io.*;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 public class ModelPack {
 
-    public static final TextureGetter skinGetter = player -> player.getSkinTexture();
+    public static final Supplier<Identifier> skinGetter = () -> CustomModelClient.currentPlayer.getSkinTexture();
 
     private JsonObject modelJson;
     private Map<String, Identifier> textureIds = Maps.newHashMap();
@@ -35,7 +38,7 @@ public class ModelPack {
 
     private ModelPack() {}
 
-    public static ModelPack fromDirectory(TextureManager textureManager, File dir) throws FileNotFoundException, IOException {
+    public static ModelPack fromDirectory(TextureManager textureManager, File dir) throws FileNotFoundException, IOException, ParseException {
         IModelResource modelFile = null;
         List<IModelResource> textureFiles = Lists.newArrayList();
 
@@ -70,7 +73,7 @@ public class ModelPack {
         return fromResource(textureManager, dir.getName(), modelFile, textureFiles);
     }
 
-    public static ModelPack fromZipFile(TextureManager textureManager, File zipFile) throws IOException {
+    public static ModelPack fromZipFile(TextureManager textureManager, File zipFile) throws IOException, ParseException {
         ZipInputStream zip = new ZipInputStream(new BufferedInputStream(new FileInputStream(zipFile)));
         ZipFile file = new ZipFile(zipFile);
         ZipEntry entry;
@@ -108,7 +111,7 @@ public class ModelPack {
         return fromResource(textureManager, zipFile.getName(), modelFile, textureFiles);
     }
 
-    public static ModelPack fromZipMemory(TextureManager textureManager, String name, byte[] data) throws IOException {
+    public static ModelPack fromZipMemory(TextureManager textureManager, String name, byte[] data) throws IOException, ParseException {
         ZipInputStream zip = new ZipInputStream(new ByteArrayInputStream(data));
         ZipEntry entry;
 
@@ -150,7 +153,7 @@ public class ModelPack {
         return fromResource(textureManager, name, modelFile, textureFiles);
     }
 
-    public static ModelPack fromResource(TextureManager textureManager, String name, IModelResource model, Collection<IModelResource> textures) throws IOException {
+    public static ModelPack fromResource(TextureManager textureManager, String name, IModelResource model, Collection<IModelResource> textures) throws IOException, ParseException {
         ModelPack pack = new ModelPack();
         pack.dirName = getFileName(name);
         if (model == null)
@@ -173,7 +176,7 @@ public class ModelPack {
     private static String getFileName(String path) {
         int idx1 = Math.max(0, Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\')));
         int idx2 = path.indexOf('.', idx1);
-        if (idx2 < 0) idx2 = path.length() - 1;
+        if (idx2 < 0) idx2 = path.length();
         return path.substring(idx1, idx2);
     }
 
@@ -181,16 +184,16 @@ public class ModelPack {
         return modelJson;
     }
 
-    public TextureGetter getBaseTexture() {
+    public Supplier<Identifier> getBaseTexture() {
         return skinGetter;
     }
 
-    public TextureGetter getTexture(String name) {
+    public Supplier<Identifier> getTexture(String name) {
         if (name.equals("skin.png"))
             return skinGetter;
         Identifier texture = textureIds.get(name);
         if (texture != null)
-            return player -> texture;
+            return () -> texture;
         return null;
     }
 

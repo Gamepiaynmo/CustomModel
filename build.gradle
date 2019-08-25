@@ -32,11 +32,11 @@ dependencies {
 
 	// PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
 	// You may need to force-disable transitiveness on them.
-	modCompile "me.shedaniel.cloth:config-1:+"
-    modCompile "me.sargunvohra.mcmods:auto-config:+"
+	modCompile "me.shedaniel.cloth:config-1:0.2.5"
+    modCompile "me.sargunvohra.mcmods:auto-config:1.2.0+mc1.14.4"
 
     // not required, but we want to see our config screen
-    modCompile "io.github.prospector:modmenu:+"
+    modCompile "io.github.prospector:modmenu:1.7.9+build.118"
 }
 
 processResources {

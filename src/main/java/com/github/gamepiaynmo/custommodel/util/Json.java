@@ -1,15 +1,24 @@
 package com.github.gamepiaynmo.custommodel.util;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
+import com.github.gamepiaynmo.custommodel.expression.*;
+import com.google.gson.*;
 import net.minecraft.text.TranslatableText;
 
 public class Json {
    public static float getFloat(JsonObject obj, String field, float def) {
       JsonElement elem = obj.get(field);
       return elem == null ? def : elem.getAsFloat();
+   }
+
+   public static IExpressionFloat getFloatExpression(JsonElement jsonElement, float def, ExpressionParser parser) throws ParseException {
+      if (jsonElement == null) return new ConstantFloat(def);
+      JsonPrimitive primitive = jsonElement.getAsJsonPrimitive();
+      if (primitive.isNumber()) return new ConstantFloat(primitive.getAsFloat());
+      return parser.parseFloat(primitive.getAsString());
+   }
+
+   public static IExpressionFloat getFloatExpression(JsonObject obj, String field, float def, ExpressionParser parser) throws ParseException {
+      return getFloatExpression(obj.get(field), def, parser);
    }
 
    public static double getDouble(JsonObject obj, String field, double def) {
@@ -20,6 +29,18 @@ public class Json {
    public static boolean getBoolean(JsonObject obj, String field, boolean def) {
       JsonElement elem = obj.get(field);
       return elem == null ? def : elem.getAsBoolean();
+   }
+
+   private static IExpressionBool getConstantBoolean(boolean val) {
+      return new FunctionBool(val ? FunctionType.TRUE : FunctionType.FALSE, new IExpression[0]);
+   }
+
+   public static IExpressionBool getBooleanExpression(JsonObject obj, String field, boolean def, ExpressionParser parser) throws ParseException {
+      JsonElement elem = obj.get(field);
+      if (elem == null) return getConstantBoolean(def);
+      JsonPrimitive primitive = elem.getAsJsonPrimitive();
+      if (primitive.isBoolean()) return getConstantBoolean(primitive.getAsBoolean());
+      return parser.parseBool(primitive.getAsString());
    }
 
    public static String getString(JsonObject jsonObj, String field) {
@@ -49,6 +70,25 @@ public class Json {
                floatArr[i] = arr.get(i).getAsFloat();
             }
 
+            return floatArr;
+         }
+      }
+   }
+
+   public static IExpressionFloat[] parseFloatExpressionArray(JsonElement jsonElement, int len, float[] def, ExpressionParser parser) throws ParseException {
+      if (jsonElement == null) {
+         IExpressionFloat[] floatArr = new IExpressionFloat[len];
+         for (int i = 0; i < len; i++)
+            floatArr[i] = new ConstantFloat(def[i]);
+         return floatArr;
+      } else {
+         JsonArray arr = jsonElement.getAsJsonArray();
+         if (arr.size() != len) {
+            throw new TranslatableException("error.custommodel.loadmodelpack.jsonarraylen", arr, len);
+         } else {
+            IExpressionFloat[] floatArr = new IExpressionFloat[arr.size()];
+            for(int i = 0; i < floatArr.length; ++i)
+               floatArr[i] = getFloatExpression(arr.get(i), def[i], parser);
             return floatArr;
          }
       }

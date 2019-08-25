@@ -1,5 +1,6 @@
 package com.github.gamepiaynmo.custommodel.client;
 
+import com.github.gamepiaynmo.custommodel.render.RenderParameter;
 import com.github.gamepiaynmo.custommodel.server.CustomModel;
 import com.github.gamepiaynmo.custommodel.network.PacketModel;
 import com.github.gamepiaynmo.custommodel.network.PacketQuery;
@@ -15,6 +16,7 @@ import net.fabricmc.fabric.api.event.world.WorldTickCallback;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
+import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.client.texture.TextureManager;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.player.PlayerEntity;
@@ -23,17 +25,26 @@ import net.minecraft.network.Packet;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.PacketByteBuf;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.util.*;
 
 public class CustomModelClient implements ClientModInitializer {
-    private static Map<String, ModelPack> modelPacks = Maps.newHashMap();
+    private static final  Map<String, ModelPack> modelPacks = Maps.newHashMap();
 
     public static TextureManager textureManager;
     public static CustomPlayerEntityRenderer customRenderer;
 
-    private static Set<GameProfile> queried = Sets.newHashSet();
+    private static final Set<GameProfile> queried = Sets.newHashSet();
+
+    public static final Logger LOGGER = LogManager.getLogger();
+
+    public static AbstractClientPlayerEntity currentPlayer;
+    public static RenderParameter currentParameter;
+    public static CustomPlayerEntityRenderer currentRenderer;
+    public static PlayerEntityModel currentModel;
 
     private static void sendPacket(Identifier id, Packet<?> packet) {
         PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
@@ -41,7 +52,7 @@ public class CustomModelClient implements ClientModInitializer {
             packet.write(buf);
             ClientSidePacketRegistry.INSTANCE.sendToServer(id, buf);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.warn(e.getMessage(), e);
         }
     }
 
@@ -65,7 +76,7 @@ public class CustomModelClient implements ClientModInitializer {
         String nameEntry = profile.getName().toLowerCase();
         UUID uuid = PlayerEntity.getUuidFromProfile(profile);
         String uuidEntry = uuid.toString().toLowerCase();
-        List<String> files = ImmutableList.of(nameEntry, uuidEntry);
+        List<String> files = ImmutableList.of(nameEntry, uuidEntry, nameEntry + ".zip", uuidEntry + ".zip");
         queried.add(profile);
 
         ModelPack pack = null;
@@ -80,7 +91,7 @@ public class CustomModelClient implements ClientModInitializer {
             } catch (Exception e) {
                 MinecraftClient.getInstance().inGameHud.addChatMessage(MessageType.CHAT,
                         new TranslatableText("error.custommodel.loadmodelpack", e.getMessage()));
-                e.printStackTrace();
+                LOGGER.warn(e.getMessage(), e);
             }
 
             if (pack != null && pack.successfulLoaded()) {
@@ -136,7 +147,7 @@ public class CustomModelClient implements ClientModInitializer {
                     }
                 });
             } catch (Exception e) {
-                e.printStackTrace();
+                LOGGER.warn(e.getMessage(), e);
             }
         });
 
@@ -151,13 +162,13 @@ public class CustomModelClient implements ClientModInitializer {
                     } catch (Exception e) {
                         MinecraftClient.getInstance().inGameHud.addChatMessage(MessageType.CHAT,
                                 new TranslatableText("error.custommodel.loadmodelpack", e.getMessage()));
-                        e.printStackTrace();
+                        LOGGER.warn(e.getMessage(), e);
                     }
                     if (pack != null && pack.successfulLoaded())
                         modelPacks.put(pack.getDirName(), pack);
                 });
             } catch (Exception e) {
-                e.printStackTrace();
+                LOGGER.warn(e.getMessage(), e);
             }
         });
 

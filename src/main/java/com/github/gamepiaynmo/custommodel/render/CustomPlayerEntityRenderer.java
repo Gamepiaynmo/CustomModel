@@ -82,10 +82,15 @@ public class CustomPlayerEntityRenderer extends PlayerEntityRenderer {
                 GlStateManager.enableAlphaTest();
                 this.model.animateModel(playerEntity, float_11, float_10, 1);
                 this.model.setAngles(playerEntity, float_11, float_10, float_8, float_5, float_7, 0.0625f);
+                CustomModelClient.currentParameter = new RenderParameter(float_11, float_10, float_8, float_5, float_7, 0.0625f, 1);
             } catch (Exception var19) {
             }
 
-            model.getModel().tick(playerEntity, getModel());
+            CustomModelClient.currentPlayer = playerEntity;
+            CustomModelClient.currentRenderer = this;
+            CustomModelClient.currentModel = getModel();
+
+            model.getModel().tick();
         }
     }
 
@@ -126,8 +131,13 @@ public class CustomPlayerEntityRenderer extends PlayerEntityRenderer {
             this.model.render(playerEntity, float_1, float_2, float_3, float_4, float_5, float_6);
 
             ModelPack model = CustomModelClient.getModelForPlayer(playerEntity);
+            CustomModelClient.currentPlayer = playerEntity;
+            CustomModelClient.currentParameter = new RenderParameter(float_1, float_2, float_3, float_4, float_5, float_6, partial);
+            CustomModelClient.currentRenderer = this;
+            CustomModelClient.currentModel = getModel();
+
             if (model != null)
-                model.getModel().render(playerEntity, this, getModel(), float_6, partial);
+                model.getModel().render();
 
             if (boolean_2) {
                 GlStateManager.unsetProfile(GlStateManager.RenderMode.TRANSPARENT_MODEL);
@@ -243,4 +253,5 @@ public class CustomPlayerEntityRenderer extends PlayerEntityRenderer {
 
         return bipedEntityModel$ArmPose_1;
     }
+
 }

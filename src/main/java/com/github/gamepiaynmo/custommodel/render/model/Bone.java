@@ -1,8 +1,13 @@
 package com.github.gamepiaynmo.custommodel.render.model;
 
+import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.client.ModelPack;
+import com.github.gamepiaynmo.custommodel.expression.IExpressionBool;
+import com.github.gamepiaynmo.custommodel.expression.IExpressionFloat;
+import com.github.gamepiaynmo.custommodel.expression.ParseException;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
 import com.github.gamepiaynmo.custommodel.render.PlayerBones;
+import com.github.gamepiaynmo.custommodel.render.RenderParameter;
 import com.github.gamepiaynmo.custommodel.util.*;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonElement;
@@ -12,9 +17,11 @@ import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Identifier;
 
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class Bone implements IBone {
     private static double DegToRad = (double) Math.PI / 180;
@@ -26,20 +33,27 @@ public class Bone implements IBone {
     public Vector3 position = Vector3.Zero.cpy();
     public Vector3 rotation = Vector3.Zero.cpy();
     public Vector3 scale = new Vector3(1, 1, 1);
+    public boolean visible;
+    private double[] physicsParams;
+
+    private IExpressionFloat[] positionExpr;
+    private IExpressionFloat[] rotationExpr;
+    private IExpressionFloat[] scaleExpr;
+    private IExpressionBool visibleExpr;
+    private IExpressionFloat[] physicsExpr;
 
     private List<Box> boxes = Lists.newArrayList();
     private List<Quad> quads = Lists.newArrayList();
     private List<ParticleEmitter> particles = Lists.newArrayList();
 
     private boolean physicalize = false;
-    private double[] physicsParams;
     public Vector3 velocity = Vector3.Zero.cpy();
     private double length;
 
-    private ModelPack.TextureGetter texture = null;
+    private Supplier<Identifier> texture = null;
     private Vec2d textureSize;
 
-    public static Bone getBoneFromJson(ModelPack pack, CustomJsonModel model, JsonObject jsonObj) {
+    public static Bone getBoneFromJson(ModelPack pack, CustomJsonModel model, JsonObject jsonObj) throws ParseException {
         Bone bone = new Bone(model);
 
         bone.id = Json.getString(jsonObj, CustomJsonModel.ID);
@@ -66,18 +80,16 @@ public class Bone implements IBone {
             bone.textureSize = new Vec2d(texSize[0], texSize[1]);
         }
 
-        JsonElement positionArray = jsonObj.get(CustomJsonModel.POSITION);
-        if (positionArray != null)
-            bone.position = new Vector3(Json.parseDoubleArray(positionArray, 3)).scl(-1, -1, 1);
-        bone.length = bone.position.len() * 0.0625;
-
-        JsonElement rotationArray = jsonObj.get(CustomJsonModel.ROTATION);
-        if (rotationArray != null)
-            bone.rotation = new Vector3(Json.parseDoubleArray(rotationArray, 3)).scl(DegToRad);
-
-        JsonElement scaleArray = jsonObj.get(CustomJsonModel.SCALE);
-        if (scaleArray != null)
-            bone.scale = new Vector3(Json.parseDoubleArray(scaleArray, 3));
+        bone.positionExpr = Json.parseFloatExpressionArray(jsonObj.get(CustomJsonModel.POSITION), 3, new float[] { 0, 0, 0 }, model.getParser());
+        bone.rotationExpr = Json.parseFloatExpressionArray(jsonObj.get(CustomJsonModel.ROTATION), 3, new float[] { 0, 0, 0 }, model.getParser());
+        bone.scaleExpr = Json.parseFloatExpressionArray(jsonObj.get(CustomJsonModel.SCALE), 3, new float[] { 1, 1, 1 }, model.getParser());
+        bone.visibleExpr = Json.getBooleanExpression(jsonObj, CustomJsonModel.VISIBLE, true, model.getParser());
+        JsonElement physical = jsonObj.get(CustomJsonModel.PHYSICS);
+        if (physical != null) {
+            bone.physicalize = true;
+            bone.physicsExpr = Json.parseFloatExpressionArray(physical, 5, new float[] { 0, 0, 0, 0, 0 }, model.getParser());
+            bone.physicsParams = new double[bone.physicsExpr.length];
+        }
 
         JsonElement boxArray = jsonObj.get(CustomJsonModel.BOXES);
         if (boxArray != null) {
@@ -97,12 +109,6 @@ public class Bone implements IBone {
                 bone.particles.add(ParticleEmitter.getParticleFromJson(bone, element.getAsJsonObject()));
         }
 
-        JsonElement physical = jsonObj.get(CustomJsonModel.PHYSICS);
-        if (physical != null) {
-            bone.physicalize = true;
-            bone.physicsParams = Json.parseDoubleArray(physical, 5);
-        }
-
         return bone;
     }
 
@@ -110,25 +116,30 @@ public class Bone implements IBone {
         this.model = model;
     }
 
+    public CustomJsonModel getModel() { return model; }
+
     @Override
     public String getId() {
         return id;
     }
 
     @Override
-    public Vector3 getPosition(PlayerEntityModel model) {
+    public Vector3 getPosition() {
         return position.cpy();
     }
 
     @Override
-    public Vector3 getRotation(PlayerEntityModel model) {
+    public Vector3 getRotation() {
         return rotation.cpy();
     }
 
     @Override
-    public Vector3 getScale(PlayerEntityModel model) {
+    public Vector3 getScale() {
         return scale.cpy();
     }
+
+    @Override
+    public boolean isVisible() { return visible; }
 
     @Override
     public Vec2d getTextureSize() {
@@ -139,7 +150,7 @@ public class Bone implements IBone {
     }
 
     @Override
-    public ModelPack.TextureGetter getTexture() {
+    public Supplier<Identifier> getTexture() {
         if (texture == null) {
             return texture = parent.getTexture();
         }
@@ -160,17 +171,30 @@ public class Bone implements IBone {
     public double[] getPhysicsParams() { return physicsParams; }
     public double getLength() { return length; }
 
-    public void render(AbstractClientPlayerEntity playerEntity, PlayerEntityModel playerModel, float scale, float partial) {
+    public void render() {
         BufferBuilder bufferBuilder = Tessellator.getInstance().getBufferBuilder();
+        float scaleFactor = CustomModelClient.currentParameter.scale;
+
         for (Box box : boxes)
-            box.render(bufferBuilder, scale);
+            box.render(bufferBuilder, scaleFactor);
         for (Quad quad : quads)
-            quad.render(bufferBuilder, scale);
+            quad.render(bufferBuilder, scaleFactor);
     }
 
-    public void tick(AbstractClientPlayerEntity playerEntity, Matrix4 transform) {
+    public void update() {
+        position.set(positionExpr[0].eval(), positionExpr[1].eval(), positionExpr[2].eval()).scl(-1, -1, 1);
+        rotation.set(rotationExpr[0].eval(), rotationExpr[1].eval(), rotationExpr[2].eval()).scl(DegToRad);
+        scale.set(scaleExpr[0].eval(), scaleExpr[1].eval(), scaleExpr[2].eval());
+        visible = parent.isVisible() ? visibleExpr.eval() : false;
+        length = position.len() * 0.0625;
+        if (physicalize)
+            for (int i = 0; i < physicsParams.length; i++)
+                physicsParams[i] = physicsExpr[i].eval();
+    }
+
+    public void tick(Matrix4 transform) {
         for (ParticleEmitter emitter : particles)
-            emitter.tick(playerEntity, transform);
+            emitter.tick(transform);
     }
 
     public void release() {

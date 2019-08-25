@@ -25,7 +25,7 @@ public class PacketModel implements Packet<ClientPlayPacketListener> {
             stream.read(data);
             stream.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            CustomModel.LOGGER.warn(e.getMessage(), e);
         }
     }
 

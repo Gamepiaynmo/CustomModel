@@ -16,6 +16,8 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.PacketByteBuf;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.util.Collection;
@@ -26,13 +28,15 @@ public class CustomModel implements ModInitializer {
     public static final String MODID = "custommodel";
     public static final String MODEL_DIR = "custom-models";
 
+    public static final Logger LOGGER = LogManager.getLogger();
+
     private static void sendPacket(PlayerEntity player, Identifier id, Packet<?> packet) {
         PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
         try {
             packet.write(buf);
             ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, id, buf);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.warn(e.getMessage(), e);
         }
     }
 
@@ -72,12 +76,12 @@ public class CustomModel implements ModInitializer {
                                 break;
                             }
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            LOGGER.warn(e.getMessage(), e);
                         }
                     }
                 });
             } catch (Exception e) {
-                e.printStackTrace();
+                LOGGER.warn(e.getMessage(), e);
             }
         });
     }
