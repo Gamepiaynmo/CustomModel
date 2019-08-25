@@ -12,7 +12,11 @@ public class ModConfig implements ConfigData {
     @ConfigEntry.Gui.Tooltip
     boolean clientFirst = false;
 
+    @ConfigEntry.Gui.Tooltip
+    boolean hideNearParticles = true;
+
     private static ModConfig getConfig() { return AutoConfig.getConfigHolder(ModConfig.class).getConfig(); }
 
     public static boolean isClientFirst() { return getConfig().clientFirst; }
+    public static boolean isHideNearParticles() { return getConfig().hideNearParticles; }
 }

@@ -1,5 +1,6 @@
 package com.github.gamepiaynmo.custommodel.mixin;
 
+import com.github.gamepiaynmo.custommodel.client.ModConfig;
 import com.github.gamepiaynmo.custommodel.render.model.CustomParticle;
 import com.github.gamepiaynmo.custommodel.render.model.CustomSheet;
 import com.google.common.collect.Maps;
@@ -55,10 +56,11 @@ public class MixinParticleManager {
             GlStateManager.enableBlend();
             GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
             GlStateManager.alphaFunc(516, 0.003921569F);
+            boolean hideNear = ModConfig.isHideNearParticles();
 
             while(var13.hasNext()) {
                 CustomParticle particle_1 = (CustomParticle)var13.next();
-                if (camera_1.getPos().squaredDistanceTo(particle_1.getPos()) < 1)
+                if (hideNear && camera_1.getPos().squaredDistanceTo(particle_1.getPos()) < 1)
                     continue;
 
                 try {

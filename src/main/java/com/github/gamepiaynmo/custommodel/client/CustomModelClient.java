@@ -32,7 +32,7 @@ import java.io.*;
 import java.util.*;
 
 public class CustomModelClient implements ClientModInitializer {
-    private static final  Map<String, ModelPack> modelPacks = Maps.newHashMap();
+    private static final Map<String, ModelPack> modelPacks = Maps.newHashMap();
 
     public static TextureManager textureManager;
     public static CustomPlayerEntityRenderer customRenderer;
@@ -125,6 +125,8 @@ public class CustomModelClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        new File(CustomModel.MODEL_DIR).mkdirs();
+
         WorldTickCallback.EVENT.register(world -> {
             MinecraftClient client = MinecraftClient.getInstance();
             if (world == client.world) {

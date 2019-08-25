@@ -42,8 +42,10 @@ public class CustomModel implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        new File(MODEL_DIR).mkdirs();
+
         CommandRegistry.INSTANCE.register(false, dispatcher -> {
-            dispatcher.register(CommandManager.literal("custommodel").requires((source) -> {
+            dispatcher.register(CommandManager.literal(MODID).requires((source) -> {
                 return source.hasPermissionLevel(2);
             }).then(CommandManager.literal("reload").then(CommandManager.argument("targets", EntityArgumentType.players()).executes(
                     context -> {

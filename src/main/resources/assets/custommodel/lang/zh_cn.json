@@ -4,6 +4,9 @@
 
   "text.autoconfig.custommodel.option.clientFirst": "优先使用客户端模型",
   "text.autoconfig.custommodel.option.clientFirst.@Tooltip": "如果同时在服务端和客户端存在某个玩家的可用模型，则优先使用客户端模型",
+  "text.autoconfig.custommodel.option.hideNearParticles": "隐藏过近的粒子",
+  "text.autoconfig.custommodel.option.hideNearParticles.@Tooltip": "隐藏过于靠近玩家摄像机的粒子以免遮挡视野",
+
 
   "error.custommodel.loadmodelpack": "加载模型包失败：%s",
   "error.custommodel.loadmodelpack.nomodel": "未找到model.json",
@@ -13,5 +16,23 @@
   "error.custommodel.loadmodelpack.noparentid": "未找到父骨骼%s",
   "error.custommodel.loadmodelpack.notexture": "未找到贴图文件%s",
   "error.custommodel.loadmodelpack.notexturesize": "贴图%s必须指明大小",
-  "error.custommodel.loadmodelpack.jsonarraylen": "数组%s的长度不正确：应为%d"
+  "error.custommodel.loadmodelpack.jsonarraylen": "数组%s的长度不正确：应为%d",
+
+  "error.custommodel.parse.notfloat": "不是浮点数表达式：%s",
+  "error.custommodel.parse.notbool": "不是布尔表达式：%s",
+  "error.custommodel.parse.invalidop": "无效的操作符：%s",
+  "error.custommodel.parse.invalidinfix": "无效的中缀表达式，表达式数量：%d，操作符数量：%d",
+  "error.custommodel.parse.mergeop": "无法合并操作符，表达式数量：%d，操作符数量：%d",
+  "error.custommodel.parse.invalidprec": "无效的中缀优先级，最小值：%d，最大值：%d",
+  "error.custommodel.parse.invalidexpr": "无效的表达式：%s",
+  "error.custommodel.parse.invalidfloat": "无效的浮点数值：%s",
+  "error.custommodel.parse.missargs": "缺少参数：%s",
+  "error.custommodel.parse.numargs": "参数数量有误，函数：“%s”，参数数量：%d，应为：%d",
+  "error.custommodel.parse.argtype": "参数类型有误，函数：“%s”，序号：%d，类型：%s，应为：%s",
+  "error.custommodel.parse.functype": "未知函数类型：%s，函数：%s",
+  "error.custommodel.parse.invalidvar": "变量未找到：%s",
+  "error.custommodel.parse.missend": "缺少尾操作符：%s",
+  "error.custommodel.parse.invalidchar": "无效的字符：‘%c’，位于：%s",
+  "error.custommodel.parse.missexpr": "缺少表达式",
+  "error.custommodel.parse.invalidfunc": "未知函数：%s"
 }

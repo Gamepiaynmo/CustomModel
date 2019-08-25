@@ -1,5 +1,7 @@
 package com.github.gamepiaynmo.custommodel.expression;
 
+import com.github.gamepiaynmo.custommodel.util.TranslatableException;
+
 import java.io.IOException;
 import java.io.PushbackReader;
 import java.io.Reader;
@@ -23,7 +25,7 @@ public class TokenParser {
          if (!Character.isWhitespace(ch)) {
             TokenType type = TokenType.getTypeByFirstChar(ch);
             if (type == null) {
-               throw new ParseException("Invalid character: '" + ch + "', in: " + str);
+               throw new TranslatableException("error.custommodel.parse.invalidchar", ch, str);
             }
 
             Token token = readToken(ch, type, pr);

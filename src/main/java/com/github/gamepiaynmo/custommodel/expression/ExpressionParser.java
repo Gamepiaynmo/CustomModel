@@ -1,5 +1,7 @@
 package com.github.gamepiaynmo.custommodel.expression;
 
+import com.github.gamepiaynmo.custommodel.util.TranslatableException;
+
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -19,7 +21,7 @@ public class ExpressionParser {
    public IExpressionFloat parseFloat(String str) throws ParseException {
       IExpression expr = this.parse(str);
       if (!(expr instanceof IExpressionFloat)) {
-         throw new ParseException("Not a float expression: " + expr.getExpressionType());
+         throw new TranslatableException("error.custommodel.parse.notfloat", expr.getExpressionType());
       } else {
          return (IExpressionFloat)expr;
       }
@@ -28,7 +30,7 @@ public class ExpressionParser {
    public IExpressionBool parseBool(String str) throws ParseException {
       IExpression expr = this.parse(str);
       if (!(expr instanceof IExpressionBool)) {
-         throw new ParseException("Not a boolean expression: " + expr.getExpressionType());
+         throw new TranslatableException("error.custommodel.parse.notbool", expr.getExpressionType());
       } else {
          return (IExpressionBool)expr;
       }
@@ -55,7 +57,7 @@ public class ExpressionParser {
          List listExpr = new LinkedList();
          List listOperTokens = new LinkedList();
          IExpression expr = this.parseExpression(deque);
-         checkNull(expr, "Missing expression");
+         checkNull(expr, "error.custommodel.parse.missexpr");
          listExpr.add(expr);
 
          while(true) {
@@ -65,11 +67,11 @@ public class ExpressionParser {
             }
 
             if (tokenOper.getType() != TokenType.OPERATOR) {
-               throw new ParseException("Invalid operator: " + tokenOper);
+               throw new TranslatableException("error.custommodel.parse.invalidop", tokenOper);
             }
 
             IExpression expr2 = this.parseExpression(deque);
-            checkNull(expr2, "Missing expression");
+            checkNull(expr2, "error.custommodel.parse.missexpr");
             listOperTokens.add(tokenOper);
             listExpr.add(expr2);
          }
@@ -83,7 +85,7 @@ public class ExpressionParser {
       while(it.hasNext()) {
          Token token = (Token)it.next();
          FunctionType type = FunctionType.parse(token.getText());
-         checkNull(type, "Invalid operator: " + token);
+         checkNull(type, "error.custommodel.parse.invalidop", token);
          listFunc.add(type);
       }
 
@@ -92,7 +94,7 @@ public class ExpressionParser {
 
    private IExpression makeInfixFunc(List listExpr, List listFunc) throws ParseException {
       if (listExpr.size() != listFunc.size() + 1) {
-         throw new ParseException("Invalid infix expression, expressions: " + listExpr.size() + ", operators: " + listFunc.size());
+         throw new TranslatableException("error.custommodel.parse.invalidinfix", listExpr.size(), listFunc.size());
       } else if (listExpr.size() == 1) {
          return (IExpression)listExpr.get(0);
       } else {
@@ -113,10 +115,10 @@ public class ExpressionParser {
             if (listExpr.size() == 1 && listFunc.size() == 0) {
                return (IExpression)listExpr.get(0);
             } else {
-               throw new ParseException("Error merging operators, expressions: " + listExpr.size() + ", operators: " + listFunc.size());
+               throw new TranslatableException("error.custommodel.parse.mergeop", listExpr.size(), listFunc.size());
             }
          } else {
-            throw new ParseException("Invalid infix precedence, min: " + minPrecedence + ", max: " + maxPrecedence);
+            throw new TranslatableException("error.custommodel.parse.invalidprec", minPrecedence, maxPrecedence);
          }
       }
    }
@@ -138,7 +140,7 @@ public class ExpressionParser {
 
    private IExpression parseExpression(Deque deque) throws ParseException {
       Token token = (Token)deque.poll();
-      checkNull(token, "Missing expression");
+      checkNull(token, "error.custommodel.parse.missexpr");
       switch(token.getType()) {
       case NUMBER:
          return makeConstantFloat(token);
@@ -153,7 +155,7 @@ public class ExpressionParser {
          return this.makeBracketed(token, deque);
       case OPERATOR:
          FunctionType operType = FunctionType.parse(token.getText());
-         checkNull(operType, "Invalid operator: " + token);
+         checkNull(operType, "error.custommodel.parse.invalidop", token);
          if (operType == FunctionType.PLUS) {
             return this.parseExpression(deque);
          } else {
@@ -167,7 +169,7 @@ public class ExpressionParser {
             }
          }
       default:
-         throw new ParseException("Invalid expression: " + token);
+         throw new TranslatableException("error.custommodel.parse.invalidexpr", token);
       }
    }
 
@@ -187,7 +189,7 @@ public class ExpressionParser {
    private static IExpression makeConstantFloat(Token token) throws ParseException {
       float val = parseFloat(token.getText(), Float.NaN);
       if (val == Float.NaN) {
-         throw new ParseException("Invalid float value: " + token);
+         throw new TranslatableException("error.custommodel.parse.invalidfloat", token);
       } else {
          return new ConstantFloat(val);
       }
@@ -198,14 +200,14 @@ public class ExpressionParser {
       FunctionType type;
       if (tokenNext != null && tokenNext.getType() == TokenType.BRACKET_OPEN) {
          type = FunctionType.parse(token.getText());
-         checkNull(type, "Unknown function: " + token);
+         checkNull(type, "error.custommodel.parse.invalidfunc", token);
          return type;
       } else {
          type = FunctionType.parse(token.getText());
          if (type == null) {
             return null;
          } else if (type.getParameterCount(new IExpression[0]) > 0) {
-            throw new ParseException("Missing arguments: " + type);
+            throw new TranslatableException("error.custommodel.parse.missargs", type);
          } else {
             return type;
          }
@@ -245,14 +247,14 @@ public class ExpressionParser {
    private static IExpression makeFunction(FunctionType type, IExpression[] args) throws ParseException {
       ExpressionType[] funcParamTypes = type.getParameterTypes(args);
       if (args.length != funcParamTypes.length) {
-         throw new ParseException("Invalid number of arguments, function: \"" + type.getName() + "\", count arguments: " + args.length + ", should be: " + funcParamTypes.length);
+         throw new TranslatableException("error.custommodel.parse.numargs", type.getName(), args.length, funcParamTypes.length);
       } else {
          for(int i = 0; i < args.length; ++i) {
             IExpression arg = args[i];
             ExpressionType argType = arg.getExpressionType();
             ExpressionType funcParamType = funcParamTypes[i];
             if (argType != funcParamType) {
-               throw new ParseException("Invalid argument type, function: \"" + type.getName() + "\", index: " + i + ", type: " + argType + ", should be: " + funcParamType);
+               throw new TranslatableException("error.custommodel.parse.argtype", type.getName(), i, argType, funcParamType);
             }
          }
 
@@ -261,18 +263,18 @@ public class ExpressionParser {
          } else if (type.getExpressionType() == ExpressionType.BOOL) {
             return new FunctionBool(type, args);
          } else {
-            throw new ParseException("Unknown function type: " + type.getExpressionType() + ", function: " + type.getName());
+            throw new TranslatableException("error.custommodel.parse.functype", type.getExpressionType(), type.getName());
          }
       }
    }
 
    private IExpression makeVariable(Token token) throws ParseException {
       if (this.expressionResolver == null) {
-         throw new ParseException("Model variable not found: " + token);
+         throw new TranslatableException("error.custommodel.parse.invalidvar", token);
       } else {
          IExpression expr = this.expressionResolver.getExpression(token.getText());
          if (expr == null) {
-            throw new ParseException("Model variable not found: " + token);
+            throw new TranslatableException("error.custommodel.parse.invalidvar", token);
          } else {
             return expr;
          }
@@ -307,15 +309,15 @@ public class ExpressionParser {
       }
 
       if (tokenEndRequired) {
-         throw new ParseException("Missing end token: " + tokenTypeEnd);
+         throw new TranslatableException("error.custommodel.parse.missend", tokenTypeEnd);
       } else {
          return dequeGroup;
       }
    }
 
-   private static void checkNull(Object obj, String message) throws ParseException {
+   private static void checkNull(Object obj, String message, Object... args) throws ParseException {
       if (obj == null) {
-         throw new ParseException(message);
+         throw new TranslatableException(message, args);
       }
    }
 }

@@ -138,15 +138,15 @@ public class ParticleEmitter {
                 dir.scl(MathHelper.lerp(random.nextDouble(), speed[0], speed[1]));
 
                 CustomParticle particle = new CustomParticle(world, this, pos, dir);
-                particle.setAngle(D2R * (float) MathHelper.lerp(random.nextDouble(), angle[0], angle[1]));
-                particle.setRotSpeed((float) MathHelper.lerp(random.nextDouble(), rotSpeed[0], rotSpeed[1]));
-                particle.setMaxAge((int) MathHelper.lerp(random.nextDouble(), lifeSpan[0], lifeSpan[1]));
-                particle.setSize((float) MathHelper.lerp(random.nextDouble(), size[0], size[1]));
-                particle.setColor((float) MathHelper.lerp(random.nextDouble(), color[0][0], color[0][1]),
-                        (float) MathHelper.lerp(random.nextDouble(), color[1][0], color[1][1]),
-                        (float) MathHelper.lerp(random.nextDouble(), color[2][0], color[2][1]));
-                particle.setAlpha((float) MathHelper.lerp(random.nextDouble(), color[3][0], color[3][1]));
-                particle.setGravity((float) gravity);
+                particle.setAngle(D2R * MathHelper.lerp(random.nextFloat(), angle[0], angle[1]));
+                particle.setRotSpeed(MathHelper.lerp(random.nextFloat(), rotSpeed[0], rotSpeed[1]));
+                particle.setMaxAge((int) MathHelper.lerp(random.nextFloat(), lifeSpan[0], lifeSpan[1]));
+                particle.setSize(MathHelper.lerp(random.nextFloat(), size[0], size[1]));
+                particle.setColor(MathHelper.lerp(random.nextFloat(), color[0][0], color[0][1]),
+                        MathHelper.lerp(random.nextFloat(), color[1][0], color[1][1]),
+                        MathHelper.lerp(random.nextFloat(), color[2][0], color[2][1]));
+                particle.setAlpha(MathHelper.lerp(random.nextFloat(), color[3][0], color[3][1]));
+                particle.setGravity(gravity);
                 particle.setCollide(collide);
                 particle.setTexture(bone.getTexture().get());
 
