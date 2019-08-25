@@ -62,8 +62,8 @@ public class Bone implements IBone {
 
         String parentId = Json.getString(jsonObj, CustomJsonModel.PARENT);
         if (parentId == null)
-            throw new TranslatableException("error.custommodel.loadmodelpack.noparent");
-        bone.parent = model.getBone(parentId);
+            bone.parent = PlayerBones.NONE.getBone();
+        else bone.parent = model.getBone(parentId);
         if (bone.parent == null)
             throw new TranslatableException("error.custommodel.loadmodelpack.noparentid", parentId);
 

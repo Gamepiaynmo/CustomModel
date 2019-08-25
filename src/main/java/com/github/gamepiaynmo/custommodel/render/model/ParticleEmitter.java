@@ -96,61 +96,63 @@ public class ParticleEmitter {
         ParticleManager manager = client.particleManager;
         ClientWorld world = client.world;
 
-        timer += 1;
-        density = densityExpr.eval();
-        if (density > EPS && timer > 0 && bone.isVisible()) {
-            posRange = Vector3.Zero.set(posRangeExpr[0].eval(), posRangeExpr[1].eval(), posRangeExpr[2].eval());
-            dirRange = dirRangeExpr.eval();
-            evalFloatArray(angle, angleExpr);
-            evalFloatArray(speed, speedExpr);
-            evalFloatArray(rotSpeed, rotSpeedExpr);
-            evalFloatArray(lifeSpan, lifeSpanExpr);
+        if (bone.isVisible()) {
+            timer += 1;
             density = densityExpr.eval();
-            for (int i = 0; i < 4; i++)
-                evalFloatArray(color[i], colorExpr[i]);
-            evalFloatArray(size, sizeExpr);
-            gravity = gravityExpr.eval();
-            collide = collideExpr.eval();
+            if (density > EPS && timer > 0) {
+                posRange = Vector3.Zero.set(posRangeExpr[0].eval(), posRangeExpr[1].eval(), posRangeExpr[2].eval());
+                dirRange = dirRangeExpr.eval();
+                evalFloatArray(angle, angleExpr);
+                evalFloatArray(speed, speedExpr);
+                evalFloatArray(rotSpeed, rotSpeedExpr);
+                evalFloatArray(lifeSpan, lifeSpanExpr);
+                density = densityExpr.eval();
+                for (int i = 0; i < 4; i++)
+                    evalFloatArray(color[i], colorExpr[i]);
+                evalFloatArray(size, sizeExpr);
+                gravity = gravityExpr.eval();
+                collide = collideExpr.eval();
 
-            Vector3 epos = new Vector3();
-            epos.x = transform.val[12];
-            epos.y = transform.val[13];
-            epos.z = transform.val[14];
+                Vector3 epos = new Vector3();
+                epos.x = transform.val[12];
+                epos.y = transform.val[13];
+                epos.z = transform.val[14];
 
-            Vector3 edir[] = new Vector3[3];
-            for (int i = 0; i < 3; i++) {
-                edir[i] = new Vector3();
-                edir[i].x = transform.val[i * 4];
-                edir[i].y = transform.val[i * 4 + 1];
-                edir[i].z = transform.val[i * 4 + 2];
-            }
+                Vector3 edir[] = new Vector3[3];
+                for (int i = 0; i < 3; i++) {
+                    edir[i] = new Vector3();
+                    edir[i].x = transform.val[i * 4];
+                    edir[i].y = transform.val[i * 4 + 1];
+                    edir[i].z = transform.val[i * 4 + 2];
+                }
 
-            while (timer > 0) {
-                timer -= 1 / density;
-                Vector3 pos = epos.cpy();
-                pos.add(edir[0].cpy().scl(MathHelper.lerp(random.nextDouble(), -posRange.x, posRange.x)));
-                pos.add(edir[1].cpy().scl(MathHelper.lerp(random.nextDouble(), -posRange.y, posRange.y)));
-                pos.add(edir[2].cpy().scl(MathHelper.lerp(random.nextDouble(), -posRange.z, posRange.z)));
+                while (timer > 0) {
+                    timer -= 1 / density;
+                    Vector3 pos = epos.cpy();
+                    pos.add(edir[0].cpy().scl(MathHelper.lerp(random.nextDouble(), -posRange.x, posRange.x)));
+                    pos.add(edir[1].cpy().scl(MathHelper.lerp(random.nextDouble(), -posRange.y, posRange.y)));
+                    pos.add(edir[2].cpy().scl(MathHelper.lerp(random.nextDouble(), -posRange.z, posRange.z)));
 
-                Vector3 dir = edir[2].cpy();
-                dir.rotate(edir[0], MathHelper.lerp(random.nextDouble(), -dirRange, dirRange));
-                dir.rotate(edir[1], MathHelper.lerp(random.nextDouble(), -dirRange, dirRange));
-                dir.scl(MathHelper.lerp(random.nextDouble(), speed[0], speed[1]));
+                    Vector3 dir = edir[2].cpy();
+                    dir.rotate(edir[0], MathHelper.lerp(random.nextDouble(), -dirRange, dirRange));
+                    dir.rotate(edir[1], MathHelper.lerp(random.nextDouble(), -dirRange, dirRange));
+                    dir.scl(MathHelper.lerp(random.nextDouble(), speed[0], speed[1]));
 
-                CustomParticle particle = new CustomParticle(world, this, pos, dir);
-                particle.setAngle(D2R * MathHelper.lerp(random.nextFloat(), angle[0], angle[1]));
-                particle.setRotSpeed(MathHelper.lerp(random.nextFloat(), rotSpeed[0], rotSpeed[1]));
-                particle.setMaxAge((int) MathHelper.lerp(random.nextFloat(), lifeSpan[0], lifeSpan[1]));
-                particle.setSize(MathHelper.lerp(random.nextFloat(), size[0], size[1]));
-                particle.setColor(MathHelper.lerp(random.nextFloat(), color[0][0], color[0][1]),
-                        MathHelper.lerp(random.nextFloat(), color[1][0], color[1][1]),
-                        MathHelper.lerp(random.nextFloat(), color[2][0], color[2][1]));
-                particle.setAlpha(MathHelper.lerp(random.nextFloat(), color[3][0], color[3][1]));
-                particle.setGravity(gravity);
-                particle.setCollide(collide);
-                particle.setTexture(bone.getTexture().get());
+                    CustomParticle particle = new CustomParticle(world, this, pos, dir);
+                    particle.setAngle(D2R * MathHelper.lerp(random.nextFloat(), angle[0], angle[1]));
+                    particle.setRotSpeed(MathHelper.lerp(random.nextFloat(), rotSpeed[0], rotSpeed[1]));
+                    particle.setMaxAge((int) MathHelper.lerp(random.nextFloat(), lifeSpan[0], lifeSpan[1]));
+                    particle.setSize(MathHelper.lerp(random.nextFloat(), size[0], size[1]));
+                    particle.setColor(MathHelper.lerp(random.nextFloat(), color[0][0], color[0][1]),
+                            MathHelper.lerp(random.nextFloat(), color[1][0], color[1][1]),
+                            MathHelper.lerp(random.nextFloat(), color[2][0], color[2][1]));
+                    particle.setAlpha(MathHelper.lerp(random.nextFloat(), color[3][0], color[3][1]));
+                    particle.setGravity(gravity);
+                    particle.setCollide(collide);
+                    particle.setTexture(bone.getTexture().get());
 
-                manager.addParticle(particle);
+                    manager.addParticle(particle);
+                }
             }
         }
     }
