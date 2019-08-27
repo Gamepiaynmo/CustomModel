@@ -1,0 +1,105 @@
+{
+	"hide": ["head", "body", "left_arm", "right_arm", "left_leg", "right_leg",
+		"head_overlay", "body_overlay", "left_arm_overlay", "right_arm_overlay",
+		"left_leg_overlay", "right_leg_overlay"],
+	"bones": [
+		{
+			"id": "head_c",
+			"parent": "head",
+			"textureSize": [64, 64],
+			"boxes": [
+				{
+					"textureOffset": [0, 0],
+					"coordinates": [-4, 0, 4, 8, 8, 8]
+				},
+				{
+					"textureOffset": [32, 0],
+					"coordinates": [-4, 0, 4, 8, 8, 8],
+					"sizeAdd": 0.5
+				}
+			]
+		},
+		{
+			"id": "body_c",
+			"parent": "body",
+			"textureSize": [64, 64],
+			"boxes": [
+				{
+					"textureOffset": [16, 16],
+					"coordinates": [-4, -12, 2, 8, 12, 4]
+				},
+				{
+					"textureOffset": [16, 32],
+					"coordinates": [-4, -12, 2, 8, 12, 4],
+					"sizeAdd": 0.25
+				}
+			]
+		},
+		{
+			"id": "left_arm_c",
+			"parent": "left_arm",
+			"textureSize": [64, 64],
+			"boxes": [
+				{
+					"textureOffset": [32, 48],
+					"coordinates": [-2, -10, 2, 3, 12, 4]
+				},
+				{
+					"textureOffset": [48, 48],
+					"coordinates": [-2, -10, 2, 3, 12, 4],
+					"sizeAdd": 0.25
+				}
+			]
+		},
+		{
+			"id": "right_arm_c",
+			"parent": "right_arm",
+			"textureSize": [64, 64],
+			"boxes": [
+				{
+					"textureOffset": [40, 16],
+					"coordinates": [-1, -10, 2, 3, 12, 4]
+				},
+				{
+					"textureOffset": [40, 32],
+					"coordinates": [-1, -10, 2, 3, 12, 4],
+					"sizeAdd": 0.25
+				}
+			]
+		},
+		{
+			"id": "left_leg_c",
+			"parent": "left_leg",
+			"position": [0, -12, 0],
+			"textureSize": [64, 64],
+			"boxes": [
+				{
+					"textureOffset": [16, 48],
+					"coordinates": [-2, 0, 2, 4, 12, 4]
+				},
+				{
+					"textureOffset": [0, 48],
+					"coordinates": [-2, -12, 2, 4, 12, 4],
+					"sizeAdd": 0.25
+				}
+			]
+		},
+		{
+			"id": "right_leg_c",
+			"parent": "right_leg",
+			"position": [0, -12, 0],
+			"textureSize": [64, 64],
+			"boxes": [
+				{
+					"textureOffset": [0, 16],
+					"coordinates": [-2, 0, 2, 4, 12, 4]
+				},
+				{
+					"textureOffset": [0, 32],
+					"coordinates": [-2, -12, 2, 4, 12, 4],
+					"sizeAdd": 0.25
+				}
+			]
+		}
+	]
+}
