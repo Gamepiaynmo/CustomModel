@@ -18,7 +18,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public enum PlayerBones {
-    NONE("none", () -> null),
     HEAD("head", () -> CustomModelClient.currentModel.head),
     HEAD_OVERLAY("head_overlay", () -> CustomModelClient.currentModel.headwear),
     BODY("body", () -> CustomModelClient.currentModel.body),
@@ -43,7 +42,7 @@ public enum PlayerBones {
     private PlayerBones(String id, Supplier<Cuboid> cuboidGetter) {
         this.id = id;
         this.cuboidGetter = cuboidGetter;
-        bone = id.equals("none") ? new BaseBone() : new OriginalBone(this, cuboidGetter);
+        bone = new OriginalBone(this, cuboidGetter);
     }
 
     public String getId() {
@@ -58,49 +57,6 @@ public enum PlayerBones {
 
     public static PlayerBones getById(String id) {
         return id2Bone.get(id);
-    }
-
-    public static class BaseBone implements IBone {
-
-        @Override
-        public Vector3 getPosition() {
-            return Vector3.Zero.cpy();
-        }
-
-        @Override
-        public Vector3 getRotation() {
-            return Vector3.Zero.cpy();
-        }
-
-        @Override
-        public Vector3 getScale() {
-            return One.cpy();
-        }
-
-        @Override
-        public Vec2d getTextureSize() {
-            return TexSize;
-        }
-
-        @Override
-        public Supplier<Identifier> getTexture() {
-            return ModelPack.skinGetter;
-        }
-
-        @Override
-        public IBone getParent() {
-            return null;
-        }
-
-        @Override
-        public PlayerBones getPlayerBone() {
-            return NONE;
-        }
-
-        @Override
-        public String getId() {
-            return "none";
-        }
     }
 
     public static class OriginalBone implements IBone {
@@ -133,6 +89,9 @@ public enum PlayerBones {
         public Matrix4 getTransform() {
             return new Matrix4().translate(getPosition().scl(0.0625)).rotate(getQuaternion());
         }
+
+        @Override
+        public boolean isVisible() { return CustomModelClient.currentJsonModel.isVisible(playerBone); }
 
         @Override
         public Vector3 getScale() {

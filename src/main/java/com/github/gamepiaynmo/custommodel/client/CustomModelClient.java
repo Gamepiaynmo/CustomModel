@@ -1,5 +1,6 @@
 package com.github.gamepiaynmo.custommodel.client;
 
+import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
 import com.github.gamepiaynmo.custommodel.render.RenderParameter;
 import com.github.gamepiaynmo.custommodel.server.CustomModel;
 import com.github.gamepiaynmo.custommodel.network.PacketModel;
@@ -45,6 +46,7 @@ public class CustomModelClient implements ClientModInitializer {
     public static RenderParameter currentParameter;
     public static CustomPlayerEntityRenderer currentRenderer;
     public static PlayerEntityModel currentModel;
+    public static CustomJsonModel currentJsonModel;
 
     private static void sendPacket(Identifier id, Packet<?> packet) {
         PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());

@@ -102,7 +102,10 @@ public class CustomJsonModel {
 
     private ExpressionParser parser = new ExpressionParser(new ModelResolver(this));
 
-    private CustomJsonModel() {}
+    private CustomJsonModel() {
+        for (PlayerBones bone : PlayerBones.values())
+            visibleBones.put(bone, true);
+    }
 
     public Collection<PlayerBones> getHiddenBones() {
         return hideList;
@@ -125,6 +128,10 @@ public class CustomJsonModel {
         return visibleBones.get(bone.getPlayerBone());
     }
 
+    public boolean isVisible(PlayerBones bone) {
+        return visibleBones.get(bone);
+    }
+
     public void setVisible(PlayerBones bone, boolean visible) {
         visibleBones.replace(bone, visible);
     }
@@ -141,6 +148,7 @@ public class CustomJsonModel {
         PlayerEntityModel model = CustomModelClient.currentModel;
 
         float partial = params.partial;
+        GlStateManager.pushMatrix();
         GlStateManager.rotatef(-MathHelper.lerp(partial, entity.field_6220, entity.field_6283), 0, 1, 0);
         GlStateManager.translated(-MathHelper.lerp(partial, entity.prevX, entity.x),
                 MathHelper.lerp(partial, entity.prevY, entity.y),
@@ -160,6 +168,7 @@ public class CustomJsonModel {
                 bone.render();
             GlStateManager.popMatrix();
         }
+        GlStateManager.popMatrix();
     }
 
     private void update() {

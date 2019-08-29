@@ -89,6 +89,7 @@ public class CustomPlayerEntityRenderer extends PlayerEntityRenderer {
             CustomModelClient.currentPlayer = playerEntity;
             CustomModelClient.currentRenderer = this;
             CustomModelClient.currentModel = getModel();
+            CustomModelClient.currentJsonModel = model.getModel();
 
             model.getModel().tick();
         }
@@ -106,7 +107,8 @@ public class CustomPlayerEntityRenderer extends PlayerEntityRenderer {
 
             if (model != null)
                 this.setModelPose(playerEntity, model.getModel());
-            else this.setModelPose(playerEntity);
+            else
+                this.setModelPose(playerEntity);
             this.partial = partial;
 
             GlStateManager.setProfile(GlStateManager.RenderMode.PLAYER_SKIN);
@@ -135,6 +137,7 @@ public class CustomPlayerEntityRenderer extends PlayerEntityRenderer {
             CustomModelClient.currentParameter = new RenderParameter(float_1, float_2, float_3, float_4, float_5, float_6, partial);
             CustomModelClient.currentRenderer = this;
             CustomModelClient.currentModel = getModel();
+            CustomModelClient.currentJsonModel = model.getModel();
 
             if (model != null)
                 model.getModel().render();
@@ -143,6 +146,7 @@ public class CustomPlayerEntityRenderer extends PlayerEntityRenderer {
                 GlStateManager.unsetProfile(GlStateManager.RenderMode.TRANSPARENT_MODEL);
             }
         }
+        this.setModelPose(playerEntity);
 
     }
 

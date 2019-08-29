@@ -22,7 +22,7 @@ public interface IBone {
     public IBone getParent();
     public PlayerBones getPlayerBone();
     public String getId();
-    default public boolean isVisible() { return true; }
+    public boolean isVisible();
 
     default public Quaternion getQuaternion() {
         Vector3 rotation = getRotation();
