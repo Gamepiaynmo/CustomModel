@@ -30,8 +30,8 @@ public enum FunctionType {
    ATAN2(ExpressionType.FLOAT, "atan2", args -> MathHelper.atan2(evalFloat(args, 0), evalFloat(args, 1)), ExpressionType.FLOAT, ExpressionType.FLOAT),
    TORAD(ExpressionType.FLOAT, "torad", args -> FunctionType.D2R * evalFloat(args, 0), ExpressionType.FLOAT),
    TODEG(ExpressionType.FLOAT, "todeg", args -> FunctionType.R2D * evalFloat(args, 0), ExpressionType.FLOAT),
-   MIN(ExpressionType.FLOAT, "min", args -> getMin(args), (new ParametersVariable()).first(ExpressionType.FLOAT).repeat(ExpressionType.FLOAT)),
-   MAX(ExpressionType.FLOAT, "max", args -> getMax(args), (new ParametersVariable()).first(ExpressionType.FLOAT).repeat(ExpressionType.FLOAT)),
+   MIN(ExpressionType.FLOAT, "min", FunctionType::getMin, (new ParametersVariable()).first(ExpressionType.FLOAT).repeat(ExpressionType.FLOAT)),
+   MAX(ExpressionType.FLOAT, "max", FunctionType::getMax, (new ParametersVariable()).first(ExpressionType.FLOAT).repeat(ExpressionType.FLOAT)),
    CLAMP(ExpressionType.FLOAT, "clamp", args -> MathHelper.clamp(evalFloat(args, 0), evalFloat(args, 1), evalFloat(args, 2)), ExpressionType.FLOAT, ExpressionType.FLOAT, ExpressionType.FLOAT),
    ABS(ExpressionType.FLOAT, "abs", args -> MathHelper.abs(evalFloat(args, 0)), ExpressionType.FLOAT),
    FLOOR(ExpressionType.FLOAT, "floor", args -> MathHelper.floor(evalFloat(args, 0)), ExpressionType.FLOAT),
@@ -105,19 +105,19 @@ public enum FunctionType {
    private static final float R2D = 180 / (float) Math.PI;
    private static final float D2R = (float) Math.PI / 180;
 
-   private FunctionType(ExpressionType expressionType, String name, Function<IExpression[], Object> eval, ExpressionType... parameterTypes) {
+   FunctionType(ExpressionType expressionType, String name, Function<IExpression[], Object> eval, ExpressionType... parameterTypes) {
       this(0, expressionType, name, eval, parameterTypes);
    }
 
-   private FunctionType(int precedence, ExpressionType expressionType, String name, Function<IExpression[], Object> eval, ExpressionType... parameterTypes) {
+   FunctionType(int precedence, ExpressionType expressionType, String name, Function<IExpression[], Object> eval, ExpressionType... parameterTypes) {
       this(precedence, expressionType, name, eval, new Parameters(parameterTypes));
    }
 
-   private FunctionType(ExpressionType expressionType, String name, Function<IExpression[], Object> eval, IParameters parameters) {
+   FunctionType(ExpressionType expressionType, String name, Function<IExpression[], Object> eval, IParameters parameters) {
       this(0, expressionType, name, eval, parameters);
    }
 
-   private FunctionType(int precedence, ExpressionType expressionType, String name, Function<IExpression[], Object> eval, IParameters parameters) {
+   FunctionType(int precedence, ExpressionType expressionType, String name, Function<IExpression[], Object> eval, IParameters parameters) {
       this.precedence = precedence;
       this.expressionType = expressionType;
       this.name = name;
@@ -214,8 +214,7 @@ public enum FunctionType {
    }
 
    public static FunctionType parse(String str) {
-      for(int i = 0; i < VALUES.length; ++i) {
-         FunctionType ef = VALUES[i];
+      for (FunctionType ef : VALUES) {
          if (ef.getName().equals(str)) {
             return ef;
          }

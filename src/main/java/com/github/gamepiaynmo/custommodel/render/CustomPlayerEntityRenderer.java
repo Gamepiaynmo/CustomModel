@@ -83,7 +83,7 @@ public class CustomPlayerEntityRenderer extends PlayerEntityRenderer {
                 this.model.animateModel(playerEntity, float_11, float_10, 1);
                 this.model.setAngles(playerEntity, float_11, float_10, float_8, float_5, float_7, 0.0625f);
                 CustomModelClient.currentParameter = new RenderParameter(float_11, float_10, float_8, float_5, float_7, 0.0625f, 1);
-            } catch (Exception var19) {
+            } catch (Exception ignored) {
             }
 
             CustomModelClient.currentPlayer = playerEntity;
@@ -104,6 +104,9 @@ public class CustomPlayerEntityRenderer extends PlayerEntityRenderer {
             }
 
             ModelPack model = CustomModelClient.getModelForPlayer(playerEntity);
+            CustomModelClient.currentPlayer = playerEntity;
+            CustomModelClient.currentRenderer = this;
+            CustomModelClient.currentModel = getModel();
 
             if (model != null)
                 this.setModelPose(playerEntity, model.getModel());
@@ -133,14 +136,12 @@ public class CustomPlayerEntityRenderer extends PlayerEntityRenderer {
             this.model.render(playerEntity, float_1, float_2, float_3, float_4, float_5, float_6);
 
             ModelPack model = CustomModelClient.getModelForPlayer(playerEntity);
-            CustomModelClient.currentPlayer = playerEntity;
             CustomModelClient.currentParameter = new RenderParameter(float_1, float_2, float_3, float_4, float_5, float_6, partial);
-            CustomModelClient.currentRenderer = this;
-            CustomModelClient.currentModel = getModel();
-            CustomModelClient.currentJsonModel = model.getModel();
 
-            if (model != null)
+            if (model != null) {
+                CustomModelClient.currentJsonModel = model.getModel();
                 model.getModel().render();
+            }
 
             if (boolean_2) {
                 GlStateManager.unsetProfile(GlStateManager.RenderMode.TRANSPARENT_MODEL);
@@ -151,7 +152,7 @@ public class CustomPlayerEntityRenderer extends PlayerEntityRenderer {
     }
 
     private void setModelPose(AbstractClientPlayerEntity abstractClientPlayerEntity_1) {
-        PlayerEntityModel<AbstractClientPlayerEntity> playerEntityModel_1 = (PlayerEntityModel)this.getModel();
+        PlayerEntityModel<AbstractClientPlayerEntity> playerEntityModel_1 = this.getModel();
         if (abstractClientPlayerEntity_1.isSpectator()) {
             playerEntityModel_1.setVisible(false);
             playerEntityModel_1.head.visible = true;
@@ -181,7 +182,7 @@ public class CustomPlayerEntityRenderer extends PlayerEntityRenderer {
     }
 
     private void setModelPose(AbstractClientPlayerEntity abstractClientPlayerEntity_1, CustomJsonModel model) {
-        PlayerEntityModel<AbstractClientPlayerEntity> playerEntityModel_1 = (PlayerEntityModel)this.getModel();
+        PlayerEntityModel<AbstractClientPlayerEntity> playerEntityModel_1 = this.getModel();
         if (abstractClientPlayerEntity_1.isSpectator()) {
             playerEntityModel_1.setVisible(false);
             model.setVisible(false);

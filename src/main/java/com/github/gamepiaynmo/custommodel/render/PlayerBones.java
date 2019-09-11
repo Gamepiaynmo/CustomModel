@@ -1,20 +1,17 @@
 package com.github.gamepiaynmo.custommodel.render;
 
 import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
+import com.github.gamepiaynmo.custommodel.client.ModelPack;
 import com.github.gamepiaynmo.custommodel.render.model.IBone;
 import com.github.gamepiaynmo.custommodel.util.Matrix4;
-import com.github.gamepiaynmo.custommodel.client.ModelPack;
+import com.github.gamepiaynmo.custommodel.util.Vec2d;
 import com.github.gamepiaynmo.custommodel.util.Vector3;
 import com.google.common.collect.Maps;
-import com.sun.javafx.geom.Vec2d;
-import net.fabricmc.loader.util.sat4j.core.Vec;
 import net.minecraft.client.model.Cuboid;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.util.Identifier;
 
 import java.util.Map;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 public enum PlayerBones {
@@ -39,7 +36,7 @@ public enum PlayerBones {
     private static final Vector3 One = new Vector3(1, 1, 1);
     private static final Vec2d TexSize = new Vec2d(64, 64);
 
-    private PlayerBones(String id, Supplier<Cuboid> cuboidGetter) {
+    PlayerBones(String id, Supplier<Cuboid> cuboidGetter) {
         this.id = id;
         this.cuboidGetter = cuboidGetter;
         bone = new OriginalBone(this, cuboidGetter);
@@ -63,7 +60,7 @@ public enum PlayerBones {
         private Supplier<Cuboid> cuboidGetter;
         private PlayerBones playerBone;
 
-        public OriginalBone(PlayerBones playerBone, Supplier<Cuboid> cuboidGetter) {
+        OriginalBone(PlayerBones playerBone, Supplier<Cuboid> cuboidGetter) {
             this.playerBone = playerBone;
             this.cuboidGetter = cuboidGetter;
         }

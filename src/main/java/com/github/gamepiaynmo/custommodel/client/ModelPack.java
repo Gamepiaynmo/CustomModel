@@ -38,7 +38,7 @@ public class ModelPack {
 
     private ModelPack() {}
 
-    public static ModelPack fromDirectory(TextureManager textureManager, File dir) throws FileNotFoundException, IOException, ParseException {
+    public static ModelPack fromDirectory(TextureManager textureManager, File dir) throws IOException, ParseException {
         IModelResource modelFile = null;
         List<IModelResource> textureFiles = Lists.newArrayList();
 
@@ -215,12 +215,12 @@ public class ModelPack {
         return dirName;
     }
 
-    public static interface TextureGetter {
-        public Identifier getTexture(AbstractClientPlayerEntity player);
+    public interface TextureGetter {
+        Identifier getTexture(AbstractClientPlayerEntity player);
     }
 
-    public static interface IModelResource {
-        public String getName();
-        public InputStream getInputStream() throws IOException;
+    public interface IModelResource {
+        String getName();
+        InputStream getInputStream() throws IOException;
     }
 }

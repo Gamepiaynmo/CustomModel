@@ -3,13 +3,6 @@ plugins {
 	id 'maven-publish'
 }
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
-
-archivesBaseName = project.archives_base_name
-version = project.mod_version
-group = project.maven_group
-
 minecraft {
 }
 
@@ -34,6 +27,9 @@ dependencies {
 	// You may need to force-disable transitiveness on them.
 	modCompile "me.shedaniel.cloth:config-1:0.2.5"
     modCompile "me.sargunvohra.mcmods:auto-config:1.2.0+mc1.14.4"
+
+    include "me.shedaniel.cloth:config-1:0.2.5"
+    include "me.sargunvohra.mcmods:auto-config:1.2.0+mc1.14.4"
 
     // not required, but we want to see our config screen
     modCompile "io.github.prospector:modmenu:1.7.9+build.118"

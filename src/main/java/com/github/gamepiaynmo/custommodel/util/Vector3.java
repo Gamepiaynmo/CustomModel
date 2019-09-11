@@ -153,11 +153,11 @@ public class Vector3 {
 
     /** @return The euclidean length */
     public static double len (final double x, final double y, final double z) {
-        return (double)Math.sqrt(x * x + y * y + z * z);
+        return Math.sqrt(x * x + y * y + z * z);
     }
 
     public double len () {
-        return (double)Math.sqrt(x * x + y * y + z * z);
+        return Math.sqrt(x * x + y * y + z * z);
     }
 
     /** @return The squared euclidean length */
@@ -180,14 +180,14 @@ public class Vector3 {
         final double a = x2 - x1;
         final double b = y2 - y1;
         final double c = z2 - z1;
-        return (double)Math.sqrt(a * a + b * b + c * c);
+        return Math.sqrt(a * a + b * b + c * c);
     }
 
     public double dst (final Vector3 vector) {
         final double a = vector.x - x;
         final double b = vector.y - y;
         final double c = vector.z - z;
-        return (double)Math.sqrt(a * a + b * b + c * c);
+        return Math.sqrt(a * a + b * b + c * c);
     }
 
     /** @return the distance between this point and the given point */
@@ -195,7 +195,7 @@ public class Vector3 {
         final double a = x - this.x;
         final double b = y - this.y;
         final double c = z - this.z;
-        return (double)Math.sqrt(a * a + b * b + c * c);
+        return Math.sqrt(a * a + b * b + c * c);
     }
 
     /** @return the squared distance between the given points */
@@ -228,7 +228,7 @@ public class Vector3 {
     public Vector3 nor () {
         final double len2 = this.len2();
         if (len2 == 0f || len2 == 1f) return this;
-        return this.scl(1f / (double)Math.sqrt(len2));
+        return this.scl(1f / Math.sqrt(len2));
     }
 
     /** @return The dot product between the two vectors */
@@ -278,7 +278,7 @@ public class Vector3 {
      * @param matrix The matrix
      * @return This vector for chaining */
     public Vector3 mul (final Matrix4 matrix) {
-        final double l_mat[] = matrix.val;
+        final double[] l_mat = matrix.val;
         return this.set(x * l_mat[Matrix4.M00] + y * l_mat[Matrix4.M01] + z * l_mat[Matrix4.M02] + l_mat[Matrix4.M03], x
                 * l_mat[Matrix4.M10] + y * l_mat[Matrix4.M11] + z * l_mat[Matrix4.M12] + l_mat[Matrix4.M13], x * l_mat[Matrix4.M20] + y
                 * l_mat[Matrix4.M21] + z * l_mat[Matrix4.M22] + l_mat[Matrix4.M23]);
@@ -288,7 +288,7 @@ public class Vector3 {
      * @param matrix The matrix
      * @return This vector for chaining */
     public Vector3 traMul (final Matrix4 matrix) {
-        final double l_mat[] = matrix.val;
+        final double[] l_mat = matrix.val;
         return this.set(x * l_mat[Matrix4.M00] + y * l_mat[Matrix4.M10] + z * l_mat[Matrix4.M20] + l_mat[Matrix4.M30], x
                 * l_mat[Matrix4.M01] + y * l_mat[Matrix4.M11] + z * l_mat[Matrix4.M21] + l_mat[Matrix4.M31], x * l_mat[Matrix4.M02] + y
                 * l_mat[Matrix4.M12] + z * l_mat[Matrix4.M22] + l_mat[Matrix4.M32]);
@@ -306,7 +306,7 @@ public class Vector3 {
      * @param matrix The matrix.
      * @return This vector for chaining */
     public Vector3 prj (final Matrix4 matrix) {
-        final double l_mat[] = matrix.val;
+        final double[] l_mat = matrix.val;
         final double l_w = 1f / (x * l_mat[Matrix4.M30] + y * l_mat[Matrix4.M31] + z * l_mat[Matrix4.M32] + l_mat[Matrix4.M33]);
         return this.set((x * l_mat[Matrix4.M00] + y * l_mat[Matrix4.M01] + z * l_mat[Matrix4.M02] + l_mat[Matrix4.M03]) * l_w, (x
                 * l_mat[Matrix4.M10] + y * l_mat[Matrix4.M11] + z * l_mat[Matrix4.M12] + l_mat[Matrix4.M13])
@@ -318,7 +318,7 @@ public class Vector3 {
      * @param matrix The matrix
      * @return This vector for chaining */
     public Vector3 rot (final Matrix4 matrix) {
-        final double l_mat[] = matrix.val;
+        final double[] l_mat = matrix.val;
         return this.set(x * l_mat[Matrix4.M00] + y * l_mat[Matrix4.M01] + z * l_mat[Matrix4.M02], x * l_mat[Matrix4.M10] + y
                 * l_mat[Matrix4.M11] + z * l_mat[Matrix4.M12], x * l_mat[Matrix4.M20] + y * l_mat[Matrix4.M21] + z * l_mat[Matrix4.M22]);
     }
@@ -328,7 +328,7 @@ public class Vector3 {
      * @param matrix The transformation matrix
      * @return The vector for chaining */
     public Vector3 unrotate (final Matrix4 matrix) {
-        final double l_mat[] = matrix.val;
+        final double[] l_mat = matrix.val;
         return this.set(x * l_mat[Matrix4.M00] + y * l_mat[Matrix4.M10] + z * l_mat[Matrix4.M20], x * l_mat[Matrix4.M01] + y
                 * l_mat[Matrix4.M11] + z * l_mat[Matrix4.M21], x * l_mat[Matrix4.M02] + y * l_mat[Matrix4.M12] + z * l_mat[Matrix4.M22]);
     }
@@ -339,7 +339,7 @@ public class Vector3 {
      * @param matrix The transformation matrix
      * @return The vector for chaining */
     public Vector3 untransform (final Matrix4 matrix) {
-        final double l_mat[] = matrix.val;
+        final double[] l_mat = matrix.val;
         x -= l_mat[Matrix4.M03];
         y -= l_mat[Matrix4.M03];
         z -= l_mat[Matrix4.M03];
@@ -444,18 +444,18 @@ public class Vector3 {
         if (dot > 0.9995 || dot < -0.9995) return lerp(target, alpha);
 
         // theta0 = angle between input vectors
-        final double theta0 = (double)Math.acos(dot);
+        final double theta0 = Math.acos(dot);
         // theta = angle between this vector and result
         final double theta = theta0 * alpha;
 
-        final double st = (double)Math.sin(theta);
+        final double st = Math.sin(theta);
         final double tx = target.x - x * dot;
         final double ty = target.y - y * dot;
         final double tz = target.z - z * dot;
         final double l2 = tx * tx + ty * ty + tz * tz;
-        final double dl = st * ((l2 < 0.0001f) ? 1f : 1f / (double)Math.sqrt(l2));
+        final double dl = st * ((l2 < 0.0001f) ? 1f : 1f / Math.sqrt(l2));
 
-        return scl((double)Math.cos(theta)).add(tx * dl, ty * dl, tz * dl).nor();
+        return scl(Math.cos(theta)).add(tx * dl, ty * dl, tz * dl).nor();
     }
 
     /** Converts this {@code Vector3} to a string in the format {@code (x,y,z)}.
@@ -490,7 +490,7 @@ public class Vector3 {
     public Vector3 limit2 (double limit2) {
         double len2 = len2();
         if (len2 > limit2) {
-            scl((double)Math.sqrt(limit2 / len2));
+            scl(Math.sqrt(limit2 / len2));
         }
         return this;
     }
@@ -501,16 +501,16 @@ public class Vector3 {
 
     public Vector3 setLength2 (double len2) {
         double oldLen2 = len2();
-        return (oldLen2 == 0 || oldLen2 == len2) ? this : scl((double)Math.sqrt(len2 / oldLen2));
+        return (oldLen2 == 0 || oldLen2 == len2) ? this : scl(Math.sqrt(len2 / oldLen2));
     }
 
     public Vector3 clamp (double min, double max) {
         final double len2 = len2();
         if (len2 == 0f) return this;
         double max2 = max * max;
-        if (len2 > max2) return scl((double)Math.sqrt(max2 / len2));
+        if (len2 > max2) return scl(Math.sqrt(max2 / len2));
         double min2 = min * min;
-        if (len2 < min2) return scl((double)Math.sqrt(min2 / len2));
+        if (len2 < min2) return scl(Math.sqrt(min2 / len2));
         return this;
     }
 
@@ -518,8 +518,7 @@ public class Vector3 {
         if (other == null) return false;
         if (Math.abs(other.x - x) > epsilon) return false;
         if (Math.abs(other.y - y) > epsilon) return false;
-        if (Math.abs(other.z - z) > epsilon) return false;
-        return true;
+        return !(Math.abs(other.z - z) > epsilon);
     }
 
     /** Compares this vector with the other vector, using the supplied epsilon for fuzzy equality testing.
@@ -527,8 +526,7 @@ public class Vector3 {
     public boolean epsilonEquals (double x, double y, double z, double epsilon) {
         if (Math.abs(x - this.x) > epsilon) return false;
         if (Math.abs(y - this.y) > epsilon) return false;
-        if (Math.abs(z - this.z) > epsilon) return false;
-        return true;
+        return !(Math.abs(z - this.z) > epsilon);
     }
 
     public Vector3 setZero () {

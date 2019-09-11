@@ -118,7 +118,7 @@ public class ParticleEmitter {
                 epos.y = transform.val[13];
                 epos.z = transform.val[14];
 
-                Vector3 edir[] = new Vector3[3];
+                Vector3[] edir = new Vector3[3];
                 for (int i = 0; i < 3; i++) {
                     edir[i] = new Vector3();
                     edir[i].x = transform.val[i * 4];

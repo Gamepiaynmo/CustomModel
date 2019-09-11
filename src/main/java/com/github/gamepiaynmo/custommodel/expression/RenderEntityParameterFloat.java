@@ -36,7 +36,7 @@ public enum RenderEntityParameterFloat implements IExpressionFloat {
    private static final RenderEntityParameterFloat[] VALUES = values();
    private final BiFunction<PlayerEntity, RenderParameter, Float> valueGetter;
 
-   private RenderEntityParameterFloat(String name, BiFunction<PlayerEntity, RenderParameter, Float> getter) {
+   RenderEntityParameterFloat(String name, BiFunction<PlayerEntity, RenderParameter, Float> getter) {
       this.name = name;
       valueGetter = getter;
    }
@@ -53,8 +53,7 @@ public enum RenderEntityParameterFloat implements IExpressionFloat {
       if (str == null) {
          return null;
       } else {
-         for(int i = 0; i < VALUES.length; ++i) {
-            RenderEntityParameterFloat type = VALUES[i];
+         for (RenderEntityParameterFloat type : VALUES) {
             if (type.getName().equals(str)) {
                return type;
             }

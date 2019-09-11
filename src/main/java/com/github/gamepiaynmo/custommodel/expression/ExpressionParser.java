@@ -236,7 +236,7 @@ public class ExpressionParser {
          Deque dequeArg = getGroup(deque, TokenType.COMMA, false);
          IExpression expr = this.parseInfix(dequeArg);
          if (expr == null) {
-            IExpression[] exprs = (IExpression[])((IExpression[])list.toArray(new IExpression[list.size()]));
+            IExpression[] exprs = (IExpression[]) list.toArray(new IExpression[list.size()]);
             return exprs;
          }
 

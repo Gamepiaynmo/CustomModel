@@ -11,9 +11,9 @@ public class Quaternion {
     public double z;
     public double w;
 
-    private static double degreesToRadians = (double) Math.PI / 180;
-    private static double radiansToDegrees = 180 / (double) Math.PI;
-    private static double PI2 = (double) (Math.PI * 2);
+    private static double degreesToRadians = Math.PI / 180;
+    private static double radiansToDegrees = 180 / Math.PI;
+    private static double PI2 = Math.PI * 2;
 
     /** Constructor, sets the four components of the quaternion.
      * @param x The x-component
@@ -80,12 +80,12 @@ public class Quaternion {
 
     /** @return the euclidean length of the specified quaternion */
     public final static double len (final double x, final double y, final double z, final double w) {
-        return (double)Math.sqrt(x * x + y * y + z * z + w * w);
+        return Math.sqrt(x * x + y * y + z * z + w * w);
     }
 
     /** @return the euclidean length of this quaternion */
     public double len () {
-        return (double)Math.sqrt(x * x + y * y + z * z + w * w);
+        return Math.sqrt(x * x + y * y + z * z + w * w);
     }
 
     @Override
@@ -110,14 +110,14 @@ public class Quaternion {
      * @return this quaternion */
     public Quaternion setEulerAnglesRad (double yaw, double pitch, double roll) {
         final double hr = roll * 0.5f;
-        final double shr = (double)Math.sin(hr);
-        final double chr = (double)Math.cos(hr);
+        final double shr = Math.sin(hr);
+        final double chr = Math.cos(hr);
         final double hp = pitch * 0.5f;
-        final double shp = (double)Math.sin(hp);
-        final double chp = (double)Math.cos(hp);
+        final double shp = Math.sin(hp);
+        final double chp = Math.cos(hp);
         final double hy = yaw * 0.5f;
-        final double shy = (double)Math.sin(hy);
-        final double chy = (double)Math.cos(hy);
+        final double shy = Math.sin(hy);
+        final double chy = Math.cos(hy);
         final double chy_shp = chy * shp;
         final double shy_chp = shy * chp;
         final double chy_chp = chy * chp;
@@ -141,8 +141,8 @@ public class Quaternion {
      * @return the rotation around the z axis in radians (between -PI and +PI) */
     public double getRollRad () {
         final int pole = getGimbalPole();
-        return (double) (pole == 0 ? Math.atan2(2f * (w * z + y * x), 1f - 2f * (x * x + z * z)) : (double)pole * 2f
-                * Math.atan2(y, w));
+        return pole == 0 ? Math.atan2(2f * (w * z + y * x), 1f - 2f * (x * x + z * z)) : (double)pole * 2f
+                * Math.atan2(y, w);
     }
 
     /** Get the roll euler angle in degrees, which is the rotation around the z axis. Requires that this quaternion is normalized.
@@ -155,7 +155,7 @@ public class Quaternion {
      * @return the rotation around the x axis in radians (between -(PI/2) and +(PI/2)) */
     public double getPitchRad () {
         final int pole = getGimbalPole();
-        return pole == 0 ? (double)Math.asin(MathHelper.clamp(2f * (w * x - z * y), -1f, 1f)) : (double)pole * (double) Math.PI * 0.5f;
+        return pole == 0 ? Math.asin(MathHelper.clamp(2f * (w * x - z * y), -1f, 1f)) : (double)pole * Math.PI * 0.5f;
     }
 
     /** Get the pitch euler angle in degrees, which is the rotation around the x axis. Requires that this quaternion is normalized.
@@ -167,7 +167,7 @@ public class Quaternion {
     /** Get the yaw euler angle in radians, which is the rotation around the y axis. Requires that this quaternion is normalized.
      * @return the rotation around the y axis in radians (between -PI and +PI) */
     public double getYawRad () {
-        return getGimbalPole() == 0 ? (double) Math.atan2(2f * (y * w + x * z), 1f - 2f * (y * y + x * x)) : 0f;
+        return getGimbalPole() == 0 ? Math.atan2(2f * (y * w + x * z), 1f - 2f * (y * y + x * x)) : 0f;
     }
 
     /** Get the yaw euler angle in degrees, which is the rotation around the y axis. Requires that this quaternion is normalized.
@@ -189,7 +189,7 @@ public class Quaternion {
      * @return the quaternion for chaining */
     public Quaternion nor () {
         double len = len2();
-        len = (double)Math.sqrt(len);
+        len = Math.sqrt(len);
         w /= len;
         x /= len;
         y /= len;
@@ -390,8 +390,8 @@ public class Quaternion {
         if (d == 0f) return idt();
         d = 1f / d;
         double l_ang = radians < 0 ? PI2 - (-radians % PI2) : radians % PI2;
-        double l_sin = (double)Math.sin(l_ang / 2);
-        double l_cos = (double)Math.cos(l_ang / 2);
+        double l_sin = Math.sin(l_ang / 2);
+        double l_cos = Math.cos(l_ang / 2);
         return this.set(d * x * l_sin, d * y * l_sin, d * z * l_sin, l_cos).nor();
     }
 
@@ -470,28 +470,28 @@ public class Quaternion {
 
         // we protect the division by s by ensuring that s>=1
         if (t >= 0) { // |w| >= .5
-            double s = (double)Math.sqrt(t + 1); // |s|>=1 ...
+            double s = Math.sqrt(t + 1); // |s|>=1 ...
             w = 0.5f * s;
             s = 0.5f / s; // so this division isn't bad
             x = (zy - yz) * s;
             y = (xz - zx) * s;
             z = (yx - xy) * s;
         } else if ((xx > yy) && (xx > zz)) {
-            double s = (double)Math.sqrt(1.0 + xx - yy - zz); // |s|>=1
+            double s = Math.sqrt(1.0 + xx - yy - zz); // |s|>=1
             x = s * 0.5f; // |x| >= .5
             s = 0.5f / s;
             y = (yx + xy) * s;
             z = (xz + zx) * s;
             w = (zy - yz) * s;
         } else if (yy > zz) {
-            double s = (double)Math.sqrt(1.0 + yy - xx - zz); // |s|>=1
+            double s = Math.sqrt(1.0 + yy - xx - zz); // |s|>=1
             y = s * 0.5f; // |y| >= .5
             s = 0.5f / s;
             x = (yx + xy) * s;
             z = (zy + yz) * s;
             w = (xz - zx) * s;
         } else {
-            double s = (double)Math.sqrt(1.0 + zz - xx - yy); // |s|>=1
+            double s = Math.sqrt(1.0 + zz - xx - yy); // |s|>=1
             z = s * 0.5f; // |z| >= .5
             s = 0.5f / s;
             x = (xz + zx) * s;
@@ -508,7 +508,7 @@ public class Quaternion {
      * @return This quaternion for chaining */
     public Quaternion setFromCross (final Vector3 v1, final Vector3 v2) {
         final double dot = MathHelper.clamp(v1.dot(v2), -1f, 1f);
-        final double angle = (double)Math.acos(dot);
+        final double angle = Math.acos(dot);
         return setFromAxisRad(v1.y * v2.z - v1.z * v2.y, v1.z * v2.x - v1.x * v2.z, v1.x * v2.y - v1.y * v2.x, angle);
     }
 
@@ -522,7 +522,7 @@ public class Quaternion {
      * @return This quaternion for chaining */
     public Quaternion setFromCross (final double x1, final double y1, final double z1, final double x2, final double y2, final double z2) {
         final double dot = MathHelper.clamp(Vector3.dot(x1, y1, z1, x2, y2, z2), -1f, 1f);
-        final double angle = (double)Math.acos(dot);
+        final double angle = Math.acos(dot);
         return setFromAxisRad(y1 * z2 - z1 * y2, z1 * x2 - x1 * z2, x1 * y2 - y1 * x2, angle);
     }
 
@@ -543,13 +543,13 @@ public class Quaternion {
         // warrant such calculations
         if ((1 - absDot) > 0.1) {// Get the angle between the 2 quaternions,
             // and then store the sin() of that angle
-            final double angle = (double)Math.acos(absDot);
-            final double invSinTheta = 1f / (double)Math.sin(angle);
+            final double angle = Math.acos(absDot);
+            final double invSinTheta = 1f / Math.sin(angle);
 
             // Calculate the scale for q1 and q2, according to the angle and
             // it's sine value
-            scale0 = ((double)Math.sin((1f - alpha) * angle) * invSinTheta);
-            scale1 = ((double)Math.sin((alpha * angle)) * invSinTheta);
+            scale0 = (Math.sin((1f - alpha) * angle) * invSinTheta);
+            scale1 = (Math.sin((alpha * angle)) * invSinTheta);
         }
 
         if (d < 0.f) scale1 = -scale1;
@@ -604,10 +604,10 @@ public class Quaternion {
 
         // Calculate |q|^alpha
         double norm = len();
-        double normExp = (double)Math.pow(norm, alpha);
+        double normExp = Math.pow(norm, alpha);
 
         // Calculate theta
-        double theta = (double)Math.acos(w / norm);
+        double theta = Math.acos(w / norm);
 
         // Calculate coefficient of basis elements
         double coeff = 0;
@@ -615,10 +615,10 @@ public class Quaternion {
 // value
             coeff = normExp * alpha / norm;
         else
-            coeff = (double)(normExp * Math.sin(alpha * theta) / (norm * Math.sin(theta)));
+            coeff = normExp * Math.sin(alpha * theta) / (norm * Math.sin(theta));
 
         // Write results
-        w = (double)(normExp * Math.cos(alpha * theta));
+        w = normExp * Math.cos(alpha * theta);
         x *= coeff;
         y *= coeff;
         z *= coeff;
@@ -698,12 +698,12 @@ public class Quaternion {
      * @see <a href="http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToAngle">calculation</a> */
     public double getAxisAngleRad (Vector3 axis) {
         if (this.w > 1) this.nor(); // if w>1 acos and sqrt will produce errors, this cant happen if quaternion is normalised
-        double angle = (double)(2.0 * Math.acos(this.w));
+        double angle = 2.0 * Math.acos(this.w);
         double s = Math.sqrt(1 - this.w * this.w); // assuming quaternion normalised then w is less than 1, so term always positive.
 
-        axis.x = (double)(this.x / s); // normalise axis
-        axis.y = (double)(this.y / s);
-        axis.z = (double)(this.z / s);
+        axis.x = this.x / s; // normalise axis
+        axis.y = this.y / s;
+        axis.z = this.z / s;
 
         return angle;
     }
@@ -713,7 +713,7 @@ public class Quaternion {
      * {@link #getAngleAroundRad(Vector3)} to get the angle around a specific axis.
      * @return the angle in radians of the rotation */
     public double getAngleRad () {
-        return (double)(2.0 * Math.acos((this.w > 1) ? (this.w / len()) : this.w));
+        return 2.0 * Math.acos((this.w > 1) ? (this.w / len()) : this.w);
     }
 
     /** Get the angle in degrees of the rotation this quaternion represents. Use {@link #getAxisAngle(Vector3)} to get both the axis
@@ -763,8 +763,8 @@ public class Quaternion {
     public double getAngleAroundRad (final double axisX, final double axisY, final double axisZ) {
         final double d = Vector3.dot(this.x, this.y, this.z, axisX, axisY, axisZ);
         final double l2 = Quaternion.len2(axisX * d, axisY * d, axisZ * d, this.w);
-        return (double)(2.0 * Math.acos(MathHelper.clamp(
-                (double)((d < 0 ? -this.w : this.w) / Math.sqrt(l2)), -1f, 1f)));
+        return 2.0 * Math.acos(MathHelper.clamp(
+                (d < 0 ? -this.w : this.w) / Math.sqrt(l2), -1f, 1f));
     }
 
     /** Get the angle in radians of the rotation around the specified axis. The axis must be normalized.

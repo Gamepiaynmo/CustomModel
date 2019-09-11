@@ -23,7 +23,7 @@ public enum ModelVariableType {
 
    private final Function<IBone, Float> valueGetter;
 
-   private ModelVariableType(String name, Function<IBone, Float> getter) {
+   ModelVariableType(String name, Function<IBone, Float> getter) {
       this.name = name;
       valueGetter = getter;
    }
@@ -37,8 +37,7 @@ public enum ModelVariableType {
    }
 
    public static ModelVariableType parse(String str) {
-      for(int i = 0; i < VALUES.length; ++i) {
-         ModelVariableType var = VALUES[i];
+      for (ModelVariableType var : VALUES) {
          if (var.getName().equals(str)) {
             return var;
          }

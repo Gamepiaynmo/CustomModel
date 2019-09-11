@@ -17,7 +17,7 @@ public class TokenParser {
       while(true) {
          int i = pr.read();
          if (i < 0) {
-            Token[] tokens = (Token[])((Token[])list.toArray(new Token[list.size()]));
+            Token[] tokens = (Token[]) list.toArray(new Token[list.size()]);
             return tokens;
          }
 

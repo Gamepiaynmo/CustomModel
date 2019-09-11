@@ -7,33 +7,27 @@ import com.github.gamepiaynmo.custommodel.expression.IExpressionFloat;
 import com.github.gamepiaynmo.custommodel.expression.ParseException;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
 import com.github.gamepiaynmo.custommodel.render.PlayerBones;
-import com.github.gamepiaynmo.custommodel.render.RenderParameter;
 import com.github.gamepiaynmo.custommodel.util.*;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.sun.javafx.geom.Vec2d;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.util.Identifier;
 
 import java.util.List;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class Bone implements IBone {
-    private static double DegToRad = (double) Math.PI / 180;
     private CustomJsonModel model;
 
     private String id;
     private IBone parent;
 
-    public Vector3 position = Vector3.Zero.cpy();
-    public Vector3 rotation = Vector3.Zero.cpy();
-    public Vector3 scale = new Vector3(1, 1, 1);
-    public boolean visible;
+    private Vector3 position = Vector3.Zero.cpy();
+    private Vector3 rotation = Vector3.Zero.cpy();
+    private Vector3 scale = new Vector3(1, 1, 1);
+    private boolean visible;
     private double[] physicsParams;
 
     private IExpressionFloat[] positionExpr;
@@ -183,9 +177,10 @@ public class Bone implements IBone {
 
     public void update() {
         position.set(positionExpr[0].eval(), positionExpr[1].eval(), positionExpr[2].eval()).scl(-1, -1, 1);
-        rotation.set(rotationExpr[0].eval(), rotationExpr[1].eval(), rotationExpr[2].eval()).scl(DegToRad);
+        double degToRad = Math.PI / 180;
+        rotation.set(rotationExpr[0].eval(), rotationExpr[1].eval(), rotationExpr[2].eval()).scl(degToRad);
         scale.set(scaleExpr[0].eval(), scaleExpr[1].eval(), scaleExpr[2].eval());
-        visible = parent.isVisible() ? visibleExpr.eval() : false;
+        visible = parent.isVisible() && visibleExpr.eval();
         length = position.len() * 0.0625;
         if (physicalize)
             for (int i = 0; i < physicsParams.length; i++)

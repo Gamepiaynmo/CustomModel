@@ -44,7 +44,7 @@ public class Quad {
 
         for(int int_1 = 0; int_1 < 4; ++int_1) {
             Vertex vertex_1 = this.vertices[int_1];
-            bufferBuilder_1.vertex(vertex_1.pos.x * (double)float_1, vertex_1.pos.y * (double)float_1, vertex_1.pos.z * (double)float_1).texture((double)vertex_1.u, (double)vertex_1.v).normal(float_2, float_3, float_4).next();
+            bufferBuilder_1.vertex(vertex_1.pos.x * (double)float_1, vertex_1.pos.y * (double)float_1, vertex_1.pos.z * (double)float_1).texture(vertex_1.u, vertex_1.v).normal(float_2, float_3, float_4).next();
         }
 
         Tessellator.getInstance().draw();

@@ -43,8 +43,8 @@ public class Matrix4 {
     /** WW: Typically the value one. On Vector3 multiplication this value is ignored. */
     public static final int M33 = 15;
 
-    private static final double tmp[] = new double[16];
-    public final double val[] = new double[16];
+    private static final double[] tmp = new double[16];
+    public final double[] val = new double[16];
 
     /** Constructs an identity matrix */
     public Matrix4 () {
@@ -450,7 +450,7 @@ public class Matrix4 {
      * @return This matrix for the purpose of chaining methods together. */
     public Matrix4 setToProjection (double near, double far, double fovy, double aspectRatio) {
         idt();
-        double l_fd = (double)(1.0 / Math.tan((fovy * (Math.PI / 180)) / 2.0));
+        double l_fd = 1.0 / Math.tan((fovy * (Math.PI / 180)) / 2.0);
         double l_a1 = (far + near) / (near - far);
         double l_a2 = (2 * far * near) / (near - far);
         val[M00] = l_fd / aspectRatio;
@@ -1023,17 +1023,17 @@ public class Matrix4 {
 
     /** @return the scale factor on the X axis (non-negative) */
     public double getScaleX () {
-        return (double)Math.sqrt(getScaleXSquared());
+        return Math.sqrt(getScaleXSquared());
     }
 
     /** @return the scale factor on the Y axis (non-negative) */
     public double getScaleY () {
-        return (double)Math.sqrt(getScaleYSquared());
+        return Math.sqrt(getScaleYSquared());
     }
 
     /** @return the scale factor on the X axis (non-negative) */
     public double getScaleZ () {
-        return (double)Math.sqrt(getScaleZSquared());
+        return Math.sqrt(getScaleZSquared());
     }
 
     /** @param scale The vector which will receive the (non-negative) scale components on each axis.

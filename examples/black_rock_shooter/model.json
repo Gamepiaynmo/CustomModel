@@ -1,5 +1,7 @@
 {
-	"hide": ["head", "body", "left_arm", "right_arm", "left_leg", "right_leg"],
+	"hide": ["head", "body", "left_arm", "right_arm", "left_leg", "right_leg",
+		"head_overlay", "body_overlay", "left_arm_overlay", "right_arm_overlay",
+		"left_leg_overlay", "right_leg_overlay"],
 	"bones": [
 		{
 			"id": "head_c",

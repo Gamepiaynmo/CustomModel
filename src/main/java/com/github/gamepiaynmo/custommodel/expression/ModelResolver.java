@@ -19,7 +19,7 @@ public class ModelResolver implements IExpressionResolver {
          return parBool;
       } else {
          RenderEntityParameterFloat parFloat = RenderEntityParameterFloat.parse(name);
-         return parFloat != null ? parFloat : null;
+         return parFloat;
       }
    }
 
@@ -29,7 +29,7 @@ public class ModelResolver implements IExpressionResolver {
          return mv;
       } else {
          IExpression param = getParameter(name);
-         return param != null ? param : null;
+         return param;
       }
    }
 
