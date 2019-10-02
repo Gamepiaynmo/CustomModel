@@ -22,7 +22,7 @@ public interface IBone {
 
     default Quaternion getQuaternion() {
         Vector3 rotation = getRotation();
-        return new Quaternion().setEulerAnglesRad(rotation.x, rotation.y, rotation.z);
+        return new Quaternion().setEulerAnglesRad(rotation.x, rotation.y, 0).mulLeft(new Quaternion().setFromAxisRad(0, 0, 1, rotation.z));
     }
     default Matrix4 getTransform() {
         return new Matrix4().setToScaling(getScale()).rotate(getQuaternion()).translate(getPosition().scl(0.0625));
