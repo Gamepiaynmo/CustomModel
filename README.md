@@ -17,6 +17,8 @@ When rendering, the client will search for models both at client side and server
 
 If you want some new features or need to report bugs, please rise a new issue at [github issue tracker](https://github.com/Gamepiaynmo/CustomModel/issues).
 
+Welcome to the [CPM discord server](https://discord.gg/uVT39n5).
+
 
 
 #### 说明
@@ -34,3 +36,5 @@ If you want some new features or need to report bugs, please rise a new issue at
 #### 联系
 
 如果您需要一些新功能或需要报告错误，请在[github issue tracker](https://github.com/Gamepiaynmo/CustomModel/issues)上发布新问题。
+
+欢迎加入[自定义玩家模型Discord服务器](https://discord.gg/uVT39n5).
