@@ -1,7 +1,11 @@
 plugins {
-	id 'fabric-loom' version '0.2.3-SNAPSHOT'
+	id 'fabric-loom' version '0.2.5-SNAPSHOT'
 	id 'maven-publish'
 }
+
+archivesBaseName = project.archives_base_name
+version = project.mod_version
+group = project.maven_group
 
 minecraft {
 }
