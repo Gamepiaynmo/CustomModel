@@ -38,15 +38,7 @@ public class ModelResolver implements IExpressionResolver {
    }
 
    public static String[] tokenize(String str, String delim) {
-      StringTokenizer tok = new StringTokenizer(str, delim);
-      ArrayList<String> list = new ArrayList();
-
-      while(tok.hasMoreTokens()) {
-         String token = tok.nextToken();
-         list.add(token);
-      }
-
-      return list.toArray(new String[list.size()]);
+      return str.split(delim);
    }
 
    public ModelVariableFloat getModelVariable(String name) {

@@ -74,7 +74,7 @@
 				},
 				{
 					"textureOffset": [0, 48],
-					"coordinates": [-2, -12, 2, 4, 12, 4],
+					"coordinates": [-2, 0, 2, 4, 12, 4],
 					"sizeAdd": 0.25
 				}
 			]
@@ -90,7 +90,7 @@
 				},
 				{
 					"textureOffset": [0, 32],
-					"coordinates": [-2, -12, 2, 4, 12, 4],
+					"coordinates": [-2, 0, 2, 4, 12, 4],
 					"sizeAdd": 0.25
 				}
 			]
