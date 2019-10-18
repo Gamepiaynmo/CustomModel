@@ -20,7 +20,6 @@ public class ParametersVariable implements IParameters {
    }
 
    public ParametersVariable(ExpressionType[] first, ExpressionType[] repeat, ExpressionType[] last, int maxCount) {
-      this.maxCount = Integer.MAX_VALUE;
       this.first = normalize(first);
       this.repeat = normalize(repeat);
       this.last = normalize(last);
