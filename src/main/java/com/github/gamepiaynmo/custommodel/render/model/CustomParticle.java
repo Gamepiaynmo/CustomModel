@@ -1,11 +1,8 @@
 package com.github.gamepiaynmo.custommodel.render.model;
 
 import com.github.gamepiaynmo.custommodel.util.Vector3;
-import com.ibm.icu.text.MessagePattern;
-import com.sun.corba.se.spi.ior.IdentifiableFactory;
 import net.minecraft.client.particle.BillboardParticle;
 import net.minecraft.client.particle.ParticleTextureSheet;
-import net.minecraft.client.texture.TextureManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
