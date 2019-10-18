@@ -3,13 +3,7 @@ package com.github.gamepiaynmo.custommodel.expression;
 import com.github.gamepiaynmo.custommodel.util.TranslatableException;
 
 import java.io.IOException;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Deque;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class ExpressionParser {
    private IExpressionResolver expressionResolver;

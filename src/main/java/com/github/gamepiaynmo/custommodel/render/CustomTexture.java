@@ -3,12 +3,9 @@ package com.github.gamepiaynmo.custommodel.render;
 import com.mojang.blaze3d.platform.TextureUtil;
 import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.texture.NativeImage;
-import net.minecraft.client.texture.TextureManager;
 import net.minecraft.resource.ResourceManager;
-import net.minecraft.util.Identifier;
 
 import java.io.IOException;
-import java.util.concurrent.Executor;
 
 public class CustomTexture extends AbstractTexture {
 

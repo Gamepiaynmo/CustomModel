@@ -7,7 +7,10 @@ import com.github.gamepiaynmo.custommodel.expression.ModelResolver;
 import com.github.gamepiaynmo.custommodel.expression.ParseException;
 import com.github.gamepiaynmo.custommodel.render.model.Bone;
 import com.github.gamepiaynmo.custommodel.render.model.IBone;
-import com.github.gamepiaynmo.custommodel.util.*;
+import com.github.gamepiaynmo.custommodel.util.Matrix4;
+import com.github.gamepiaynmo.custommodel.util.Quaternion;
+import com.github.gamepiaynmo.custommodel.util.TranslatableException;
+import com.github.gamepiaynmo.custommodel.util.Vector3;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonElement;
@@ -22,7 +25,6 @@ import org.lwjgl.opengl.GL11;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class CustomJsonModel {

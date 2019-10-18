@@ -1,22 +1,21 @@
 package com.github.gamepiaynmo.custommodel.render.model;
 
-import com.github.gamepiaynmo.custommodel.client.ModelPack;
 import com.github.gamepiaynmo.custommodel.expression.ExpressionParser;
 import com.github.gamepiaynmo.custommodel.expression.IExpressionBool;
 import com.github.gamepiaynmo.custommodel.expression.IExpressionFloat;
 import com.github.gamepiaynmo.custommodel.expression.ParseException;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
-import com.github.gamepiaynmo.custommodel.util.*;
+import com.github.gamepiaynmo.custommodel.util.Json;
+import com.github.gamepiaynmo.custommodel.util.Matrix4;
+import com.github.gamepiaynmo.custommodel.util.Vector3;
 import com.google.gson.JsonObject;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
 import java.util.Random;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class ParticleEmitter {

@@ -1,10 +1,7 @@
 package com.github.gamepiaynmo.custommodel.expression;
 
 import com.github.gamepiaynmo.custommodel.render.model.IBone;
-import net.minecraft.client.render.entity.model.PlayerEntityModel;
-import net.minecraft.entity.player.PlayerEntity;
 
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public enum ModelVariableType {

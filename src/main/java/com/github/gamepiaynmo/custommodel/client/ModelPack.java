@@ -1,9 +1,9 @@
 package com.github.gamepiaynmo.custommodel.client;
 
 import com.github.gamepiaynmo.custommodel.expression.ParseException;
-import com.github.gamepiaynmo.custommodel.server.CustomModel;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
 import com.github.gamepiaynmo.custommodel.render.CustomTexture;
+import com.github.gamepiaynmo.custommodel.server.CustomModel;
 import com.github.gamepiaynmo.custommodel.util.TranslatableException;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -12,7 +12,6 @@ import com.google.gson.JsonParser;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.TextureManager;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import org.apache.commons.io.IOUtils;
 
@@ -20,7 +19,6 @@ import java.io.*;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;

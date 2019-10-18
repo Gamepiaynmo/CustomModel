@@ -1,7 +1,5 @@
 package com.github.gamepiaynmo.custommodel.expression;
 
-import net.minecraft.entity.player.PlayerEntity;
-
 public class FunctionBool implements IExpressionBool {
    private FunctionType type;
    private IExpression[] arguments;

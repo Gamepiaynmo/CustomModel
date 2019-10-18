@@ -1,13 +1,14 @@
 package com.github.gamepiaynmo.custommodel.client;
 
-import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
-import com.github.gamepiaynmo.custommodel.render.RenderParameter;
-import com.github.gamepiaynmo.custommodel.server.CustomModel;
 import com.github.gamepiaynmo.custommodel.network.PacketModel;
 import com.github.gamepiaynmo.custommodel.network.PacketQuery;
-import com.github.gamepiaynmo.custommodel.network.PacketReload;
+import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
 import com.github.gamepiaynmo.custommodel.render.CustomPlayerEntityRenderer;
-import com.google.common.collect.*;
+import com.github.gamepiaynmo.custommodel.render.RenderParameter;
+import com.github.gamepiaynmo.custommodel.server.CustomModel;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
 import io.netty.buffer.Unpooled;
 import me.sargunvohra.mcmods.autoconfig1.AutoConfig;
@@ -19,7 +20,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.client.texture.TextureManager;
-import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.MessageType;
 import net.minecraft.network.Packet;
@@ -29,8 +29,11 @@ import net.minecraft.util.PacketByteBuf;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 public class CustomModelClient implements ClientModInitializer {
     private static final Map<String, ModelPack> modelPacks = Maps.newHashMap();
@@ -58,7 +61,7 @@ public class CustomModelClient implements ClientModInitializer {
         }
     }
 
-    private static void clearModel(GameProfile profile) {
+    public static void clearModel(GameProfile profile) {
         String nameEntry = profile.getName().toLowerCase();
         UUID uuid = PlayerEntity.getUuidFromProfile(profile);
         String uuidEntry = uuid.toString().toLowerCase();
@@ -134,24 +137,6 @@ public class CustomModelClient implements ClientModInitializer {
             if (world == client.world) {
                 for (AbstractClientPlayerEntity player : client.world.getPlayers())
                     customRenderer.tick(player);
-            }
-        });
-
-        ClientSidePacketRegistry.INSTANCE.register(PacketReload.ID, (context, buffer) -> {
-            PacketReload packet = new PacketReload();
-            try {
-                packet.read(buffer);
-                context.getTaskQueue().execute(() -> {
-                    ClientWorld world = MinecraftClient.getInstance().world;
-                    if (world != null) {
-                        for (UUID uuid : packet.getUUIDs()) {
-                            AbstractClientPlayerEntity player = (AbstractClientPlayerEntity) world.getPlayerByUuid(uuid);
-                            clearModel(player.getGameProfile());
-                        }
-                    }
-                });
-            } catch (Exception e) {
-                LOGGER.warn(e.getMessage(), e);
             }
         });
 

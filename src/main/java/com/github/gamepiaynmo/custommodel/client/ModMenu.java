@@ -6,7 +6,6 @@ import me.sargunvohra.mcmods.autoconfig1.AutoConfig;
 import net.minecraft.client.gui.screen.Screen;
 
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class ModMenu implements ModMenuApi {
     @Override

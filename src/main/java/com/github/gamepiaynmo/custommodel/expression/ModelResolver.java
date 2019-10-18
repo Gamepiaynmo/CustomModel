@@ -3,9 +3,6 @@ package com.github.gamepiaynmo.custommodel.expression;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
 import com.github.gamepiaynmo.custommodel.render.model.IBone;
 
-import java.util.ArrayList;
-import java.util.StringTokenizer;
-
 public class ModelResolver implements IExpressionResolver {
    CustomJsonModel model;
 

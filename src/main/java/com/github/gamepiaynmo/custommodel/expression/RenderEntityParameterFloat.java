@@ -1,16 +1,11 @@
 package com.github.gamepiaynmo.custommodel.expression;
 
 import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
-import com.github.gamepiaynmo.custommodel.render.CustomPlayerEntityRenderer;
 import com.github.gamepiaynmo.custommodel.render.RenderParameter;
-import com.mojang.datafixers.util.Either;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.entity.PlayerEntityRenderer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.MathHelper;
 
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 public enum RenderEntityParameterFloat implements IExpressionFloat {
    LIMB_SWING("limb_swing", (entity, params) -> params.limbSwing),
