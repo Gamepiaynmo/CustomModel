@@ -143,22 +143,19 @@ public class CustomJsonModel {
             visibleBones.replace(bone, visible);
     }
 
-    public void render() {
+    public void render(Matrix4 baseMat) {
         AbstractClientPlayerEntity entity = CustomModelClient.currentPlayer;
         RenderParameter params = CustomModelClient.currentParameter;
         CustomPlayerEntityRenderer renderer = CustomModelClient.customRenderer;
         PlayerEntityModel model = CustomModelClient.currentModel;
 
+        if (lastBoneMats.isEmpty())
+            CustomModelClient.currentRenderer.tick(CustomModelClient.currentPlayer);
+        update(baseMat.cpy());
+
         float partial = params.partial;
         GlStateManager.pushMatrix();
-        GlStateManager.rotatef(-MathHelper.lerp(partial, entity.field_6220, entity.field_6283), 0, 1, 0);
-        GlStateManager.translated(-MathHelper.lerp(partial, entity.prevX, entity.x),
-                MathHelper.lerp(partial, entity.prevY, entity.y),
-                MathHelper.lerp(partial, entity.prevZ, entity.z));
-
-        if (lastBoneMats.isEmpty())
-            tick();
-        update();
+        GL11.glMultMatrixd(baseMat.inv().val);
 
         for (Bone bone : bones) {
             renderer.bindTexture(bone.getTexture().get());
@@ -173,18 +170,13 @@ public class CustomJsonModel {
         GlStateManager.popMatrix();
     }
 
-    private void update() {
+    private void update(Matrix4 baseMat) {
         AbstractClientPlayerEntity entity = CustomModelClient.currentPlayer;
         PlayerEntityModel model = CustomModelClient.currentModel;
         float partial = CustomModelClient.currentParameter.partial;
 
-        Matrix4 baseMat = new Matrix4();
         if (entity.isInSneakingPose())
             baseMat.translate(0, 0.2f, 0);
-        baseMat.translate(MathHelper.lerp(partial, entity.prevX, entity.x),
-                -MathHelper.lerp(partial, entity.prevY, entity.y),
-                -MathHelper.lerp(partial, entity.prevZ, entity.z));
-        baseMat.rotate(Vector3.Y, MathHelper.lerp(partial, entity.field_6220, entity.field_6283));
 
         for (PlayerBones playerBone : PlayerBones.values()) {
             IBone bone = playerBone.getBone();
@@ -209,15 +201,12 @@ public class CustomJsonModel {
         }
     }
 
-    public void tick() {
+    public void tick(Matrix4 baseMat) {
         AbstractClientPlayerEntity entity = CustomModelClient.currentPlayer;
         PlayerEntityModel model = CustomModelClient.currentModel;
 
-        Matrix4 baseMat = new Matrix4();
         if (entity.isInSneakingPose())
             baseMat.translate(0, 0.2f, 0);
-        baseMat.translate(entity.x, -entity.y, -entity.z);
-        baseMat.rotate(Vector3.Y, entity.field_6283);
 
         if (lastBoneMats.isEmpty()) {
             for (PlayerBones playerBone : PlayerBones.values()) {
@@ -259,8 +248,8 @@ public class CustomJsonModel {
                     curEnd.sub(curStart).nor().scl(bone.getLength()).add(curStart);
 
                     bone.velocity.add(targetEnd.cpy().sub(curEnd).scl(bone.getPhysicsParams()[0]));
-                    bone.velocity.add(new Vector3(entity.getVelocity()).scl(-1, 1, 1).scl(bone.getPhysicsParams()[3]));
-                    bone.velocity.y += bone.getPhysicsParams()[4];
+                    bone.velocity.add(new Vector3(entity.getVelocity()).scl(-1, -1, -1).scl(bone.getPhysicsParams()[3]));
+                    bone.velocity.y -= bone.getPhysicsParams()[4];
                     bone.velocity.scl(bone.getPhysicsParams()[2]);
 
                     Quaternion direction = new Quaternion().setFromCross(lastEnd.cpy().sub(lastStart).nor(), curEnd.cpy().sub(curStart).nor());

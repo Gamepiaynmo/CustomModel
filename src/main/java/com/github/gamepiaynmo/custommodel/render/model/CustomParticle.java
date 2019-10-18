@@ -16,10 +16,10 @@ public class CustomParticle extends BillboardParticle {
     private float minU, maxU, minV, maxV;
 
     protected CustomParticle(World world_1, ParticleEmitter emitter, Vector3 pos, Vector3 dir) {
-        super(world_1, pos.x, -pos.y + 1.501, -pos.z);
+        super(world_1, pos.x, pos.y, pos.z);
         this.velocityX = dir.x;
-        this.velocityY = -dir.y;
-        this.velocityZ = -dir.z;
+        this.velocityY = dir.y;
+        this.velocityZ = dir.z;
         this.emitter = emitter;
         calcUV();
     }
