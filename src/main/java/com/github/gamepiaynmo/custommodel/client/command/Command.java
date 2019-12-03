@@ -15,7 +15,7 @@ public class Command implements ClientCommandPlugin {
     @Override
     public void registerCommands(CommandDispatcher<CottonClientCommandSource> dispatcher) {
         dispatcher.register(ArgumentBuilders.literal(CustomModel.MODID).requires((source) -> {
-            return source.hasPermissionLevel(2);
+            return true;
         }).then(ArgumentBuilders.literal("reload").then(ArgumentBuilders.argument("targets", EntityArgumentType.players()).executes(
                 context -> {
                     try {
