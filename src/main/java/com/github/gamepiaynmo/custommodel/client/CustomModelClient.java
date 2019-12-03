@@ -4,6 +4,7 @@ import com.github.gamepiaynmo.custommodel.network.PacketModel;
 import com.github.gamepiaynmo.custommodel.network.PacketQuery;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
 import com.github.gamepiaynmo.custommodel.render.CustomPlayerEntityRenderer;
+import com.github.gamepiaynmo.custommodel.render.EntityParameter;
 import com.github.gamepiaynmo.custommodel.render.RenderParameter;
 import com.github.gamepiaynmo.custommodel.server.CustomModel;
 import com.google.common.collect.ImmutableList;
@@ -18,6 +19,7 @@ import net.fabricmc.fabric.api.event.world.WorldTickCallback;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
+import net.minecraft.client.render.entity.PlayerEntityRenderer;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.client.texture.TextureManager;
 import net.minecraft.entity.player.PlayerEntity;
@@ -39,7 +41,7 @@ public class CustomModelClient implements ClientModInitializer {
     private static final Map<String, ModelPack> modelPacks = Maps.newHashMap();
 
     public static TextureManager textureManager;
-    public static CustomPlayerEntityRenderer customRenderer;
+    public static Map<String, PlayerEntityRenderer> playerRenderers;
 
     private static final Set<GameProfile> queried = Sets.newHashSet();
 
@@ -50,6 +52,9 @@ public class CustomModelClient implements ClientModInitializer {
     public static CustomPlayerEntityRenderer currentRenderer;
     public static PlayerEntityModel currentModel;
     public static CustomJsonModel currentJsonModel;
+
+    public static boolean isRenderingInventory;
+    public static EntityParameter inventoryEntityParameter;
 
     private static void sendPacket(Identifier id, Packet<?> packet) {
         PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
@@ -135,8 +140,19 @@ public class CustomModelClient implements ClientModInitializer {
         WorldTickCallback.EVENT.register(world -> {
             MinecraftClient client = MinecraftClient.getInstance();
             if (world == client.world) {
-                for (AbstractClientPlayerEntity player : client.world.getPlayers())
-                    customRenderer.tick(player);
+                for (AbstractClientPlayerEntity player : client.world.getPlayers()) {
+                    PlayerEntityRenderer renderer = client.getEntityRenderManager().getRenderer(player);
+                    if (renderer instanceof CustomPlayerEntityRenderer)
+                        ((CustomPlayerEntityRenderer) renderer).tick(player);
+                }
+
+                for (Map.Entry<String, PlayerEntityRenderer> entry : playerRenderers.entrySet()) {
+                    PlayerEntityRenderer renderer = entry.getValue();
+                    if (!(renderer instanceof CustomPlayerEntityRenderer)) {
+                        boolean slim = entry.getKey().equals("slim");
+                        entry.setValue(new CustomPlayerEntityRenderer(client.getEntityRenderManager(), slim, renderer));
+                    }
+                }
             }
         });
 

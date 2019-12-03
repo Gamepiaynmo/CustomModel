@@ -45,7 +45,7 @@ public abstract class MixinEntitySelector implements Command.IClientEntitySelect
     }
 
     public List<GameProfile> getPlayers(CommandSource commandSource) throws CommandSyntaxException {
-        this.check(commandSource);
+//        this.check(commandSource);
         if (this.playerName != null) {
             PlayerListEntry entry = MinecraftClient.getInstance().getNetworkHandler().getPlayerListEntry(this.playerName);
             return entry != null ? Lists.newArrayList(entry.getProfile()) : Collections.emptyList();

@@ -143,22 +143,26 @@ public class CustomJsonModel {
             visibleBones.replace(bone, visible);
     }
 
+    public void clearTransform() {
+        tmpBoneMats = null;
+    }
+
     public void render(Matrix4 baseMat) {
         AbstractClientPlayerEntity entity = CustomModelClient.currentPlayer;
         RenderParameter params = CustomModelClient.currentParameter;
-        CustomPlayerEntityRenderer renderer = CustomModelClient.customRenderer;
         PlayerEntityModel model = CustomModelClient.currentModel;
 
         if (lastBoneMats.isEmpty())
             CustomModelClient.currentRenderer.tick(CustomModelClient.currentPlayer);
-        update(baseMat.cpy());
+
+        update(baseMat);
 
         float partial = params.partial;
         GlStateManager.pushMatrix();
         GL11.glMultMatrixd(baseMat.inv().val);
 
         for (Bone bone : bones) {
-            renderer.bindTexture(bone.getTexture().get());
+            CustomModelClient.textureManager.bindTexture(bone.getTexture().get());
             GlStateManager.pushMatrix();
             Matrix4 transform = tmpBoneMats.get(bone.getId());
 
@@ -170,17 +174,18 @@ public class CustomJsonModel {
         GlStateManager.popMatrix();
     }
 
-    private void update(Matrix4 baseMat) {
+    public void update(Matrix4 baseMat) {
         AbstractClientPlayerEntity entity = CustomModelClient.currentPlayer;
         PlayerEntityModel model = CustomModelClient.currentModel;
         float partial = CustomModelClient.currentParameter.partial;
 
         if (entity.isInSneakingPose())
-            baseMat.translate(0, 0.2f, 0);
+            baseMat = baseMat.cpy().translate(0, 0.2f, 0);
 
+        Map<String, Matrix4> curBoneMats = Maps.newHashMap();
         for (PlayerBones playerBone : PlayerBones.values()) {
             IBone bone = playerBone.getBone();
-            tmpBoneMats.put(bone.getId(), bone.getTransform().mulLeft(baseMat));
+            curBoneMats.put(bone.getId(), bone.getTransform().mulLeft(baseMat));
         }
 
         for (Bone bone : bones) {
@@ -192,13 +197,20 @@ public class CustomJsonModel {
                 Matrix4 lastMat = lastBoneMats.get(bone.getId());
                 Matrix4 curMat = boneMats.get(bone.getId());
                 curTrans = lastMat.cpy().lerp(curMat, partial);
+                if (tmpBoneMats != null) {
+                    String pid = parent.getId();
+                    curTrans.mulLeft(tmpBoneMats.get(pid).cpy().inv());
+                    curTrans.mulLeft(curBoneMats.get(pid));
+                }
             } else {
-                Matrix4 curParTrans = tmpBoneMats.get(parent.getId());
+                Matrix4 curParTrans = curBoneMats.get(parent.getId());
                 curTrans = curParTrans.cpy().mul(bone.getTransform());
             }
 
-            tmpBoneMats.put(bone.getId(), curTrans);
+            curBoneMats.put(bone.getId(), curTrans);
         }
+
+        tmpBoneMats = curBoneMats;
     }
 
     public void tick(Matrix4 baseMat) {

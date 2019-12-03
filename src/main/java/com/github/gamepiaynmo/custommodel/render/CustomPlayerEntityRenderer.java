@@ -27,12 +27,24 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
 public class CustomPlayerEntityRenderer extends PlayerEntityRenderer {
-    public CustomPlayerEntityRenderer(EntityRenderDispatcher entityRenderDispatcher_1) {
-        super(entityRenderDispatcher_1);
+    private PlayerEntityRenderer parent = null;
+
+    public CustomPlayerEntityRenderer(EntityRenderDispatcher entityRenderDispatcher) {
+        super(entityRenderDispatcher);
     }
 
-    public CustomPlayerEntityRenderer(EntityRenderDispatcher entityRenderDispatcher_1, boolean boolean_1) {
-        super(entityRenderDispatcher_1, boolean_1);
+    public CustomPlayerEntityRenderer(EntityRenderDispatcher entityRenderDispatcher, boolean slim) {
+        super(entityRenderDispatcher, slim);
+    }
+
+    public CustomPlayerEntityRenderer(EntityRenderDispatcher entityRenderDispatcher, PlayerEntityRenderer parent) {
+        super(entityRenderDispatcher);
+        this.parent = parent;
+    }
+
+    public CustomPlayerEntityRenderer(EntityRenderDispatcher entityRenderDispatcher, boolean slim, PlayerEntityRenderer parent) {
+        super(entityRenderDispatcher, slim);
+        this.parent = parent;
     }
 
     private float partial;
@@ -144,68 +156,15 @@ public class CustomPlayerEntityRenderer extends PlayerEntityRenderer {
         return 0.0625F;
     }
 
-    int counter = 0;
-
     public void tick(AbstractClientPlayerEntity playerEntity) {
-        if (counter++ % 1 != 0) return;
         ModelPack model = CustomModelClient.getModelForPlayer(playerEntity);
         if (model != null) {
             this.model.handSwingProgress = this.getHandSwingProgress(playerEntity, 1);
             this.model.isRiding = playerEntity.hasVehicle();
             this.model.isChild = playerEntity.isBaby();
-            this.transform = new Matrix4();
 
-            try {
-                float float_3 = playerEntity.field_6283;
-                float float_4 = playerEntity.headYaw;
-                float float_5 = float_4 - float_3;
-                float float_8;
-                if (playerEntity.hasVehicle() && playerEntity.getVehicle() instanceof LivingEntity) {
-                    LivingEntity livingEntity_2 = (LivingEntity)playerEntity.getVehicle();
-                    float_3 = livingEntity_2.field_6283;
-                    float_5 = float_4 - float_3;
-                    float_8 = MathHelper.wrapDegrees(float_5);
-                    if (float_8 < -85.0F) {
-                        float_8 = -85.0F;
-                    }
-
-                    if (float_8 >= 85.0F) {
-                        float_8 = 85.0F;
-                    }
-
-                    float_3 = float_4 - float_8;
-                    if (float_8 * float_8 > 2500.0F) {
-                        float_3 += float_8 * 0.2F;
-                    }
-
-                    float_5 = float_4 - float_3;
-                }
-
-                float float_7 = playerEntity.pitch;
-                this.method_4048_c(playerEntity, 1);
-                float_8 = this.getAge(playerEntity, 1);
-                this.method_4212_c(playerEntity, float_8, float_3, 1);
-                float float_9 = this.scaleAndTranslate_c(playerEntity, 1);
-                float float_10 = 0.0F;
-                float float_11 = 0.0F;
-                if (!playerEntity.hasVehicle() && playerEntity.isAlive()) {
-                    float_10 = playerEntity.limbDistance;
-                    float_11 = playerEntity.limbAngle;
-                    if (playerEntity.isBaby()) {
-                        float_11 *= 3.0F;
-                    }
-
-                    if (float_10 > 1.0F) {
-                        float_10 = 1.0F;
-                    }
-                }
-
-                GlStateManager.enableAlphaTest();
-                this.model.animateModel(playerEntity, float_11, float_10, 1);
-                this.model.setAngles(playerEntity, float_11, float_10, float_8, float_5, float_7, 0.0625f);
-                CustomModelClient.currentParameter = new RenderParameter(float_11, float_10, float_8, float_5, float_7, 0.0625f, 1);
-            } catch (Exception ignored) {
-            }
+            this.partial = 1;
+            CustomModelClient.currentParameter = calculateTransform(playerEntity);
 
             CustomModelClient.currentPlayer = playerEntity;
             CustomModelClient.currentRenderer = this;
@@ -216,28 +175,82 @@ public class CustomPlayerEntityRenderer extends PlayerEntityRenderer {
         }
     }
 
+    public boolean disableSetModelPose;
+
     @Override
     public void render(AbstractClientPlayerEntity playerEntity, double offX, double offY, double offZ, float rotYaw, float partial) {
         if (!playerEntity.isMainPlayer() || this.renderManager.camera != null && this.renderManager.camera.getFocusedEntity() == playerEntity) {
-            double newOffY = offY;
-            if (playerEntity.isInSneakingPose()) {
-                newOffY = offY - 0.125D;
-            }
-
             ModelPack model = CustomModelClient.getModelForPlayer(playerEntity);
             CustomModelClient.currentPlayer = playerEntity;
             CustomModelClient.currentRenderer = this;
             CustomModelClient.currentModel = getModel();
 
-            if (model != null)
+            disableSetModelPose = model != null;
+            if (disableSetModelPose)
                 this.setModelPose(playerEntity, model.getModel());
-            else
-                this.setModelPose(playerEntity);
             this.partial = partial;
 
             GlStateManager.setProfile(GlStateManager.RenderMode.PLAYER_SKIN);
-            super.render(playerEntity, offX, newOffY, offZ, rotYaw, partial);
+            if (parent != null)
+                parent.render(playerEntity, offX, offY, offZ, rotYaw, partial);
+            else super.render(playerEntity, offX, offY, offZ, rotYaw, partial);
             GlStateManager.unsetProfile(GlStateManager.RenderMode.PLAYER_SKIN);
+        }
+    }
+
+    private RenderParameter calculateTransform(AbstractClientPlayerEntity playerEntity) {
+        try {
+            float yaw = MathHelper.lerpAngleDegrees(partial, playerEntity.field_6220, playerEntity.field_6283);
+            float headYaw = MathHelper.lerpAngleDegrees(partial, playerEntity.prevHeadYaw, playerEntity.headYaw);
+            float delta = headYaw - yaw;
+            float float_8;
+            if (playerEntity.hasVehicle() && playerEntity.getVehicle() instanceof LivingEntity) {
+                LivingEntity livingEntity_2 = (LivingEntity) playerEntity.getVehicle();
+                yaw = MathHelper.lerpAngleDegrees(partial, livingEntity_2.field_6220, livingEntity_2.field_6283);
+                delta = headYaw - yaw;
+                float_8 = MathHelper.wrapDegrees(delta);
+                if (float_8 < -85.0F) {
+                    float_8 = -85.0F;
+                }
+
+                if (float_8 >= 85.0F) {
+                    float_8 = 85.0F;
+                }
+
+                yaw = headYaw - float_8;
+                if (float_8 * float_8 > 2500.0F) {
+                    yaw += float_8 * 0.2F;
+                }
+
+                delta = headYaw - yaw;
+            }
+
+            transform = new Matrix4();
+            float float_7 = MathHelper.lerp(partial, playerEntity.prevPitch, playerEntity.pitch);
+            this.method_4048_c(playerEntity, partial);
+            float_8 = this.getAge(playerEntity, partial);
+            this.method_4212_c(playerEntity, float_8, yaw, partial);
+            float float_9 = this.scaleAndTranslate_c(playerEntity, partial);
+            float float_10 = 0.0F;
+            float float_11 = 0.0F;
+            if (!playerEntity.hasVehicle() && playerEntity.isAlive()) {
+                float_10 = MathHelper.lerp(partial, playerEntity.lastLimbDistance, playerEntity.limbDistance);
+                float_11 = playerEntity.limbAngle - playerEntity.limbDistance * (1.0F - partial);
+                if (playerEntity.isBaby()) {
+                    float_11 *= 3.0F;
+                }
+
+                if (float_10 > 1.0F) {
+                    float_10 = 1.0F;
+                }
+            }
+
+            GlStateManager.enableAlphaTest();
+            this.model.animateModel(playerEntity, float_11, float_10, partial);
+            this.model.setAngles(playerEntity, float_11, float_10, float_8, delta, float_7, float_9);
+            return new RenderParameter(float_11, float_10, float_8, delta, float_7, 0.0625f, partial);
+        } catch (Exception ignored) {
+            return null;
         }
     }
 
@@ -257,44 +270,20 @@ public class CustomPlayerEntityRenderer extends PlayerEntityRenderer {
             this.model.render(playerEntity, float_1, float_2, float_3, float_4, float_5, float_6);
 
             ModelPack model = CustomModelClient.getModelForPlayer(playerEntity);
-            CustomModelClient.currentParameter = new RenderParameter(float_1, float_2, float_3, float_4, float_5, float_6, partial);
 
             if (model != null) {
                 CustomModelClient.currentJsonModel = model.getModel();
-
-                try {
-                    float yaw = MathHelper.lerpAngleDegrees(partial, playerEntity.field_6220, playerEntity.field_6283);
-                    float headYaw = MathHelper.lerpAngleDegrees(partial, playerEntity.prevHeadYaw, playerEntity.headYaw);
-                    float delta = headYaw - yaw;
-                    float float_8;
-                    if (playerEntity.hasVehicle() && playerEntity.getVehicle() instanceof LivingEntity) {
-                        LivingEntity livingEntity_2 = (LivingEntity) playerEntity.getVehicle();
-                        yaw = MathHelper.lerpAngleDegrees(partial, livingEntity_2.field_6220, livingEntity_2.field_6283);
-                        delta = headYaw - yaw;
-                        float_8 = MathHelper.wrapDegrees(delta);
-                        if (float_8 < -85.0F) {
-                            float_8 = -85.0F;
-                        }
-
-                        if (float_8 >= 85.0F) {
-                            float_8 = 85.0F;
-                        }
-
-                        yaw = headYaw - float_8;
-                        if (float_8 * float_8 > 2500.0F) {
-                            yaw += float_8 * 0.2F;
-                        }
-                    }
-
-                    transform = new Matrix4();
-                    this.method_4048_c(playerEntity, partial);
-                    float_8 = this.getAge(playerEntity, partial);
-                    this.method_4212_c(playerEntity, float_8, yaw, partial);
-                    this.scaleAndTranslate_c(playerEntity, partial);
-                } catch (Exception ignored) {
+                CustomModelClient.currentJsonModel.clearTransform();
+                if (CustomModelClient.isRenderingInventory) {
+                    EntityParameter currentParameter = new EntityParameter(playerEntity);
+                    CustomModelClient.inventoryEntityParameter.apply(playerEntity);
+                    CustomModelClient.currentParameter = calculateTransform(playerEntity);
+                    CustomModelClient.currentJsonModel.update(this.transform);
+                    currentParameter.apply(playerEntity);
                 }
 
-                model.getModel().render(transform);
+                CustomModelClient.currentParameter = calculateTransform(playerEntity);
+                CustomModelClient.currentJsonModel.render(transform);
             }
 
             if (boolean_2) {

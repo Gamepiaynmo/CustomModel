@@ -18,8 +18,8 @@ repositories {
     jcenter()
     maven { url = "http://maven.fabricmc.net" }
     maven { url = "http://server.bbkr.space:8081/artifactory/libs-snapshot" }
-    maven { url = "https://minecraft.curseforge.com/api/maven" }
     maven { url = "http://maven.sargunv.s3-website-us-west-2.amazonaws.com/" }
+    maven { url = "https://minecraft.curseforge.com/api/maven" }
 }
 
 dependencies {
@@ -35,11 +35,9 @@ dependencies {
 	// You may need to force-disable transitiveness on them.
 	modCompile "me.shedaniel.cloth:config-1:0.2.5"
     modCompile "me.sargunvohra.mcmods:auto-config:1.2.0+mc1.14.4"
-    modCompile "io.github.cottonmc:cotton-client-commands:0.4.2+1.14.3-SNAPSHOT"
 
     include "me.shedaniel.cloth:config-1:0.2.5"
     include "me.sargunvohra.mcmods:auto-config:1.2.0+mc1.14.4"
-    include "io.github.cottonmc:cotton-client-commands:0.4.2+1.14.3-SNAPSHOT"
 
     // not required, but we want to see our config screen
     modCompile "io.github.prospector:modmenu:1.7.9+build.118"
