@@ -27,24 +27,12 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
 public class CustomPlayerEntityRenderer extends PlayerEntityRenderer {
-    private PlayerEntityRenderer parent = null;
-
     public CustomPlayerEntityRenderer(EntityRenderDispatcher entityRenderDispatcher) {
         super(entityRenderDispatcher);
     }
 
     public CustomPlayerEntityRenderer(EntityRenderDispatcher entityRenderDispatcher, boolean slim) {
         super(entityRenderDispatcher, slim);
-    }
-
-    public CustomPlayerEntityRenderer(EntityRenderDispatcher entityRenderDispatcher, PlayerEntityRenderer parent) {
-        super(entityRenderDispatcher);
-        this.parent = parent;
-    }
-
-    public CustomPlayerEntityRenderer(EntityRenderDispatcher entityRenderDispatcher, boolean slim, PlayerEntityRenderer parent) {
-        super(entityRenderDispatcher, slim);
-        this.parent = parent;
     }
 
     private float partial;
@@ -191,9 +179,7 @@ public class CustomPlayerEntityRenderer extends PlayerEntityRenderer {
             this.partial = partial;
 
             GlStateManager.setProfile(GlStateManager.RenderMode.PLAYER_SKIN);
-            if (parent != null)
-                parent.render(playerEntity, offX, offY, offZ, rotYaw, partial);
-            else super.render(playerEntity, offX, offY, offZ, rotYaw, partial);
+            super.render(playerEntity, offX, offY, offZ, rotYaw, partial);
             GlStateManager.unsetProfile(GlStateManager.RenderMode.PLAYER_SKIN);
         }
     }

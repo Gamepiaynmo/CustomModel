@@ -145,14 +145,6 @@ public class CustomModelClient implements ClientModInitializer {
                     if (renderer instanceof CustomPlayerEntityRenderer)
                         ((CustomPlayerEntityRenderer) renderer).tick(player);
                 }
-
-                for (Map.Entry<String, PlayerEntityRenderer> entry : playerRenderers.entrySet()) {
-                    PlayerEntityRenderer renderer = entry.getValue();
-                    if (!(renderer instanceof CustomPlayerEntityRenderer)) {
-                        boolean slim = entry.getKey().equals("slim");
-                        entry.setValue(new CustomPlayerEntityRenderer(client.getEntityRenderManager(), slim, renderer));
-                    }
-                }
             }
         });
 
