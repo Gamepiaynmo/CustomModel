@@ -20,6 +20,7 @@ repositories {
     maven { url = "http://server.bbkr.space:8081/artifactory/libs-snapshot" }
     maven { url = "http://maven.sargunv.s3-website-us-west-2.amazonaws.com/" }
     maven { url = "https://minecraft.curseforge.com/api/maven" }
+    flatDir { dirs 'libs'}
 }
 
 dependencies {

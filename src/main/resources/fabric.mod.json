@@ -20,8 +20,7 @@
   "entrypoints": {
     "main": [ "com.github.gamepiaynmo.custommodel.server.CustomModel" ],
     "client": [ "com.github.gamepiaynmo.custommodel.client.CustomModelClient" ],
-    "modmenu": [ "com.github.gamepiaynmo.custommodel.client.ModMenu" ],
-    "cotton-client-commands": ["com.github.gamepiaynmo.custommodel.client.Command"]
+    "modmenu": [ "com.github.gamepiaynmo.custommodel.client.ModMenu" ]
   },
   "mixins": [
     "custommodel.mixins.json"

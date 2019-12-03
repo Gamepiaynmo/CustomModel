@@ -1,6 +1,6 @@
 package com.github.gamepiaynmo.custommodel.mixin;
 
-import com.github.gamepiaynmo.custommodel.client.Command;
+import com.github.gamepiaynmo.custommodel.client.command.Command;
 import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
