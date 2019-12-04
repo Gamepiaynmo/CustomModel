@@ -1,7 +1,6 @@
 package com.github.gamepiaynmo.custommodel.mixin;
 
 import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
-import com.github.gamepiaynmo.custommodel.render.CustomPlayerEntityRenderer;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
 import net.minecraft.client.render.item.ItemRenderer;
@@ -24,9 +23,9 @@ public class MixinEntityRenderDispatcher {
 
     @Inject(method = "<init>(Lnet/minecraft/client/texture/TextureManager;Lnet/minecraft/client/render/item/ItemRenderer;Lnet/minecraft/resource/ReloadableResourceManager;)V", at = @At("RETURN"))
     public void init(TextureManager textureManager, ItemRenderer itemRenderer, ReloadableResourceManager manager, CallbackInfo info) {
-        this.playerRenderer = new CustomPlayerEntityRenderer((EntityRenderDispatcher) (Object) this);
-        this.modelRenderers.put("default", this.playerRenderer);
-        this.modelRenderers.put("slim", new CustomPlayerEntityRenderer((EntityRenderDispatcher) (Object) this, true));
+//        this.playerRenderer = new CustomPlayerEntityRenderer((EntityRenderDispatcher) (Object) this);
+//        this.modelRenderers.put("default", this.playerRenderer);
+//        this.modelRenderers.put("slim", new CustomPlayerEntityRenderer((EntityRenderDispatcher) (Object) this, true));
         CustomModelClient.textureManager = textureManager;
         CustomModelClient.playerRenderers = this.modelRenderers;
     }

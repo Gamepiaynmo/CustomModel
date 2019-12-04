@@ -3,8 +3,8 @@ package com.github.gamepiaynmo.custommodel.client;
 import com.github.gamepiaynmo.custommodel.network.PacketModel;
 import com.github.gamepiaynmo.custommodel.network.PacketQuery;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
-import com.github.gamepiaynmo.custommodel.render.CustomPlayerEntityRenderer;
 import com.github.gamepiaynmo.custommodel.render.EntityParameter;
+import com.github.gamepiaynmo.custommodel.render.ICustomPlayerRenderer;
 import com.github.gamepiaynmo.custommodel.render.RenderParameter;
 import com.github.gamepiaynmo.custommodel.server.CustomModel;
 import com.google.common.collect.ImmutableList;
@@ -49,7 +49,7 @@ public class CustomModelClient implements ClientModInitializer {
 
     public static AbstractClientPlayerEntity currentPlayer;
     public static RenderParameter currentParameter;
-    public static CustomPlayerEntityRenderer currentRenderer;
+    public static PlayerEntityRenderer currentRenderer;
     public static PlayerEntityModel currentModel;
     public static CustomJsonModel currentJsonModel;
 
@@ -119,8 +119,7 @@ public class CustomModelClient implements ClientModInitializer {
         String nameEntry = profile.getName().toLowerCase();
         UUID uuid = PlayerEntity.getUuidFromProfile(profile);
         String uuidEntry = uuid.toString().toLowerCase();
-        List<String> names = ImmutableList.of(nameEntry, uuidEntry);
-//        List<String> names = ImmutableList.of(nameEntry, nameEntry + ".zip", uuidEntry, uuidEntry + ".zip");
+        List<String> names = ImmutableList.of(nameEntry, nameEntry + ".zip", uuidEntry, uuidEntry + ".zip");
 
         for (String name : names) {
             ModelPack pack = modelPacks.get(nameEntry);
@@ -142,8 +141,7 @@ public class CustomModelClient implements ClientModInitializer {
             if (world == client.world) {
                 for (AbstractClientPlayerEntity player : client.world.getPlayers()) {
                     PlayerEntityRenderer renderer = client.getEntityRenderManager().getRenderer(player);
-                    if (renderer instanceof CustomPlayerEntityRenderer)
-                        ((CustomPlayerEntityRenderer) renderer).tick(player);
+                    ((ICustomPlayerRenderer) renderer).tick(player);
                 }
             }
         });

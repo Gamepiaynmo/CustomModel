@@ -153,7 +153,7 @@ public class CustomJsonModel {
         PlayerEntityModel model = CustomModelClient.currentModel;
 
         if (lastBoneMats.isEmpty())
-            CustomModelClient.currentRenderer.tick(CustomModelClient.currentPlayer);
+            ((ICustomPlayerRenderer) CustomModelClient.currentRenderer).tick(CustomModelClient.currentPlayer);
 
         update(baseMat);
 
