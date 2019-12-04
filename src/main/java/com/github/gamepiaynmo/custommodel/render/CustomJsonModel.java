@@ -163,7 +163,7 @@ public class CustomJsonModel {
 
         float partial = params.partial;
         GlStateManager.pushMatrix();
-        GL11.glMultMatrixd(baseMat.inv().val);
+        GL11.glMultMatrixd(baseMat.cpy().inv().val);
 
         for (Bone bone : bones) {
             CustomModelClient.textureManager.bindTexture(bone.getTexture().get());

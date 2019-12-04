@@ -92,11 +92,17 @@ public class CustomArmorBiped<T extends AbstractClientPlayerEntity, M extends Bi
     }
 
     private void renderCuboid(CustomJsonModel model, String boneName, Cuboid cuboid, float scale) {
-        IBone bone = model.getBone(boneName);
+        IBone bone = model.getBone(boneName + "_armor");
+        if (bone == null)
+            bone = model.getBone(boneName);
+
         cuboid.visible = bone.isVisible();
         if (cuboid.visible) {
-            Matrix4 transform = model.getTransform(bone);
+            Matrix4 transform = model.getTransform(bone).cpy();
             transform.mulLeft(invTransform);
+            float x = cuboid.rotationPointX;
+            float y = cuboid.rotationPointY;
+            float z = cuboid.rotationPointZ;
             cuboid.rotationPointX = 0;
             cuboid.rotationPointY = 0;
             cuboid.rotationPointZ = 0;
@@ -107,38 +113,33 @@ public class CustomArmorBiped<T extends AbstractClientPlayerEntity, M extends Bi
             GL11.glMultMatrixd(transform.val);
             cuboid.render(scale);
             GlStateManager.popMatrix();
+            cuboid.rotationPointX = x;
+            cuboid.rotationPointY = y;
+            cuboid.rotationPointZ = z;
         }
     }
 
     private void renderModel(T livingEntity_1, BipedEntityModel model, EquipmentSlot slot, CustomJsonModel cmodel, float scale) {
-        GlStateManager.pushMatrix();
-        if (livingEntity_1.isInSneakingPose())
-            GlStateManager.translatef(0.0F, 0.2F, 0.0F);
-
-        if (model != null) {
-            switch (slot) {
-                case HEAD:
-                    renderCuboid(cmodel, "head", model.head, scale);
-                    renderCuboid(cmodel, "head_overlay", model.headwear, scale);
-                    break;
-                case CHEST:
-                    renderCuboid(cmodel, "body", model.body, scale);
-                    renderCuboid(cmodel, "left_arm", model.leftArm, scale);
-                    renderCuboid(cmodel, "right_arm", model.rightArm, scale);
-                    break;
-                case LEGS:
-                    renderCuboid(cmodel, "body", model.body, scale);
-                    renderCuboid(cmodel, "left_leg", model.leftLeg, scale);
-                    renderCuboid(cmodel, "right_leg", model.rightLeg, scale);
-                    break;
-                case FEET:
-                    renderCuboid(cmodel, "left_leg", model.leftLeg, scale);
-                    renderCuboid(cmodel, "right_leg", model.rightLeg, scale);
-                    break;
-            }
+        switch (slot) {
+            case HEAD:
+                renderCuboid(cmodel, "head", model.head, scale);
+                renderCuboid(cmodel, "head_overlay", model.headwear, scale);
+                break;
+            case CHEST:
+                renderCuboid(cmodel, "body", model.body, scale);
+                renderCuboid(cmodel, "left_arm", model.leftArm, scale);
+                renderCuboid(cmodel, "right_arm", model.rightArm, scale);
+                break;
+            case LEGS:
+                renderCuboid(cmodel, "body", model.body, scale);
+                renderCuboid(cmodel, "left_leg", model.leftLeg, scale);
+                renderCuboid(cmodel, "right_leg", model.rightLeg, scale);
+                break;
+            case FEET:
+                renderCuboid(cmodel, "left_leg", model.leftLeg, scale);
+                renderCuboid(cmodel, "right_leg", model.rightLeg, scale);
+                break;
         }
-
-        GlStateManager.popMatrix();
     }
 
     // copied
