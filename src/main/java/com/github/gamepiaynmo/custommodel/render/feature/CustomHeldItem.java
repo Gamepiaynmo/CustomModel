@@ -68,7 +68,6 @@ public class CustomHeldItem<T extends AbstractClientPlayerEntity, M extends Play
         }
     }
 
-    // copied
     private void method_4192(LivingEntity livingEntity_1, ItemStack itemStack_1, ModelTransformation.Type modelTransformation$Type_1, Arm arm_1) {
         if (!itemStack_1.isEmpty()) {
             GlStateManager.pushMatrix();
