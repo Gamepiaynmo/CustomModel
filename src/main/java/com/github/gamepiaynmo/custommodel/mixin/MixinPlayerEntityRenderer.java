@@ -4,6 +4,7 @@ import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.client.ModelPack;
 import com.github.gamepiaynmo.custommodel.render.*;
 import com.github.gamepiaynmo.custommodel.render.feature.CustomArmorBiped;
+import com.github.gamepiaynmo.custommodel.render.feature.CustomHeldItem;
 import com.github.gamepiaynmo.custommodel.util.Matrix4;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.MinecraftClient;
@@ -12,6 +13,7 @@ import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
 import net.minecraft.client.render.entity.PlayerModelPart;
+import net.minecraft.client.render.entity.feature.HeldItemFeatureRenderer;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.entity.Entity;
@@ -28,7 +30,6 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -43,6 +44,7 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
     public void addFeatures(EntityRenderDispatcher dispatcher, boolean slim, CallbackInfo info) {
         this.features.clear();
         this.addFeature(new CustomArmorBiped<>(this, new BipedEntityModel(0.5F), new BipedEntityModel(1.0F)));
+        this.addFeature(new CustomHeldItem<>(this));
     }
 
     public boolean disableSetModelPose;
@@ -82,7 +84,7 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
                 }
 
                 CustomModelClient.currentParameter = calculateTransform(playerEntity);
-                CustomModelClient.currentTransform = transform;
+                CustomModelClient.currentInvTransform = transform.cpy().inv();
                 CustomModelClient.currentJsonModel.render(transform);
             }
 
@@ -91,7 +93,7 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
             }
         }
 
-        this.setModelPose(playerEntity);
+        this.setModelPose_c(playerEntity);
     }
 
     @Override
@@ -109,7 +111,7 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
             CustomModelClient.currentRenderer = (PlayerEntityRenderer) (Object) this;
             CustomModelClient.currentModel = getModel();
             CustomModelClient.currentJsonModel = model.getModel();
-            CustomModelClient.currentTransform = transform;
+            CustomModelClient.currentInvTransform = transform.cpy().inv();
 
             model.getModel().tick(transform);
         }
@@ -296,7 +298,7 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
     }
 
     // copied
-    private void setModelPose(AbstractClientPlayerEntity abstractClientPlayerEntity_1) {
+    private void setModelPose_c(AbstractClientPlayerEntity abstractClientPlayerEntity_1) {
         PlayerEntityModel<AbstractClientPlayerEntity> playerEntityModel_1 = this.getModel();
         if (abstractClientPlayerEntity_1.isSpectator()) {
             playerEntityModel_1.setVisible(false);

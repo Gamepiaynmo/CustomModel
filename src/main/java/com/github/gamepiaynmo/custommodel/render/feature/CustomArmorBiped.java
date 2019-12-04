@@ -5,8 +5,6 @@ import com.github.gamepiaynmo.custommodel.client.ModelPack;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
 import com.github.gamepiaynmo.custommodel.render.model.IBone;
 import com.github.gamepiaynmo.custommodel.util.Matrix4;
-import com.github.gamepiaynmo.custommodel.util.Quaternion;
-import com.github.gamepiaynmo.custommodel.util.Vector3;
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.model.Cuboid;
@@ -30,11 +28,8 @@ public class CustomArmorBiped<T extends AbstractClientPlayerEntity, M extends Bi
         super(featureRendererContext_1, bipedEntityModel_1, bipedEntityModel_2);
     }
 
-    private Matrix4 invTransform;
-
     @Override
     public void render(T livingEntity_1, float float_1, float float_2, float float_3, float float_4, float float_5, float float_6, float float_7) {
-        invTransform = CustomModelClient.currentTransform.cpy().inv();
         this.renderArmor(livingEntity_1, float_1, float_2, float_3, float_4, float_5, float_6, float_7, EquipmentSlot.CHEST);
         this.renderArmor(livingEntity_1, float_1, float_2, float_3, float_4, float_5, float_6, float_7, EquipmentSlot.LEGS);
         this.renderArmor(livingEntity_1, float_1, float_2, float_3, float_4, float_5, float_6, float_7, EquipmentSlot.FEET);
@@ -96,27 +91,39 @@ public class CustomArmorBiped<T extends AbstractClientPlayerEntity, M extends Bi
         if (bone == null)
             bone = model.getBone(boneName);
 
+        boolean visible = cuboid.visible;
         cuboid.visible = bone.isVisible();
         if (cuboid.visible) {
             Matrix4 transform = model.getTransform(bone).cpy();
-            transform.mulLeft(invTransform);
+            transform.mulLeft(CustomModelClient.currentInvTransform);
+
             float x = cuboid.rotationPointX;
             float y = cuboid.rotationPointY;
             float z = cuboid.rotationPointZ;
+            float yaw = cuboid.yaw;
+            float pitch = cuboid.pitch;
+            float roll = cuboid.roll;
             cuboid.rotationPointX = 0;
             cuboid.rotationPointY = 0;
             cuboid.rotationPointZ = 0;
             cuboid.yaw = 0;
             cuboid.pitch = 0;
             cuboid.roll = 0;
+
             GlStateManager.pushMatrix();
             GL11.glMultMatrixd(transform.val);
             cuboid.render(scale);
             GlStateManager.popMatrix();
+
             cuboid.rotationPointX = x;
             cuboid.rotationPointY = y;
             cuboid.rotationPointZ = z;
+            cuboid.yaw = yaw;
+            cuboid.pitch = pitch;
+            cuboid.roll = roll;
         }
+
+        cuboid.visible = visible;
     }
 
     private void renderModel(T livingEntity_1, BipedEntityModel model, EquipmentSlot slot, CustomJsonModel cmodel, float scale) {

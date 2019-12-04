@@ -53,7 +53,7 @@ public class CustomModelClient implements ClientModInitializer {
     public static PlayerEntityRenderer currentRenderer;
     public static PlayerEntityModel currentModel;
     public static CustomJsonModel currentJsonModel;
-    public static Matrix4 currentTransform;
+    public static Matrix4 currentInvTransform;
 
     public static boolean isRenderingInventory;
     public static EntityParameter inventoryEntityParameter;
