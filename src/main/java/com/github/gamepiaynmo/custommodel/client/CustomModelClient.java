@@ -7,6 +7,7 @@ import com.github.gamepiaynmo.custommodel.render.EntityParameter;
 import com.github.gamepiaynmo.custommodel.render.ICustomPlayerRenderer;
 import com.github.gamepiaynmo.custommodel.render.RenderParameter;
 import com.github.gamepiaynmo.custommodel.server.CustomModel;
+import com.github.gamepiaynmo.custommodel.util.Matrix4;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -52,6 +53,7 @@ public class CustomModelClient implements ClientModInitializer {
     public static PlayerEntityRenderer currentRenderer;
     public static PlayerEntityModel currentModel;
     public static CustomJsonModel currentJsonModel;
+    public static Matrix4 currentTransform;
 
     public static boolean isRenderingInventory;
     public static EntityParameter inventoryEntityParameter;

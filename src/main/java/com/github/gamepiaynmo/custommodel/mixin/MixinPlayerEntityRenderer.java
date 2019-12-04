@@ -3,6 +3,7 @@ package com.github.gamepiaynmo.custommodel.mixin;
 import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.client.ModelPack;
 import com.github.gamepiaynmo.custommodel.render.*;
+import com.github.gamepiaynmo.custommodel.render.feature.CustomArmorBiped;
 import com.github.gamepiaynmo.custommodel.util.Matrix4;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.MinecraftClient;
@@ -36,6 +37,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<AbstractClientPlayerEntity, PlayerEntityModel<AbstractClientPlayerEntity>> implements ICustomPlayerRenderer {
     public MixinPlayerEntityRenderer(EntityRenderDispatcher entityRenderDispatcher_1, PlayerEntityModel<AbstractClientPlayerEntity> entityModel_1, float float_1) {
         super(entityRenderDispatcher_1, entityModel_1, float_1);
+    }
+
+    @Inject(method = "<init>(Lnet/minecraft/client/render/entity/EntityRenderDispatcher;Z)V", at = @At(value = "RETURN"))
+    public void addFeatures(EntityRenderDispatcher dispatcher, boolean slim, CallbackInfo info) {
+        this.features.clear();
+        this.addFeature(new CustomArmorBiped<>(this, new BipedEntityModel(0.5F), new BipedEntityModel(1.0F)));
     }
 
     public boolean disableSetModelPose;
@@ -75,6 +82,7 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
                 }
 
                 CustomModelClient.currentParameter = calculateTransform(playerEntity);
+                CustomModelClient.currentTransform = transform;
                 CustomModelClient.currentJsonModel.render(transform);
             }
 
@@ -82,8 +90,8 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
                 GlStateManager.unsetProfile(GlStateManager.RenderMode.TRANSPARENT_MODEL);
             }
         }
-        this.setModelPose(playerEntity);
 
+        this.setModelPose(playerEntity);
     }
 
     @Override
@@ -101,6 +109,7 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
             CustomModelClient.currentRenderer = (PlayerEntityRenderer) (Object) this;
             CustomModelClient.currentModel = getModel();
             CustomModelClient.currentJsonModel = model.getModel();
+            CustomModelClient.currentTransform = transform;
 
             model.getModel().tick(transform);
         }
@@ -140,6 +149,7 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
         transform.translate(double_1, double_2, double_3);
     }
 
+    // copied
     private static float method_18656_c(Direction direction_1) {
         switch(direction_1) {
             case SOUTH:
@@ -285,6 +295,7 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
         }
     }
 
+    // copied
     private void setModelPose(AbstractClientPlayerEntity abstractClientPlayerEntity_1) {
         PlayerEntityModel<AbstractClientPlayerEntity> playerEntityModel_1 = this.getModel();
         if (abstractClientPlayerEntity_1.isSpectator()) {
@@ -359,6 +370,7 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
         }
     }
 
+    // copied
     private BipedEntityModel.ArmPose method_4210(AbstractClientPlayerEntity abstractClientPlayerEntity_1, ItemStack itemStack_1, ItemStack itemStack_2, Hand hand_1) {
         BipedEntityModel.ArmPose bipedEntityModel$ArmPose_1 = BipedEntityModel.ArmPose.EMPTY;
         ItemStack itemStack_3 = hand_1 == Hand.MAIN_HAND ? itemStack_1 : itemStack_2;

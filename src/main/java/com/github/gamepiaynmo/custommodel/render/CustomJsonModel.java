@@ -147,6 +147,10 @@ public class CustomJsonModel {
         tmpBoneMats = null;
     }
 
+    public Matrix4 getTransform(IBone bone) {
+        return tmpBoneMats.get(bone.getId());
+    }
+
     public void render(Matrix4 baseMat) {
         AbstractClientPlayerEntity entity = CustomModelClient.currentPlayer;
         RenderParameter params = CustomModelClient.currentParameter;
