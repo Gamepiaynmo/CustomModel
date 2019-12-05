@@ -15,6 +15,7 @@ import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.util.Identifier;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -196,4 +197,10 @@ public class Bone implements IBone {
         for (ParticleEmitter emitter : particles)
             emitter.release();
     }
+
+    public List<Box> getBoxes() { return boxes; }
+
+    public List<Quad> getQuads() { return quads; }
+
+    public List<ParticleEmitter> getParticles() { return particles; }
 }

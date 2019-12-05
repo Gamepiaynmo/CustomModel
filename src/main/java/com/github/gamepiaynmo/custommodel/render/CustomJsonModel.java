@@ -113,6 +113,8 @@ public class CustomJsonModel {
         return hideList;
     }
 
+    public Collection<Bone> getBones() { return bones; }
+
     public IBone getBone(String id) {
         PlayerBones playerBone = PlayerBones.getById(id);
         if (playerBone == null)
@@ -122,12 +124,6 @@ public class CustomJsonModel {
 
     public ExpressionParser getParser() {
         return parser;
-    }
-
-    public boolean isVisible(IBone bone) {
-        while (bone.getParent() != null)
-            bone = bone.getParent();
-        return visibleBones.get(bone.getPlayerBone());
     }
 
     public boolean isVisible(PlayerBones bone) {

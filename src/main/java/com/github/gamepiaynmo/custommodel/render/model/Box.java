@@ -21,12 +21,12 @@ public class Box {
     public final float zMax;
 
     private Box(int int_1, int int_2, float float_1, float float_2, float float_3, float int_3, float int_4, float int_5, float float_4, float texWidth, float texHeight) {
-        this.xMin = float_1 - int_3;
-        this.yMin = float_2 - int_4;
-        this.zMin = float_3 - int_5;
-        this.xMax = float_1;
-        this.yMax = float_2;
-        this.zMax = float_3;
+        this.xMin = float_1 - int_3 - float_4;
+        this.yMin = float_2 - int_4 - float_4;
+        this.zMin = float_3 - int_5 - float_4;
+        this.xMax = float_1 + float_4;
+        this.yMax = float_2 + float_4;
+        this.zMax = float_3 + float_4;
         this.vertices = new Vertex[8];
         this.polygons = new Quad[6];
         float float_5 = float_1;
