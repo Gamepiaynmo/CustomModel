@@ -6,15 +6,18 @@ import com.github.gamepiaynmo.custommodel.render.model.IBone;
 import com.github.gamepiaynmo.custommodel.util.Matrix4;
 import com.github.gamepiaynmo.custommodel.util.Vec2d;
 import com.github.gamepiaynmo.custommodel.util.Vector3;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.minecraft.client.model.Cuboid;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.util.Identifier;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public enum PlayerBones {
+public enum PlayerBone {
     HEAD("head", () -> CustomModelClient.currentModel.head),
     HEAD_OVERLAY("head_overlay", () -> CustomModelClient.currentModel.headwear),
     BODY("body", () -> CustomModelClient.currentModel.body),
@@ -30,13 +33,14 @@ public enum PlayerBones {
 
     private final String id;
     private final Supplier<Cuboid> cuboidGetter;
-    private static final Map<String, PlayerBones> id2Bone = Maps.newHashMap();
+    private static final Map<String, PlayerBone> id2Bone = Maps.newHashMap();
+    private static final Map<String, List<PlayerBone>> boneLists = Maps.newHashMap();
     private final IBone bone;
 
     private static final Vector3 One = new Vector3(1, 1, 1);
     private static final Vec2d TexSize = new Vec2d(64, 64);
 
-    PlayerBones(String id, Supplier<Cuboid> cuboidGetter) {
+    PlayerBone(String id, Supplier<Cuboid> cuboidGetter) {
         this.id = id;
         this.cuboidGetter = cuboidGetter;
         bone = new OriginalBone(this, cuboidGetter);
@@ -52,15 +56,22 @@ public enum PlayerBones {
 
     public IBone getBone() { return bone; }
 
-    public static PlayerBones getById(String id) {
+    public static PlayerBone getById(String id) {
         return id2Bone.get(id);
+    }
+
+    public static Collection<PlayerBone> getListById(String id) {
+        PlayerBone bone = getById(id);
+        if (bone == null)
+            return boneLists.get(id);
+        return Lists.newArrayList(bone);
     }
 
     public static class OriginalBone implements IBone {
         private Supplier<Cuboid> cuboidGetter;
-        private PlayerBones playerBone;
+        private PlayerBone playerBone;
 
-        OriginalBone(PlayerBones playerBone, Supplier<Cuboid> cuboidGetter) {
+        OriginalBone(PlayerBone playerBone, Supplier<Cuboid> cuboidGetter) {
             this.playerBone = playerBone;
             this.cuboidGetter = cuboidGetter;
         }
@@ -107,11 +118,21 @@ public enum PlayerBones {
         public IBone getParent() { return null; }
 
         @Override
-        public PlayerBones getPlayerBone() { return playerBone; }
+        public PlayerBone getPlayerBone() { return playerBone; }
     }
 
     static {
-        for (PlayerBones bone : PlayerBones.values())
+        for (PlayerBone bone : PlayerBone.values())
             id2Bone.put(bone.getId(), bone);
+        boneLists.put("head_all", Lists.newArrayList(HEAD, HEAD_OVERLAY));
+        boneLists.put("body_all", Lists.newArrayList(BODY, BODY_OVERLAY));
+        boneLists.put("left_arm_all", Lists.newArrayList(LEFT_ARM, LEFT_ARM_OVERLAY));
+        boneLists.put("right_arm_all", Lists.newArrayList(RIGHT_ARM, RIGHT_ARM_OVERLAY));
+        boneLists.put("arms_all", Lists.newArrayList(LEFT_ARM, LEFT_ARM_OVERLAY, RIGHT_ARM, RIGHT_ARM_OVERLAY));
+        boneLists.put("left_leg_all", Lists.newArrayList(LEFT_LEG, LEFT_LEG_OVERLAY));
+        boneLists.put("right_leg_all", Lists.newArrayList(RIGHT_LEG, RIGHT_LEG_OVERLAY));
+        boneLists.put("legs_all", Lists.newArrayList(LEFT_LEG, LEFT_LEG_OVERLAY, RIGHT_LEG, RIGHT_LEG_OVERLAY));
+        boneLists.put("model_all", Lists.newArrayList(HEAD, HEAD_OVERLAY, BODY, BODY_OVERLAY, LEFT_ARM, LEFT_ARM_OVERLAY,
+                RIGHT_ARM, RIGHT_ARM_OVERLAY, LEFT_LEG, LEFT_LEG_OVERLAY, RIGHT_LEG, RIGHT_LEG_OVERLAY));
     }
 }

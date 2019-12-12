@@ -3,6 +3,7 @@ package com.github.gamepiaynmo.custommodel.render.feature;
 import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.client.ModelPack;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
+import com.github.gamepiaynmo.custommodel.render.PlayerFeature;
 import com.github.gamepiaynmo.custommodel.render.model.IBone;
 import com.github.gamepiaynmo.custommodel.util.Matrix4;
 import com.google.common.collect.Maps;
@@ -86,65 +87,63 @@ public class CustomArmorBiped<T extends AbstractClientPlayerEntity, M extends Bi
         }
     }
 
-    private void renderCuboid(CustomJsonModel model, String boneName, Cuboid cuboid, float scale) {
-        IBone bone = model.getBone(boneName + "_armor");
-        if (bone == null)
-            bone = model.getBone(boneName);
+    private void renderCuboid(CustomJsonModel model, PlayerFeature feature, Cuboid cuboid, float scale) {
+        for (IBone bone : model.getFeatureAttached(feature)) {
+            boolean visible = cuboid.visible;
+            cuboid.visible = bone.isVisible();
+            if (cuboid.visible) {
+                Matrix4 transform = model.getTransform(bone).cpy();
+                transform.mulLeft(CustomModelClient.currentInvTransform);
 
-        boolean visible = cuboid.visible;
-        cuboid.visible = bone.isVisible();
-        if (cuboid.visible) {
-            Matrix4 transform = model.getTransform(bone).cpy();
-            transform.mulLeft(CustomModelClient.currentInvTransform);
+                float x = cuboid.rotationPointX;
+                float y = cuboid.rotationPointY;
+                float z = cuboid.rotationPointZ;
+                float yaw = cuboid.yaw;
+                float pitch = cuboid.pitch;
+                float roll = cuboid.roll;
+                cuboid.rotationPointX = 0;
+                cuboid.rotationPointY = 0;
+                cuboid.rotationPointZ = 0;
+                cuboid.yaw = 0;
+                cuboid.pitch = 0;
+                cuboid.roll = 0;
 
-            float x = cuboid.rotationPointX;
-            float y = cuboid.rotationPointY;
-            float z = cuboid.rotationPointZ;
-            float yaw = cuboid.yaw;
-            float pitch = cuboid.pitch;
-            float roll = cuboid.roll;
-            cuboid.rotationPointX = 0;
-            cuboid.rotationPointY = 0;
-            cuboid.rotationPointZ = 0;
-            cuboid.yaw = 0;
-            cuboid.pitch = 0;
-            cuboid.roll = 0;
+                GlStateManager.pushMatrix();
+                GL11.glMultMatrixd(transform.val);
+                cuboid.render(scale);
+                GlStateManager.popMatrix();
 
-            GlStateManager.pushMatrix();
-            GL11.glMultMatrixd(transform.val);
-            cuboid.render(scale);
-            GlStateManager.popMatrix();
+                cuboid.rotationPointX = x;
+                cuboid.rotationPointY = y;
+                cuboid.rotationPointZ = z;
+                cuboid.yaw = yaw;
+                cuboid.pitch = pitch;
+                cuboid.roll = roll;
+            }
 
-            cuboid.rotationPointX = x;
-            cuboid.rotationPointY = y;
-            cuboid.rotationPointZ = z;
-            cuboid.yaw = yaw;
-            cuboid.pitch = pitch;
-            cuboid.roll = roll;
+            cuboid.visible = visible;
         }
-
-        cuboid.visible = visible;
     }
 
     private void renderModel(T livingEntity_1, BipedEntityModel model, EquipmentSlot slot, CustomJsonModel cmodel, float scale) {
         switch (slot) {
             case HEAD:
-                renderCuboid(cmodel, "head", model.head, scale);
-                renderCuboid(cmodel, "head_overlay", model.headwear, scale);
+                renderCuboid(cmodel, PlayerFeature.HELMET_HEAD, model.head, scale);
+                renderCuboid(cmodel, PlayerFeature.HELMET_HEAD_OVERLAY, model.headwear, scale);
                 break;
             case CHEST:
-                renderCuboid(cmodel, "body", model.body, scale);
-                renderCuboid(cmodel, "left_arm", model.leftArm, scale);
-                renderCuboid(cmodel, "right_arm", model.rightArm, scale);
+                renderCuboid(cmodel, PlayerFeature.CHESTPLATE_BODY, model.body, scale);
+                renderCuboid(cmodel, PlayerFeature.CHESTPLATE_LEFT_ARM, model.leftArm, scale);
+                renderCuboid(cmodel, PlayerFeature.CHESTPLATE_RIGHT_ARM, model.rightArm, scale);
                 break;
             case LEGS:
-                renderCuboid(cmodel, "body", model.body, scale);
-                renderCuboid(cmodel, "left_leg", model.leftLeg, scale);
-                renderCuboid(cmodel, "right_leg", model.rightLeg, scale);
+                renderCuboid(cmodel, PlayerFeature.LEGGINGS_BODY, model.body, scale);
+                renderCuboid(cmodel, PlayerFeature.LEGGINGS_LEFT_LEG, model.leftLeg, scale);
+                renderCuboid(cmodel, PlayerFeature.LEGGINGS_RIGHT_LEG, model.rightLeg, scale);
                 break;
             case FEET:
-                renderCuboid(cmodel, "left_leg", model.leftLeg, scale);
-                renderCuboid(cmodel, "right_leg", model.rightLeg, scale);
+                renderCuboid(cmodel, PlayerFeature.BOOTS_LEFT_LEG, model.leftLeg, scale);
+                renderCuboid(cmodel, PlayerFeature.BOOTS_RIGHT_LEG, model.rightLeg, scale);
                 break;
         }
     }

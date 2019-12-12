@@ -3,7 +3,7 @@ package com.github.gamepiaynmo.custommodel.render.feature;
 import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.client.ModelPack;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
-import com.github.gamepiaynmo.custommodel.render.PlayerBones;
+import com.github.gamepiaynmo.custommodel.render.PlayerBone;
 import com.github.gamepiaynmo.custommodel.render.model.Bone;
 import com.github.gamepiaynmo.custommodel.render.model.Quad;
 import com.google.common.collect.Lists;
@@ -15,10 +15,8 @@ import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.render.entity.feature.StuckArrowsFeatureRenderer;
-import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.util.math.MathHelper;
 import org.lwjgl.opengl.GL11;
@@ -55,9 +53,9 @@ public class CustomStuckArrows<T extends AbstractClientPlayerEntity, M extends P
                     bones.add(bone);
             }
 
-            List<PlayerBones> playerBones = Lists.newArrayList();
-            for (PlayerBones bone : PlayerBones.values()) {
-                if (!model.getHiddenBones().contains(bone))
+            List<PlayerBone> playerBones = Lists.newArrayList();
+            for (PlayerBone bone : PlayerBone.values()) {
+                if (!model.isHidden(bone))
                     playerBones.add(bone);
             }
 

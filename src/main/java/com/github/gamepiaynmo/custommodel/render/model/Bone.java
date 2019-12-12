@@ -6,7 +6,8 @@ import com.github.gamepiaynmo.custommodel.expression.IExpressionBool;
 import com.github.gamepiaynmo.custommodel.expression.IExpressionFloat;
 import com.github.gamepiaynmo.custommodel.expression.ParseException;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
-import com.github.gamepiaynmo.custommodel.render.PlayerBones;
+import com.github.gamepiaynmo.custommodel.render.PlayerBone;
+import com.github.gamepiaynmo.custommodel.render.PlayerFeature;
 import com.github.gamepiaynmo.custommodel.util.*;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonElement;
@@ -37,6 +38,7 @@ public class Bone implements IBone {
     private IExpressionBool visibleExpr;
     private IExpressionFloat[] physicsExpr;
 
+    public List<PlayerFeature> attachments = Lists.newArrayList();
     private List<Box> boxes = Lists.newArrayList();
     private List<Quad> quads = Lists.newArrayList();
     private List<ParticleEmitter> particles = Lists.newArrayList();
@@ -57,7 +59,7 @@ public class Bone implements IBone {
 
         String parentId = Json.getString(jsonObj, CustomJsonModel.PARENT);
         if (parentId == null)
-            bone.parent = PlayerBones.BODY.getBone();
+            bone.parent = PlayerBone.BODY.getBone();
         else bone.parent = model.getBone(parentId);
         if (bone.parent == null)
             throw new TranslatableException("error.custommodel.loadmodelpack.noparentid", parentId);
@@ -84,6 +86,18 @@ public class Bone implements IBone {
             bone.physicalize = true;
             bone.physicsExpr = Json.parseFloatExpressionArray(physical, 5, new float[] { 0, 0, 0, 0, 0 }, model.getParser());
             bone.physicsParams = new double[bone.physicsExpr.length];
+        }
+
+        JsonElement attachArray = jsonObj.get(CustomJsonModel.ATTACHED);
+        if (attachArray != null) {
+            for (JsonElement element : attachArray.getAsJsonArray()) {
+                String id = element.getAsString();
+                Collection<PlayerFeature> features = PlayerFeature.getListById(id);
+                if (features == null)
+                    throw new TranslatableException("error.custommodel.loadmodelpack.nohidebone", id);
+                for (PlayerFeature feature : features)
+                    bone.attachments.add(feature);
+            }
         }
 
         JsonElement boxArray = jsonObj.get(CustomJsonModel.BOXES);
@@ -158,7 +172,7 @@ public class Bone implements IBone {
     }
 
     @Override
-    public PlayerBones getPlayerBone() {
+    public PlayerBone getPlayerBone() {
         return null;
     }
 

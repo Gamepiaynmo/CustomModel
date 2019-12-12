@@ -14,7 +14,6 @@ import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
 import net.minecraft.client.render.entity.PlayerModelPart;
-import net.minecraft.client.render.entity.feature.HeldItemFeatureRenderer;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.entity.Entity;
@@ -336,26 +335,26 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
             playerEntityModel_1.setVisible(false);
             model.setVisible(false);
             playerEntityModel_1.head.visible = true;
-            model.setVisible(PlayerBones.HEAD, true);
+            model.setVisible(PlayerBone.HEAD, true);
             playerEntityModel_1.headwear.visible = true;
-            model.setVisible(PlayerBones.HEAD_OVERLAY, true);
+            model.setVisible(PlayerBone.HEAD_OVERLAY, true);
         } else {
             ItemStack itemStack_1 = abstractClientPlayerEntity_1.getMainHandStack();
             ItemStack itemStack_2 = abstractClientPlayerEntity_1.getOffHandStack();
             playerEntityModel_1.setVisible(true);
             model.setVisible(true);
             playerEntityModel_1.headwear.visible = abstractClientPlayerEntity_1.isSkinOverlayVisible(PlayerModelPart.HAT);
-            model.setVisible(PlayerBones.HEAD_OVERLAY, playerEntityModel_1.headwear.visible);
+            model.setVisible(PlayerBone.HEAD_OVERLAY, playerEntityModel_1.headwear.visible);
             playerEntityModel_1.bodyOverlay.visible = abstractClientPlayerEntity_1.isSkinOverlayVisible(PlayerModelPart.JACKET);
-            model.setVisible(PlayerBones.BODY_OVERLAY, playerEntityModel_1.bodyOverlay.visible);
+            model.setVisible(PlayerBone.BODY_OVERLAY, playerEntityModel_1.bodyOverlay.visible);
             playerEntityModel_1.leftLegOverlay.visible = abstractClientPlayerEntity_1.isSkinOverlayVisible(PlayerModelPart.LEFT_PANTS_LEG);
-            model.setVisible(PlayerBones.LEFT_LEG_OVERLAY, playerEntityModel_1.leftLegOverlay.visible);
+            model.setVisible(PlayerBone.LEFT_LEG_OVERLAY, playerEntityModel_1.leftLegOverlay.visible);
             playerEntityModel_1.rightLegOverlay.visible = abstractClientPlayerEntity_1.isSkinOverlayVisible(PlayerModelPart.RIGHT_PANTS_LEG);
-            model.setVisible(PlayerBones.RIGHT_LEG_OVERLAY, playerEntityModel_1.rightLegOverlay.visible);
+            model.setVisible(PlayerBone.RIGHT_LEG_OVERLAY, playerEntityModel_1.rightLegOverlay.visible);
             playerEntityModel_1.leftArmOverlay.visible = abstractClientPlayerEntity_1.isSkinOverlayVisible(PlayerModelPart.LEFT_SLEEVE);
-            model.setVisible(PlayerBones.LEFT_ARM_OVERLAY, playerEntityModel_1.leftArmOverlay.visible);
+            model.setVisible(PlayerBone.LEFT_ARM_OVERLAY, playerEntityModel_1.leftArmOverlay.visible);
             playerEntityModel_1.rightArmOverlay.visible = abstractClientPlayerEntity_1.isSkinOverlayVisible(PlayerModelPart.RIGHT_SLEEVE);
-            model.setVisible(PlayerBones.RIGHT_ARM_OVERLAY, playerEntityModel_1.rightArmOverlay.visible);
+            model.setVisible(PlayerBone.RIGHT_ARM_OVERLAY, playerEntityModel_1.rightArmOverlay.visible);
 
             playerEntityModel_1.isSneaking = abstractClientPlayerEntity_1.isInSneakingPose();
             BipedEntityModel.ArmPose bipedEntityModel$ArmPose_1 = this.method_4210(abstractClientPlayerEntity_1, itemStack_1, itemStack_2, Hand.MAIN_HAND);
@@ -369,7 +368,7 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
             }
         }
 
-        for (PlayerBones bone : model.getHiddenBones()) {
+        for (PlayerBone bone : model.getHiddenBones()) {
             bone.getCuboid(playerEntityModel_1).visible = false;
         }
     }

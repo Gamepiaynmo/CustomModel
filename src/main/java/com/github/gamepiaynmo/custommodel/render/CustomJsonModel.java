@@ -19,7 +19,6 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
 import org.lwjgl.opengl.GL11;
 
 import java.util.Collection;
@@ -29,6 +28,7 @@ import java.util.function.Supplier;
 
 public class CustomJsonModel {
     public static final String HIDE = "hide";
+    public static final String BOUNDING_BOX = "boundingBox";
     public static final String BONES = "bones";
     public static final String ID = "id";
     public static final String PARENT = "parent";
@@ -46,6 +46,7 @@ public class CustomJsonModel {
     public static final String COORDINATES = "coordinates";
     public static final String SIZE_ADD = "sizeAdd";
     public static final String PHYSICS = "physics";
+    public static final String ATTACHED = "attached";
 
     public static final String POS_RANGE = "posRange";
     public static final String DIR_RANGE = "dirRange";
@@ -70,11 +71,18 @@ public class CustomJsonModel {
         JsonElement hideArray = jsonObj.get(HIDE);
         if (hideArray != null) {
             for (JsonElement element : hideArray.getAsJsonArray()) {
-                String boneId = element.getAsString();
-                PlayerBones bone = PlayerBones.getById(boneId);
-                if (bone == null)
-                    throw new TranslatableException("error.custommodel.loadmodelpack.nohidebone", boneId);
-                model.hideList.add(bone);
+                String id = element.getAsString();
+                Collection<PlayerBone> bones = PlayerBone.getListById(id);
+                if (bones == null) {
+                    Collection<PlayerFeature> features = PlayerFeature.getListById(id);
+                    if (features == null)
+                        throw new TranslatableException("error.custommodel.loadmodelpack.nohidebone", id);
+                    for (PlayerFeature feature : features)
+                        model.featureHideList.add(feature);
+                } else {
+                    for (PlayerBone bone : bones)
+                        model.boneHideList.add(bone);
+                }
             }
         }
 
@@ -88,16 +96,25 @@ public class CustomJsonModel {
             }
         }
 
+        for (PlayerFeature feature : PlayerFeature.values())
+            model.features.put(feature, model.isHidden(feature) ? Lists.newArrayList()
+                    : Lists.newArrayList(feature.getAttachedBone().getBone()));
+        for (Bone bone : model.bones)
+            for (PlayerFeature feature : bone.attachments)
+                model.features.get(feature).add(bone);
+
         return model;
     }
 
-    private List<PlayerBones> hideList = Lists.newArrayList();
-    private Map<PlayerBones, Boolean> visibleBones = Maps.newEnumMap(PlayerBones.class);
+    private List<PlayerBone> boneHideList = Lists.newArrayList();
+    private List<PlayerFeature> featureHideList = Lists.newArrayList();
+    private Map<PlayerBone, Boolean> visibleBones = Maps.newEnumMap(PlayerBone.class);
 
     private Supplier<Identifier> baseTexture;
 
     private Map<String, Bone> id2Bone = Maps.newHashMap();
     private List<Bone> bones = Lists.newArrayList();
+    private Map<PlayerFeature, List<IBone>> features = Maps.newEnumMap(PlayerFeature.class);
     private Map<String, Matrix4> boneMats = Maps.newHashMap();
     private Map<String, Matrix4> lastBoneMats = Maps.newHashMap();
     private Map<String, Matrix4> tmpBoneMats = Maps.newHashMap();
@@ -105,18 +122,24 @@ public class CustomJsonModel {
     private ExpressionParser parser = new ExpressionParser(new ModelResolver(this));
 
     private CustomJsonModel() {
-        for (PlayerBones bone : PlayerBones.values())
+        for (PlayerBone bone : PlayerBone.values())
             visibleBones.put(bone, true);
     }
 
-    public Collection<PlayerBones> getHiddenBones() {
-        return hideList;
+    public Collection<PlayerBone> getHiddenBones() {
+        return boneHideList;
     }
+    public Collection<PlayerFeature> getHiddenFeatures() { return featureHideList; }
+
+    public boolean isHidden(PlayerBone bone) { return boneHideList.contains(bone); }
+    public boolean isHidden(PlayerFeature feature) { return featureHideList.contains(feature); }
 
     public Collection<Bone> getBones() { return bones; }
 
+    public Collection<IBone> getFeatureAttached(PlayerFeature feature) { return features.get(feature); }
+
     public IBone getBone(String id) {
-        PlayerBones playerBone = PlayerBones.getById(id);
+        PlayerBone playerBone = PlayerBone.getById(id);
         if (playerBone == null)
             return id2Bone.get(id);
         return playerBone.getBone();
@@ -126,16 +149,16 @@ public class CustomJsonModel {
         return parser;
     }
 
-    public boolean isVisible(PlayerBones bone) {
+    public boolean isVisible(PlayerBone bone) {
         return visibleBones.get(bone);
     }
 
-    public void setVisible(PlayerBones bone, boolean visible) {
+    public void setVisible(PlayerBone bone, boolean visible) {
         visibleBones.replace(bone, visible);
     }
 
     public void setVisible(boolean visible) {
-        for (PlayerBones bone : PlayerBones.values())
+        for (PlayerBone bone : PlayerBone.values())
             visibleBones.replace(bone, visible);
     }
 
@@ -183,7 +206,7 @@ public class CustomJsonModel {
             baseMat = baseMat.cpy().translate(0, 0.2f, 0);
 
         Map<String, Matrix4> curBoneMats = Maps.newHashMap();
-        for (PlayerBones playerBone : PlayerBones.values()) {
+        for (PlayerBone playerBone : PlayerBone.values()) {
             IBone bone = playerBone.getBone();
             curBoneMats.put(bone.getId(), bone.getTransform().mulLeft(baseMat));
         }
@@ -221,7 +244,7 @@ public class CustomJsonModel {
             baseMat.translate(0, 0.2f, 0);
 
         if (lastBoneMats.isEmpty()) {
-            for (PlayerBones playerBone : PlayerBones.values()) {
+            for (PlayerBone playerBone : PlayerBone.values()) {
                 IBone bone = playerBone.getBone();
                 Matrix4 trans = bone.getTransform().mulLeft(baseMat);
                 boneMats.put(bone.getId(), trans);
@@ -235,7 +258,7 @@ public class CustomJsonModel {
             }
 
         } else {
-            for (PlayerBones playerBone : PlayerBones.values()) {
+            for (PlayerBone playerBone : PlayerBone.values()) {
                 IBone bone = playerBone.getBone();
                 lastBoneMats.put(bone.getId(), boneMats.get(bone.getId()));
                 boneMats.put(bone.getId(), bone.getTransform().mulLeft(baseMat));

@@ -1,6 +1,6 @@
 package com.github.gamepiaynmo.custommodel.render.model;
 
-import com.github.gamepiaynmo.custommodel.render.PlayerBones;
+import com.github.gamepiaynmo.custommodel.render.PlayerBone;
 import com.github.gamepiaynmo.custommodel.util.Matrix4;
 import com.github.gamepiaynmo.custommodel.util.Quaternion;
 import com.github.gamepiaynmo.custommodel.util.Vec2d;
@@ -16,7 +16,7 @@ public interface IBone {
     Vec2d getTextureSize();
     Supplier<Identifier> getTexture();
     IBone getParent();
-    PlayerBones getPlayerBone();
+    PlayerBone getPlayerBone();
     String getId();
     boolean isVisible();
 

@@ -3,6 +3,7 @@ package com.github.gamepiaynmo.custommodel.render.feature;
 import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.client.ModelPack;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
+import com.github.gamepiaynmo.custommodel.render.PlayerFeature;
 import com.github.gamepiaynmo.custommodel.render.model.IBone;
 import com.github.gamepiaynmo.custommodel.util.Matrix4;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -19,14 +20,14 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Arm;
 import org.lwjgl.opengl.GL11;
 
+import java.util.Collection;
+
 public class CustomHeldItem<T extends AbstractClientPlayerEntity, M extends PlayerEntityModel<T>> extends HeldItemFeatureRenderer<T, M> {
     public CustomHeldItem(FeatureRendererContext featureRendererContext_1) {
         super(featureRendererContext_1);
     }
 
     private AbstractClientPlayerEntity playerEntity;
-    private Matrix4 transLeft, transRight;
-    private IBone left, right;
 
     @Override
     public void render(T livingEntity_1, float float_1, float float_2, float float_3, float float_4, float float_5, float float_6, float float_7) {
@@ -42,28 +43,8 @@ public class CustomHeldItem<T extends AbstractClientPlayerEntity, M extends Play
                 GlStateManager.scalef(0.5F, 0.5F, 0.5F);
             }
 
-            ModelPack pack = CustomModelClient.getModelForPlayer(playerEntity);
-            transLeft = transRight = null;
-            left = right = null;
-            if (pack != null) {
-                CustomJsonModel model = pack.getModel();
-                left = model.getBone("left_item");
-                right = model.getBone("right_item");
-                if (left != null && left.isVisible()) {
-                    transLeft = model.getTransform(left).cpy();
-                    transLeft.mulLeft(CustomModelClient.currentInvTransform);
-                }
-
-                if (right != null && right.isVisible()) {
-                    transRight = model.getTransform(right).cpy();
-                    transRight.mulLeft(CustomModelClient.currentInvTransform);
-                }
-            }
-
-            if (left == null || transLeft != null)
-                this.method_4192(livingEntity_1, itemStack_1, ModelTransformation.Type.THIRD_PERSON_LEFT_HAND, Arm.LEFT);
-            if (right == null || transRight != null)
-                this.method_4192(livingEntity_1, itemStack_2, ModelTransformation.Type.THIRD_PERSON_RIGHT_HAND, Arm.RIGHT);
+            this.method_4192(livingEntity_1, itemStack_1, ModelTransformation.Type.THIRD_PERSON_LEFT_HAND, Arm.LEFT);
+            this.method_4192(livingEntity_1, itemStack_2, ModelTransformation.Type.THIRD_PERSON_RIGHT_HAND, Arm.RIGHT);
             GlStateManager.popMatrix();
         }
     }
@@ -71,21 +52,38 @@ public class CustomHeldItem<T extends AbstractClientPlayerEntity, M extends Play
     private void method_4192(LivingEntity livingEntity_1, ItemStack itemStack_1, ModelTransformation.Type modelTransformation$Type_1, Arm arm_1) {
         if (!itemStack_1.isEmpty()) {
             GlStateManager.pushMatrix();
-
             boolean boolean_1 = arm_1 == Arm.LEFT;
-            IBone bone = boolean_1 ? left : right;
-            Matrix4 trans = boolean_1 ? transLeft : transRight;
-            if (bone == null) {
+
+            ModelPack pack = CustomModelClient.getModelForPlayer(playerEntity);
+            if (pack != null) {
+                CustomJsonModel model = pack.getModel();
+                PlayerFeature feature = boolean_1 ? PlayerFeature.HELD_ITEM_LEFT : PlayerFeature.HELD_ITEM_RIGHT;
+                for (IBone bone : model.getFeatureAttached(feature)) {
+                    if (bone.isVisible()) {
+                        Matrix4 trans = model.getTransform(bone).cpy();
+                        trans.mulLeft(CustomModelClient.currentInvTransform);
+                        if (bone.getPlayerBone() != null) {
+                            this.method_4193(arm_1);
+                            GlStateManager.translatef(-(float)(boolean_1 ? -1 : 1) / 16.0F, 0.625F, -0.125F);
+                        } else {
+                            GL11.glMultMatrixd(trans.val);
+                        }
+
+                        GlStateManager.rotatef(-90.0F, 1.0F, 0.0F, 0.0F);
+                        GlStateManager.rotatef(180.0F, 0.0F, 1.0F, 0.0F);
+                        MinecraftClient.getInstance().getFirstPersonRenderer().renderItemFromSide(livingEntity_1, itemStack_1, modelTransformation$Type_1, boolean_1);
+                        GlStateManager.popMatrix();
+                    }
+                }
+            } else {
                 this.method_4193(arm_1);
                 GlStateManager.translatef(-(float)(boolean_1 ? -1 : 1) / 16.0F, 0.625F, -0.125F);
-            } else {
-                GL11.glMultMatrixd(trans.val);
-            }
 
-            GlStateManager.rotatef(-90.0F, 1.0F, 0.0F, 0.0F);
-            GlStateManager.rotatef(180.0F, 0.0F, 1.0F, 0.0F);
-            MinecraftClient.getInstance().getFirstPersonRenderer().renderItemFromSide(livingEntity_1, itemStack_1, modelTransformation$Type_1, boolean_1);
-            GlStateManager.popMatrix();
+                GlStateManager.rotatef(-90.0F, 1.0F, 0.0F, 0.0F);
+                GlStateManager.rotatef(180.0F, 0.0F, 1.0F, 0.0F);
+                MinecraftClient.getInstance().getFirstPersonRenderer().renderItemFromSide(livingEntity_1, itemStack_1, modelTransformation$Type_1, boolean_1);
+                GlStateManager.popMatrix();
+            }
         }
     }
 }
