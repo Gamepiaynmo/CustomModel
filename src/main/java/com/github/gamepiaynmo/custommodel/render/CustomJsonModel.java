@@ -65,7 +65,7 @@ public class CustomJsonModel {
     public static final String COLLIDE = "collide";
 
     public static CustomJsonModel fromJson(ModelPack pack, JsonObject jsonObj) throws ParseException {
-        CustomJsonModel model = new CustomJsonModel();
+        CustomJsonModel model = new CustomJsonModel(pack);
         model.baseTexture = pack.getBaseTexture();
 
         JsonElement hideArray = jsonObj.get(HIDE);
@@ -106,6 +106,8 @@ public class CustomJsonModel {
         return model;
     }
 
+    public final ModelPack pack;
+
     private List<PlayerBone> boneHideList = Lists.newArrayList();
     private List<PlayerFeature> featureHideList = Lists.newArrayList();
     private Map<PlayerBone, Boolean> visibleBones = Maps.newEnumMap(PlayerBone.class);
@@ -119,11 +121,13 @@ public class CustomJsonModel {
     private Map<String, Matrix4> lastBoneMats = Maps.newHashMap();
     private Map<String, Matrix4> tmpBoneMats = Maps.newHashMap();
 
-    private ExpressionParser parser = new ExpressionParser(new ModelResolver(this));
+    private final ExpressionParser parser;
 
-    private CustomJsonModel() {
+    private CustomJsonModel(ModelPack pack) {
         for (PlayerBone bone : PlayerBone.values())
             visibleBones.put(bone, true);
+        this.pack = pack;
+        parser = new ExpressionParser(new ModelResolver(pack));
     }
 
     public Collection<PlayerBone> getHiddenBones() {

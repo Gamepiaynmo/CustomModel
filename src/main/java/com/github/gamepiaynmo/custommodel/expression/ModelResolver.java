@@ -1,13 +1,16 @@
 package com.github.gamepiaynmo.custommodel.expression;
 
+import com.github.gamepiaynmo.custommodel.client.ModelPack;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
 import com.github.gamepiaynmo.custommodel.render.model.IBone;
 
 public class ModelResolver implements IExpressionResolver {
-   CustomJsonModel model;
+   final ModelPack pack;
+   final CustomJsonModel model;
 
-   public ModelResolver(CustomJsonModel model) {
-      this.model = model;
+   public ModelResolver(ModelPack pack) {
+      this.pack = pack;
+      this.model = pack.getModel();
    }
 
    public IExpression getParameter(String name) {
@@ -38,19 +41,30 @@ public class ModelResolver implements IExpressionResolver {
       return str.split(delim);
    }
 
-   public ModelVariableFloat getModelVariable(String name) {
-      String[] parts = tokenize(name, ".");
+   public IExpressionFloat getModelVariable(String name) {
+      String[] parts = tokenize(name, "\\.");
       if (parts.length != 2) {
          return null;
       } else {
-         String modelName = parts[0];
-         String varName = parts[1];
-         IBone mr = this.getModelRenderer(modelName);
-         if (mr == null) {
-            return null;
-         } else {
-            ModelVariableType varType = ModelVariableType.parse(varName);
-            return varType == null ? null : new ModelVariableFloat(name, mr, varType);
+         String first = parts[0];
+         String second = parts[1];
+
+         switch (first) {
+            case "tex": {
+               return pack.getTexture(second);
+            }
+            case "item": {
+               return null;
+            }
+            default: {
+               IBone mr = this.getModelRenderer(first);
+               if (mr == null) {
+                  return null;
+               } else {
+                  ModelVariableType varType = ModelVariableType.parse(second);
+                  return varType == null ? null : new ModelVariableFloat(name, mr, varType);
+               }
+            }
          }
       }
    }

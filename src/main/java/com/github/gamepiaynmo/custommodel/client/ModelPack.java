@@ -1,5 +1,7 @@
 package com.github.gamepiaynmo.custommodel.client;
 
+import com.github.gamepiaynmo.custommodel.expression.ConstantFloat;
+import com.github.gamepiaynmo.custommodel.expression.IExpressionFloat;
 import com.github.gamepiaynmo.custommodel.expression.ParseException;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
 import com.github.gamepiaynmo.custommodel.render.CustomTexture;
@@ -25,11 +27,13 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 public class ModelPack {
-
-    public static final Supplier<Identifier> skinGetter = () -> CustomModelClient.currentPlayer.getSkinTexture();
+    public static final Supplier<Identifier>[] defGetter = new Supplier[]{ () -> CustomModelClient.currentPlayer.getSkinTexture(),
+            () -> CustomModelClient.currentPlayer.getCapeTexture(),
+            () -> CustomModelClient.currentPlayer.getElytraTexture() };
 
     private JsonObject modelJson;
-    private Map<String, Identifier> textureIds = Maps.newHashMap();
+    private Map<String, Integer> textureIds = Maps.newHashMap();
+    private List<Identifier> textures = Lists.newArrayList();
     private CustomJsonModel model;
     private boolean success = false;
     private String dirName;
@@ -161,7 +165,8 @@ public class ModelPack {
         IOUtils.closeQuietly(modelInputStream);
         for (IModelResource texture : textures) {
             Identifier identifier = new Identifier(CustomModel.MODID, (pack.dirName + "/" + texture.getName()).toLowerCase());
-            pack.textureIds.put(texture.getName(), identifier);
+            pack.textureIds.put(getFileName(texture.getName()), pack.textures.size());
+            pack.textures.add(identifier);
             NativeImage image = NativeImage.read(texture.getInputStream());
             textureManager.registerTexture(identifier, new CustomTexture(image));
         }
@@ -183,15 +188,30 @@ public class ModelPack {
     }
 
     public Supplier<Identifier> getBaseTexture() {
-        return skinGetter;
+        return defGetter[0];
     }
 
-    public Supplier<Identifier> getTexture(String name) {
-        if (name.equals("skin.png"))
-            return skinGetter;
-        Identifier texture = textureIds.get(name);
-        if (texture != null)
-            return () -> texture;
+    public Supplier<Identifier> getTexture(int id) {
+        if (id < defGetter.length)
+            return defGetter[id];
+        id -= defGetter.length;
+        if (id < textures.size()) {
+            Identifier identifier = textures.get(id);
+            return () -> identifier;
+        }
+        return defGetter[0];
+    }
+
+    public IExpressionFloat getTexture(String name) {
+        if (name.equals("skin"))
+            return new ConstantFloat(0);
+        if (name.equals("cape"))
+            return new NullableTextureId(1);
+        if (name.equals("elytra"))
+            return new NullableTextureId(2);
+        Integer id = textureIds.get(name);
+        if (id != null)
+            return new ConstantFloat(id + defGetter.length);
         return null;
     }
 
@@ -204,7 +224,7 @@ public class ModelPack {
     }
 
     public void release() {
-        for (Identifier texture : textureIds.values())
+        for (Identifier texture : textures)
             CustomModelClient.textureManager.destroyTexture(texture);
         model.release();
     }
@@ -220,5 +240,18 @@ public class ModelPack {
     public interface IModelResource {
         String getName();
         InputStream getInputStream() throws IOException;
+    }
+
+    public static class NullableTextureId implements IExpressionFloat {
+        int getter;
+
+        public NullableTextureId(int getter) {
+            this.getter = getter;
+        }
+
+        @Override
+        public float eval() {
+            return defGetter[getter].get() != null ? getter : -1;
+        }
     }
 }

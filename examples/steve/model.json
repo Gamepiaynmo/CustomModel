@@ -1,7 +1,5 @@
 {
-	"hide": ["head", "body", "left_arm", "right_arm", "left_leg", "right_leg",
-		"head_overlay", "body_overlay", "left_arm_overlay", "right_arm_overlay",
-		"left_leg_overlay", "right_leg_overlay"],
+	"hide": ["model_all"],
 	"bones": [
 		{
 			"id": "head_c",
@@ -66,15 +64,14 @@
 		{
 			"id": "left_leg_c",
 			"parent": "left_leg",
-			"position": [0, -12, 0],
 			"boxes": [
 				{
 					"textureOffset": [16, 48],
-					"coordinates": [-2, 0, 2, 4, 12, 4]
+					"coordinates": [-2, -12, 2, 4, 0, 4]
 				},
 				{
 					"textureOffset": [0, 48],
-					"coordinates": [-2, 0, 2, 4, 12, 4],
+					"coordinates": [-2, -12, 2, 4, 0, 4],
 					"sizeAdd": 0.25
 				}
 			]
@@ -82,15 +79,14 @@
 		{
 			"id": "right_leg_c",
 			"parent": "right_leg",
-			"position": [0, -12, 0],
 			"boxes": [
 				{
 					"textureOffset": [0, 16],
-					"coordinates": [-2, 0, 2, 4, 12, 4]
+					"coordinates": [-2, -12, 2, 4, 0, 4]
 				},
 				{
 					"textureOffset": [0, 32],
-					"coordinates": [-2, 0, 2, 4, 12, 4],
+					"coordinates": [-2, -12, 2, 4, 0, 4],
 					"sizeAdd": 0.25
 				}
 			]

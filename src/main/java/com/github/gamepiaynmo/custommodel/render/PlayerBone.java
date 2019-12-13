@@ -112,7 +112,7 @@ public enum PlayerBone {
         }
 
         @Override
-        public Supplier<Identifier> getTexture() { return ModelPack.skinGetter; }
+        public Supplier<Identifier> getTexture() { return ModelPack.defGetter[0]; }
 
         @Override
         public IBone getParent() { return null; }

@@ -1,14 +1,12 @@
 {
-	"hide": ["head", "body", "left_arm", "right_arm", "left_leg", "right_leg",
-		"head_overlay", "body_overlay", "left_arm_overlay", "right_arm_overlay",
-		"left_leg_overlay", "right_leg_overlay"],
+	"hide": ["model_all", "armor_all", "held_item_all"],
 	"bones": [
 		{
 			"id": "head_c",
 			"parent": "head",
-			"texture": "brs.png",
+			"texture": "tex.brs",
 			"textureSize": [64, 64],
-			"position": [0, "if(is_sneaking,sin(age),0)", 0],
+			"position": [0, 0, 0],
 			"boxes": [
 				{
 					"textureOffset": [0, 0],
@@ -22,10 +20,39 @@
 			]
 		},
 		{
+			"id": "head_armor",
+			"parent": "head",
+			"attached": ["helmet_all", "head_wearing"],
+			"position": [0, "sin(swing_progress*3)*16", 0]
+		},
+		{
+			"id": "left_item_b",
+			"parent": "left_arm",
+			"position": [-1, -10, -2]
+		},
+		{
+			"id": "left_item",
+			"parent": "left_item_b",
+			"attached": ["held_item_left"],
+			"rotation": [0, "sin(age/4)*30", 0]
+		},
+		{
+			"id": "right_item_b",
+			"parent": "right_arm",
+			"position": [1, -10, -2]
+		},
+		{
+			"id": "right_item",
+			"parent": "right_item_b",
+			"attached": ["held_item_right"],
+			"rotation": [0, "sin(age/4+pi)*30", 0]
+		},
+		{
 			"id": "body_c",
 			"parent": "body",
-			"texture": "brs.png",
+			"texture": "tex.brs",
 			"textureSize": [64, 64],
+			"attached": ["armor_body_all"],
 			"boxes": [
 				{
 					"textureOffset": [16, 16],
@@ -39,10 +66,18 @@
 			]
 		},
 		{
+			"id": "cape",
+			"parent": "body",
+			"texture": "tex.mycape",
+			"textureSize": [64, 32],
+			"attached": ["cape", "elytra"]
+		},
+		{
 			"id": "left_arm_c",
 			"parent": "left_arm",
-			"texture": "brs.png",
+			"texture": "tex.brs",
 			"textureSize": [64, 64],
+			"attached": ["chestplate_left_arm"],
 			"boxes": [
 				{
 					"textureOffset": [32, 48],
@@ -58,8 +93,9 @@
 		{
 			"id": "right_arm_c",
 			"parent": "right_arm",
-			"texture": "brs.png",
+			"texture": "tex.brs",
 			"textureSize": [64, 64],
+			"attached": ["chestplate_right_arm"],
 			"boxes": [
 				{
 					"textureOffset": [40, 16],
@@ -75,17 +111,17 @@
 		{
 			"id": "left_leg_c",
 			"parent": "left_leg",
-			"texture": "brs.png",
-			"position": [0, -12, 0],
+			"texture": "tex.brs",
 			"textureSize": [64, 64],
+			"attached": ["armor_left_leg_all"],
 			"boxes": [
 				{
 					"textureOffset": [16, 48],
-					"coordinates": [-2, 0, 2, 4, 12, 4]
+					"coordinates": [-2, -12, 2, 4, 0, 4]
 				},
 				{
 					"textureOffset": [0, 48],
-					"coordinates": [-2, 0, 2, 4, 12, 4],
+					"coordinates": [-2, -12, 2, 4, 0, 4],
 					"sizeAdd": 0.25
 				}
 			]
@@ -93,17 +129,17 @@
 		{
 			"id": "right_leg_c",
 			"parent": "right_leg",
-			"texture": "brs.png",
-			"position": [0, -12, 0],
+			"texture": "tex.brs",
 			"textureSize": [64, 64],
+			"attached": ["armor_right_leg_all"],
 			"boxes": [
 				{
 					"textureOffset": [0, 16],
-					"coordinates": [-2, 0, 2, 4, 12, 4]
+					"coordinates": [-2, -12, 2, 4, 0, 4]
 				},
 				{
 					"textureOffset": [0, 32],
-					"coordinates": [-2, 0, 2, 4, 12, 4],
+					"coordinates": [-2, -12, 2, 4, 0, 4],
 					"sizeAdd": 0.25
 				}
 			]
@@ -113,7 +149,7 @@
 			"parent": "head_c",
 			"position": [-5, -3, 2],
 			"rotation": [90, 70, 0],
-			"texture": "eye_part.png",
+			"texture": "if(health<=10,tex.eye_part1,tex.eye_part2)",
 			"textureSize": [50, 50],
 			"particles": [
 				{
@@ -139,8 +175,9 @@
 			"id": "left_hair",
 			"parent": "head_c",
 			"position": [-4, 8, 4],
-			"texture": "hair.png",
+			"texture": "tex.hair",
 			"textureSize": [64, 64],
+			"attached": ["shoulder_parrot_left"],
 			"boxes": [
 				{
 					"textureOffset": [32, 20],
@@ -153,7 +190,7 @@
 			"parent": "left_hair",
 			"position": [0, 0, 3],
 			"rotation": [30, 20, 0],
-			"texture": "hair.png",
+			"texture": "tex.hair",
 			"textureSize": [64, 64],
 			"physics": [0.3, 0.15, 0.8, 0, 0],
 			"boxes": [
@@ -168,7 +205,7 @@
 			"parent": "left_hair_2",
 			"position": [0, 0, -10],
 			"rotation": [0, 90, 0],
-			"texture": "hair.png",
+			"texture": "tex.hair",
 			"textureSize": [64, 64],
 			"physics": [0.3, 0.15, 0.9, 2, 0.3],
 			"boxes": [
@@ -183,7 +220,7 @@
 			"parent": "left_hair_3",
 			"position": [0, 0, -10],
 			"rotation": [0, -20, 0],
-			"texture": "hair.png",
+			"texture": "tex.hair",
 			"textureSize": [64, 64],
 			"physics": [0.3, 0.2, 0.9, 2, 0.6],
 			"boxes": [
@@ -197,8 +234,9 @@
 			"id": "right_hair",
 			"parent": "head_c",
 			"position": [4, 8, 4],
-			"texture": "hair.png",
+			"texture": "tex.hair",
 			"textureSize": [64, 64],
+			"attached": ["shoulder_parrot_right"],
 			"boxes": [
 				{
 					"textureOffset": [32, 20],
@@ -211,7 +249,7 @@
 			"parent": "right_hair",
 			"position": [0, 0, 3],
 			"rotation": [-30, 20, 0],
-			"texture": "hair.png",
+			"texture": "tex.hair",
 			"textureSize": [64, 64],
 			"physics": [0.3, 0.15, 0.8, 0, 0],
 			"boxes": [
@@ -226,7 +264,7 @@
 			"parent": "right_hair_2",
 			"position": [0, 0, -10],
 			"rotation": [0, 90, 0],
-			"texture": "hair.png",
+			"texture": "tex.hair",
 			"textureSize": [64, 64],
 			"physics": [0.3, 0.15, 0.9, 2, 0.3],
 			"boxes": [

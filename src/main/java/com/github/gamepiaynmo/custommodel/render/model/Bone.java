@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public class Bone implements IBone {
-    private CustomJsonModel model;
+    private final CustomJsonModel model;
 
     private String id;
     private IBone parent;
@@ -47,7 +47,7 @@ public class Bone implements IBone {
     public Vector3 velocity = Vector3.Zero.cpy();
     private double length;
 
-    private Supplier<Identifier> texture = null;
+    private IExpressionFloat texture = null;
     private Vec2d textureSize;
 
     public static Bone getBoneFromJson(ModelPack pack, CustomJsonModel model, JsonObject jsonObj) throws ParseException {
@@ -64,9 +64,9 @@ public class Bone implements IBone {
         if (bone.parent == null)
             throw new TranslatableException("error.custommodel.loadmodelpack.noparentid", parentId);
 
-        String textureId = Json.getString(jsonObj, CustomJsonModel.TEXTURE);
+        JsonElement textureId = jsonObj.get(CustomJsonModel.TEXTURE);
         if (textureId != null) {
-            bone.texture = pack.getTexture(textureId);
+            bone.texture = Json.getFloatExpression(textureId, 0, model.getParser());
             if (bone.texture == null)
                 throw new TranslatableException("error.custommodel.loadmodelpack.notexture", textureId);
 
@@ -161,9 +161,12 @@ public class Bone implements IBone {
     @Override
     public Supplier<Identifier> getTexture() {
         if (texture == null) {
-            return texture = parent.getTexture();
+            Supplier<Identifier> res = parent.getTexture();
+            if (parent instanceof Bone)
+                texture = ((Bone) parent).texture;
+            return res;
         }
-        return texture;
+        return model.pack.getTexture((int) texture.eval());
     }
 
     @Override
