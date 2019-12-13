@@ -25,7 +25,9 @@ public enum PlayerFeature {
     CAPE("cape", PlayerBone.BODY),
     HEAD_WEARING("head_wearing", PlayerBone.HEAD),
     ELYTRA("elytra", PlayerBone.BODY),
-    SHOULDER_PARROT("shoulder_parrot", PlayerBone.BODY);
+
+    SHOULDER_PARROT_LEFT("shoulder_parrot_left", PlayerBone.BODY),
+    SHOULDER_PARROT_RIGHT("shoulder_parrot_right", PlayerBone.BODY);
 
     private final String id;
     private final PlayerBone attached;
@@ -69,8 +71,10 @@ public enum PlayerFeature {
 
         featureLists.put("held_item_all", Lists.newArrayList(HELD_ITEM_LEFT, HELD_ITEM_RIGHT));
 
+        featureLists.put("shoulder_parrot_all", Lists.newArrayList(SHOULDER_PARROT_LEFT, SHOULDER_PARROT_RIGHT));
+
         featureLists.put("feature_all", Lists.newArrayList(HELMET_HEAD, HELMET_HEAD_OVERLAY, CHESTPLATE_BODY, CHESTPLATE_LEFT_ARM,
                 CHESTPLATE_RIGHT_ARM, LEGGINGS_LEFT_LEG, LEGGINGS_RIGHT_LEG, BOOTS_LEFT_LEG, BOOTS_RIGHT_LEG, HELD_ITEM_LEFT,
-                HELD_ITEM_RIGHT, CAPE, HEAD_WEARING, ELYTRA, SHOULDER_PARROT));
+                HELD_ITEM_RIGHT, CAPE, HEAD_WEARING, ELYTRA, SHOULDER_PARROT_LEFT, SHOULDER_PARROT_RIGHT));
     }
 }

@@ -5,6 +5,7 @@ import com.github.gamepiaynmo.custommodel.client.ModelPack;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
 import com.github.gamepiaynmo.custommodel.render.PlayerFeature;
 import com.github.gamepiaynmo.custommodel.render.model.IBone;
+import com.github.gamepiaynmo.custommodel.server.CustomModel;
 import com.github.gamepiaynmo.custommodel.util.Matrix4;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.MinecraftClient;
@@ -52,13 +53,12 @@ public class CustomHeldItem<T extends AbstractClientPlayerEntity, M extends Play
                 for (IBone bone : model.getFeatureAttached(feature)) {
                     if (bone.isVisible()) {
                         GlStateManager.pushMatrix();
-                        Matrix4 trans = model.getTransform(bone).cpy();
-                        trans.mulLeft(CustomModelClient.currentInvTransform);
                         if (bone.getPlayerBone() != null) {
                             this.method_4193(arm_1);
                             GlStateManager.translatef(-(float)(boolean_1 ? -1 : 1) / 16.0F, 0.625F, -0.125F);
                         } else {
-                            GL11.glMultMatrixd(trans.val);
+                            GL11.glMultMatrixd(CustomModelClient.currentInvTransform.val);
+                            GL11.glMultMatrixd(model.getTransform(bone).val);
                         }
 
                         GlStateManager.rotatef(-90.0F, 1.0F, 0.0F, 0.0F);

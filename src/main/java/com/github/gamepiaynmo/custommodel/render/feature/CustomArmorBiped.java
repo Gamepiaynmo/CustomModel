@@ -92,9 +92,6 @@ public class CustomArmorBiped<T extends AbstractClientPlayerEntity, M extends Bi
             boolean visible = cuboid.visible;
             cuboid.visible = bone.isVisible();
             if (cuboid.visible) {
-                Matrix4 transform = model.getTransform(bone).cpy();
-                transform.mulLeft(CustomModelClient.currentInvTransform);
-
                 float x = cuboid.rotationPointX;
                 float y = cuboid.rotationPointY;
                 float z = cuboid.rotationPointZ;
@@ -109,7 +106,8 @@ public class CustomArmorBiped<T extends AbstractClientPlayerEntity, M extends Bi
                 cuboid.roll = 0;
 
                 GlStateManager.pushMatrix();
-                GL11.glMultMatrixd(transform.val);
+                GL11.glMultMatrixd(CustomModelClient.currentInvTransform.val);
+                GL11.glMultMatrixd(model.getTransform(bone).val);
                 cuboid.render(scale);
                 GlStateManager.popMatrix();
 

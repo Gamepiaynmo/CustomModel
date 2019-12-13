@@ -3,10 +3,7 @@ package com.github.gamepiaynmo.custommodel.mixin;
 import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.client.ModelPack;
 import com.github.gamepiaynmo.custommodel.render.*;
-import com.github.gamepiaynmo.custommodel.render.feature.CustomArmorBiped;
-import com.github.gamepiaynmo.custommodel.render.feature.CustomCape;
-import com.github.gamepiaynmo.custommodel.render.feature.CustomHeldItem;
-import com.github.gamepiaynmo.custommodel.render.feature.CustomStuckArrows;
+import com.github.gamepiaynmo.custommodel.render.feature.*;
 import com.github.gamepiaynmo.custommodel.util.Matrix4;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.MinecraftClient;
@@ -15,6 +12,7 @@ import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
 import net.minecraft.client.render.entity.PlayerModelPart;
+import net.minecraft.client.render.entity.feature.*;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.entity.Entity;
@@ -43,11 +41,24 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
 
     @Inject(method = "<init>(Lnet/minecraft/client/render/entity/EntityRenderDispatcher;Z)V", at = @At(value = "RETURN"))
     public void addFeatures(EntityRenderDispatcher dispatcher, boolean slim, CallbackInfo info) {
-        this.features.clear();
-        this.addFeature(new CustomArmorBiped<>(this, new BipedEntityModel(0.5F), new BipedEntityModel(1.0F)));
-        this.addFeature(new CustomHeldItem<>(this));
-        this.addFeature(new CustomStuckArrows<>(this));
-        this.addFeature(new CustomCape(this));
+        for (int i = 0; i < this.features.size(); i++) {
+            FeatureRenderer feature = this.features.get(i);
+            if (feature instanceof ArmorBipedFeatureRenderer)
+                feature = new CustomArmorBiped<>(this, new BipedEntityModel(0.5F), new BipedEntityModel(1.0F));
+            if (feature instanceof HeldItemFeatureRenderer)
+                feature = new CustomHeldItem<>(this);
+            if (feature instanceof StuckArrowsFeatureRenderer)
+                feature = new CustomStuckArrows<>(this);
+            if (feature instanceof CapeFeatureRenderer)
+                feature = new CustomCape(this);
+            if (feature instanceof HeadFeatureRenderer)
+                feature = new CustomHead<>(this);
+            if (feature instanceof ElytraFeatureRenderer)
+                feature = new CustomElytra<>(this);
+            if (feature instanceof ShoulderParrotFeatureRenderer)
+                feature = new CustomShoulderParrot<>(this);
+            this.features.set(i, feature);
+        }
     }
 
     public boolean disableSetModelPose;
