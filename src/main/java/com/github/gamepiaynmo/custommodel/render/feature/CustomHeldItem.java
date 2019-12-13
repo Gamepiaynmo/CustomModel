@@ -36,22 +36,13 @@ public class CustomHeldItem<T extends AbstractClientPlayerEntity, M extends Play
         ItemStack itemStack_1 = boolean_1 ? livingEntity_1.getOffHandStack() : livingEntity_1.getMainHandStack();
         ItemStack itemStack_2 = boolean_1 ? livingEntity_1.getMainHandStack() : livingEntity_1.getOffHandStack();
         if (!itemStack_1.isEmpty() || !itemStack_2.isEmpty()) {
-            GlStateManager.pushMatrix();
-            if (this.getModel().isChild) {
-                float float_8 = 0.5F;
-                GlStateManager.translatef(0.0F, 0.75F, 0.0F);
-                GlStateManager.scalef(0.5F, 0.5F, 0.5F);
-            }
-
             this.method_4192(livingEntity_1, itemStack_1, ModelTransformation.Type.THIRD_PERSON_LEFT_HAND, Arm.LEFT);
             this.method_4192(livingEntity_1, itemStack_2, ModelTransformation.Type.THIRD_PERSON_RIGHT_HAND, Arm.RIGHT);
-            GlStateManager.popMatrix();
         }
     }
 
     private void method_4192(LivingEntity livingEntity_1, ItemStack itemStack_1, ModelTransformation.Type modelTransformation$Type_1, Arm arm_1) {
         if (!itemStack_1.isEmpty()) {
-            GlStateManager.pushMatrix();
             boolean boolean_1 = arm_1 == Arm.LEFT;
 
             ModelPack pack = CustomModelClient.getModelForPlayer(playerEntity);
@@ -60,6 +51,7 @@ public class CustomHeldItem<T extends AbstractClientPlayerEntity, M extends Play
                 PlayerFeature feature = boolean_1 ? PlayerFeature.HELD_ITEM_LEFT : PlayerFeature.HELD_ITEM_RIGHT;
                 for (IBone bone : model.getFeatureAttached(feature)) {
                     if (bone.isVisible()) {
+                        GlStateManager.pushMatrix();
                         Matrix4 trans = model.getTransform(bone).cpy();
                         trans.mulLeft(CustomModelClient.currentInvTransform);
                         if (bone.getPlayerBone() != null) {
@@ -76,6 +68,7 @@ public class CustomHeldItem<T extends AbstractClientPlayerEntity, M extends Play
                     }
                 }
             } else {
+                GlStateManager.pushMatrix();
                 this.method_4193(arm_1);
                 GlStateManager.translatef(-(float)(boolean_1 ? -1 : 1) / 16.0F, 0.625F, -0.125F);
 

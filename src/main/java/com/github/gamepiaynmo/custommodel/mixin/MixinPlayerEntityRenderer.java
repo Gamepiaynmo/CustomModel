@@ -4,6 +4,7 @@ import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.client.ModelPack;
 import com.github.gamepiaynmo.custommodel.render.*;
 import com.github.gamepiaynmo.custommodel.render.feature.CustomArmorBiped;
+import com.github.gamepiaynmo.custommodel.render.feature.CustomCape;
 import com.github.gamepiaynmo.custommodel.render.feature.CustomHeldItem;
 import com.github.gamepiaynmo.custommodel.render.feature.CustomStuckArrows;
 import com.github.gamepiaynmo.custommodel.util.Matrix4;
@@ -46,6 +47,7 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
         this.addFeature(new CustomArmorBiped<>(this, new BipedEntityModel(0.5F), new BipedEntityModel(1.0F)));
         this.addFeature(new CustomHeldItem<>(this));
         this.addFeature(new CustomStuckArrows<>(this));
+        this.addFeature(new CustomCape(this));
     }
 
     public boolean disableSetModelPose;
