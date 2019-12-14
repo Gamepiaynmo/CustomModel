@@ -2,10 +2,12 @@
   "text.autoconfig.custommodel.title": "自定义模型设置",
   "text.autoconfig.custommodel.category.default": "自定义模型设置",
 
-  "text.autoconfig.custommodel.option.clientFirst": "优先使用客户端模型",
-  "text.autoconfig.custommodel.option.clientFirst.@Tooltip": "如果同时在服务端和客户端存在某个玩家的可用模型，则优先使用客户端模型",
   "text.autoconfig.custommodel.option.hideNearParticles": "隐藏过近的粒子",
   "text.autoconfig.custommodel.option.hideNearParticles.@Tooltip": "隐藏过于靠近玩家摄像机的粒子以免遮挡视野",
+  "text.autoconfig.custommodel.option.customEyeHeight": "允许改变视角高度",
+  "text.autoconfig.custommodel.option.customEyeHeight.@Tooltip": "允许自定义模型改变视角高度，若服务端未允许则仅在客户端生效",
+  "text.autoconfig.custommodel.option.customBoundingBox": "允许改变碰撞体积",
+  "text.autoconfig.custommodel.option.customBoundingBox.@Tooltip": "允许自定义模型改变碰撞体积，若服务端未允许或服务端未安装模组则无效",
 
 
   "error.custommodel.loadmodelpack": "加载模型包失败：%s",

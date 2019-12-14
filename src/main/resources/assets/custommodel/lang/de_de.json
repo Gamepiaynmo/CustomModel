@@ -2,10 +2,12 @@
   "text.autoconfig.custommodel.title": "Custom Model Konfiguration",
   "text.autoconfig.custommodel.category.default": "Custom Model Konfiguration",
 
-  "text.autoconfig.custommodel.option.clientFirst": "Nutze Client-Modelle mit Priorität",
-  "text.autoconfig.custommodel.option.clientFirst.@Tooltip": "Wenn ein Spielermodell auf dem Server und dem Client existiert, wird das des Clients verwendet.",
   "text.autoconfig.custommodel.option.hideNearParticles": "Verstecke Partikel nahe der Kamera",
   "text.autoconfig.custommodel.option.hideNearParticles.@Tooltip": "Verstecke Partikel, die sich zu nahe am Auge des Spielers befinden.",
+  "text.autoconfig.custommodel.option.customEyeHeight": "Benutzerdefinierte Augenhöhe",
+  "text.autoconfig.custommodel.option.customEyeHeight.@Tooltip": "Ermöglichen Sie Modellpackungen, die Augenhöhe zu ändern. Wirkt sich nur auf den Client aus, wenn dies auf dem Server nicht zulässig ist.",
+  "text.autoconfig.custommodel.option.customBoundingBox": "Benutzerdefinierter Begrenzungsrahmen",
+  "text.autoconfig.custommodel.option.customBoundingBox.@Tooltip": "Ermöglichen Sie Modellpaketen, den Begrenzungsrahmen zu ändern. Wird nicht wirksam, wenn die Serverseite nicht modifiziert oder unzulässig ist.",
 
   "error.custommodel.loadmodelpack": "Laden der Modelldaten fehlgeschlagen: %s",
   "error.custommodel.loadmodelpack.nomodel": "model.json wurde nicht gefunden.",

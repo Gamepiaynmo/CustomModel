@@ -2,10 +2,12 @@
   "text.autoconfig.custommodel.title": "Custom Model Config",
   "text.autoconfig.custommodel.category.default": "Custom Model Config",
 
-  "text.autoconfig.custommodel.option.clientFirst": "Use Client Side Models First",
-  "text.autoconfig.custommodel.option.clientFirst.@Tooltip": "If model pack of a certain player exists both at client and server side, use the client one.",
   "text.autoconfig.custommodel.option.hideNearParticles": "Hide Particles Near Camera",
   "text.autoconfig.custommodel.option.hideNearParticles.@Tooltip": "Hide particles that are too close to player's eye.",
+  "text.autoconfig.custommodel.option.customEyeHeight": "Custom Eye Height",
+  "text.autoconfig.custommodel.option.customEyeHeight.@Tooltip": "Allow model packs to change eye height. Only effects client side if not allowed at server side.",
+  "text.autoconfig.custommodel.option.customBoundingBox": "Custom Bounding Box",
+  "text.autoconfig.custommodel.option.customBoundingBox.@Tooltip": "Allow model packs to change bounding box. Will not take effect if server side is not modded or not allowed.",
 
   "error.custommodel.loadmodelpack": "Failed to load model pack: %s",
   "error.custommodel.loadmodelpack.nomodel": "model.json not found.",

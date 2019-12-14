@@ -1,6 +1,7 @@
 package com.github.gamepiaynmo.custommodel.client;
 
 import com.github.gamepiaynmo.custommodel.server.CustomModel;
+import com.github.gamepiaynmo.custommodel.server.ModConfig;
 import io.github.prospector.modmenu.api.ModMenuApi;
 import me.sargunvohra.mcmods.autoconfig1.AutoConfig;
 import net.minecraft.client.gui.screen.Screen;

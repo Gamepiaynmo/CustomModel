@@ -3,6 +3,7 @@
   "package": "com.github.gamepiaynmo.custommodel.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "MixinServerPlayerEntity"
   ],
   "client": [
     "MixinEntityRenderDispatcher",
@@ -12,8 +13,10 @@
     "MixinInventoryScreen",
     "MixinClientCommandSource",
     "MixinNetworkHandler",
-    "MixinPlayer",
-    "MixinCamera"
+    "MixinClientPlayerEntity",
+    "MixinMinecraftClient"
+  ],
+  "server": [
   ],
   "injectors": {
     "defaultRequire": 1

@@ -40,7 +40,7 @@ public class ModelPack {
 
     private ModelPack() {}
 
-    public static ModelPack fromDirectory(TextureManager textureManager, File dir) throws IOException, ParseException {
+    public static ModelPack fromDirectory(TextureManager textureManager, File dir, String name) throws IOException, ParseException {
         IModelResource modelFile = null;
         List<IModelResource> textureFiles = Lists.newArrayList();
 
@@ -72,10 +72,10 @@ public class ModelPack {
                 textureFiles.add(new FileResource(modelPackItem));
         }
 
-        return fromResource(textureManager, dir.getName(), modelFile, textureFiles);
+        return fromResource(textureManager, name, modelFile, textureFiles);
     }
 
-    public static ModelPack fromZipFile(TextureManager textureManager, File zipFile) throws IOException, ParseException {
+    public static ModelPack fromZipFile(TextureManager textureManager, File zipFile, String name) throws IOException, ParseException {
         ZipInputStream zip = new ZipInputStream(new BufferedInputStream(new FileInputStream(zipFile)));
         ZipFile file = new ZipFile(zipFile);
         ZipEntry entry;
@@ -110,12 +110,13 @@ public class ModelPack {
                 textureFiles.add(new ZipResource(entry));
         }
 
-        return fromResource(textureManager, zipFile.getName(), modelFile, textureFiles);
+        return fromResource(textureManager, name, modelFile, textureFiles);
     }
 
     public static ModelPack fromZipMemory(TextureManager textureManager, String name, byte[] data) throws IOException, ParseException {
         ZipInputStream zip = new ZipInputStream(new ByteArrayInputStream(data));
         ZipEntry entry;
+        byte[] buffer = new byte[1024];
 
         class MemoryResource implements IModelResource {
             private final String name;
@@ -123,10 +124,12 @@ public class ModelPack {
 
             public MemoryResource(ZipEntry zipEntry) throws IOException {
                 name = zipEntry.getName();
-                data = new byte[(int) zipEntry.getSize()];
-                int cnt = 0, pos = 0;
-                while ((cnt = zip.read(data, pos, data.length - pos)) > 0)
-                    pos += cnt;
+                ByteArrayOutputStream array = new ByteArrayOutputStream();
+                int cnt = 0;
+                while ((cnt = zip.read(buffer, 0, 1024)) > 0)
+                    array.write(buffer, 0, cnt);
+                array.close();
+                data = array.toByteArray();
             }
 
             @Override

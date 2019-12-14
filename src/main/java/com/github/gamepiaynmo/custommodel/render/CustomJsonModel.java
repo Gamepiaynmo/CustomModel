@@ -17,6 +17,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.model.Cuboid;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
+import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.util.Identifier;
 import org.lwjgl.opengl.GL11;
@@ -66,7 +67,7 @@ public class CustomJsonModel {
     public static final String GRAVITY = "gravity";
     public static final String COLLIDE = "collide";
 
-    private static final Map<String, EntityPose> poseMap = Maps.newHashMap();
+    public static final Map<String, EntityPose> poseMap = Maps.newHashMap();
 
     public static CustomJsonModel fromJson(ModelPack pack, JsonObject jsonObj) throws ParseException {
         CustomJsonModel model = new CustomJsonModel(pack);
@@ -112,6 +113,17 @@ public class CustomJsonModel {
             }
         }
 
+        JsonElement dimensionObj = jsonObj.get(BOUNDING_BOX);
+        if (dimensionObj != null) {
+            for (Map.Entry<String, JsonElement> entry : dimensionObj.getAsJsonObject().entrySet()) {
+                EntityPose pose = poseMap.get(entry.getKey());
+                if (pose == null)
+                    throw new TranslatableException("error.custommodel.loadmodelpack.unknownpose", entry.getKey());
+                float[] dimension = Json.parseFloatArray(entry.getValue(), 2);
+                model.dimensionsMap.put(pose, new EntityDimensions(dimension[0], dimension[1], true));
+            }
+        }
+
         JsonElement boneArray = jsonObj.get(BONES);
         if (boneArray != null) {
             for (JsonElement element : boneArray.getAsJsonArray()) {
@@ -139,6 +151,7 @@ public class CustomJsonModel {
     private Map<PlayerBone, Boolean> visibleBones = Maps.newEnumMap(PlayerBone.class);
     private Map<PlayerBone, IExpressionFloat[]> skeleton = Maps.newEnumMap(PlayerBone.class);
     public Map<EntityPose, Float> eyeHeightMap = Maps.newEnumMap(EntityPose.class);
+    public Map<EntityPose, EntityDimensions> dimensionsMap = Maps.newEnumMap(EntityPose.class);
 
     private Supplier<Identifier> baseTexture;
 

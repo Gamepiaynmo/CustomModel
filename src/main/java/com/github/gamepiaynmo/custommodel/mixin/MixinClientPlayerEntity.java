@@ -1,13 +1,20 @@
 package com.github.gamepiaynmo.custommodel.mixin;
 
+import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
+import com.github.gamepiaynmo.custommodel.client.ModelPack;
+import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.github.gamepiaynmo.custommodel.client.command.CottonClientCommandSource;
 import com.github.gamepiaynmo.custommodel.client.command.CommandCache;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientCommandSource;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.command.CommandException;
+import net.minecraft.entity.EntityDimensions;
+import net.minecraft.entity.EntityPose;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
@@ -20,12 +27,16 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ClientPlayerEntity.class)
-public abstract class MixinPlayer {
+public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity {
     @Shadow @Final
     protected MinecraftClient client;
 
     @Shadow @Final
     public ClientPlayNetworkHandler networkHandler;
+
+    public MixinClientPlayerEntity(ClientWorld clientWorld_1, GameProfile gameProfile_1) {
+        super(clientWorld_1, gameProfile_1);
+    }
 
     @Shadow
     public abstract void addChatMessage(Text text_1, boolean boolean_1);
@@ -56,5 +67,41 @@ public abstract class MixinPlayer {
 
         if (cancel)
             info.cancel();
+    }
+
+    private ModelPack currentPack = null;
+
+    @Inject(method = "tick()V", at = @At("TAIL"))
+    public void updateBoundingBox(CallbackInfo info) {
+        if (CustomModelClient.serverConfig != null) {
+            ModelPack pack = CustomModelClient.getModelForPlayer(this);
+            if (pack != currentPack) {
+                currentPack = pack;
+                calculateDimensions();
+            }
+        }
+    }
+
+    @Override
+    public float getActiveEyeHeight(EntityPose entityPose, EntityDimensions entityDimensions) {
+        if (currentPack != null && CustomModelClient.serverConfig.customEyeHeight) {
+            Float eyeHeight = currentPack.getModel().eyeHeightMap.get(entityPose);
+            if (eyeHeight != null) {
+                return eyeHeight;
+            }
+        }
+
+        return super.getActiveEyeHeight(entityPose, entityDimensions);
+    }
+
+    @Override
+    public EntityDimensions getDimensions(EntityPose entityPose) {
+        if (currentPack != null && CustomModelClient.serverConfig.customBoundingBox) {
+            EntityDimensions dimensions = currentPack.getModel().dimensionsMap.get(entityPose);
+            if (dimensions != null)
+                return dimensions;
+        }
+
+        return super.getDimensions(entityPose);
     }
 }

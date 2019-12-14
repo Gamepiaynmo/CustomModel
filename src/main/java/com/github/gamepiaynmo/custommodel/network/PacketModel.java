@@ -6,26 +6,50 @@ import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.PacketByteBuf;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 public class PacketModel implements Packet<ClientPlayPacketListener> {
     public static final Identifier ID = new Identifier(CustomModel.MODID, "packet_model");
     private String name;
     private byte[] data;
+    public boolean success;
 
-    public PacketModel(File modelFile) {
+    public PacketModel(File modelFile, String name) {
         try {
-            name = modelFile.getName();
-            InputStream stream = new FileInputStream(modelFile);
-            int len = stream.available();
-            data = new byte[len];
-            stream.read(data);
-            stream.close();
+            this.name = name;
+            if (modelFile.isFile()) {
+                InputStream stream = new FileInputStream(modelFile);
+                int len = stream.available();
+                data = new byte[len];
+                stream.read(data);
+                stream.close();
+            } else {
+                ByteArrayOutputStream array = new ByteArrayOutputStream();
+                ZipOutputStream zip = new ZipOutputStream(array);
+                for (File file : modelFile.listFiles()) {
+                    ZipEntry entry = new ZipEntry(file.getName());
+                    zip.putNextEntry(entry);
+
+                    FileInputStream fin = new FileInputStream(file);
+                    byte[] buffer = new byte[fin.available()];
+                    fin.read(buffer, 0, buffer.length);
+                    fin.close();
+                    zip.write(buffer);
+                    zip.closeEntry();
+                }
+
+                zip.flush();
+                zip.close();
+                array.flush();
+                array.close();
+                data = array.toByteArray();
+            }
+            success = true;
         } catch (IOException e) {
             CustomModel.LOGGER.warn(e.getMessage(), e);
+            success = false;
         }
     }
 

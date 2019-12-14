@@ -2,19 +2,20 @@ package com.github.gamepiaynmo.custommodel.client;
 
 import com.github.gamepiaynmo.custommodel.network.PacketModel;
 import com.github.gamepiaynmo.custommodel.network.PacketQuery;
+import com.github.gamepiaynmo.custommodel.network.PacketQueryConfig;
+import com.github.gamepiaynmo.custommodel.network.PacketReplyConfig;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
 import com.github.gamepiaynmo.custommodel.render.EntityParameter;
 import com.github.gamepiaynmo.custommodel.render.ICustomPlayerRenderer;
 import com.github.gamepiaynmo.custommodel.render.RenderParameter;
 import com.github.gamepiaynmo.custommodel.server.CustomModel;
+import com.github.gamepiaynmo.custommodel.server.ModConfig;
 import com.github.gamepiaynmo.custommodel.util.Matrix4;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
 import io.netty.buffer.Unpooled;
-import me.sargunvohra.mcmods.autoconfig1.AutoConfig;
-import me.sargunvohra.mcmods.autoconfig1.serializer.GsonConfigSerializer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.event.world.WorldTickCallback;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
@@ -45,6 +46,8 @@ public class CustomModelClient implements ClientModInitializer {
     public static Map<String, PlayerEntityRenderer> playerRenderers;
 
     private static final Set<GameProfile> queried = Sets.newHashSet();
+    public static ModConfig serverConfig;
+    public static boolean configQueried = false;
 
     public static final Logger LOGGER = LogManager.getLogger();
 
@@ -84,53 +87,65 @@ public class CustomModelClient implements ClientModInitializer {
         }
     }
 
+    public static void clearModels() {
+        for (ModelPack pack : modelPacks.values())
+            pack.release();
+        modelPacks.clear();
+    }
+
+    private static void addModel(String name, ModelPack pack) {
+        ModelPack old = modelPacks.get(name);
+        if (old != null)
+            old.release();
+        modelPacks.put(name, pack);
+    }
+
     private static void reloadModel(GameProfile profile) {
-        String nameEntry = profile.getName().toLowerCase();
-        UUID uuid = PlayerEntity.getUuidFromProfile(profile);
-        String uuidEntry = uuid.toString().toLowerCase();
-        List<String> files = ImmutableList.of(nameEntry, uuidEntry, nameEntry + ".zip", uuidEntry + ".zip");
         queried.add(profile);
+        if (ClientSidePacketRegistry.INSTANCE.canServerReceive(PacketQuery.ID))
+            sendPacket(PacketQuery.ID, new PacketQuery(profile));
+        else {
+            String nameEntry = profile.getName().toLowerCase();
+            UUID uuid = PlayerEntity.getUuidFromProfile(profile);
+            String uuidEntry = uuid.toString().toLowerCase();
+            List<String> files = ImmutableList.of(nameEntry, uuidEntry, nameEntry + ".zip", uuidEntry + ".zip");
 
-        ModelPack pack = null;
-        for (String entry : files) {
-            File modelFile = new File(CustomModel.MODEL_DIR + "/" + entry);
+            ModelPack pack = null;
+            for (String entry : files) {
+                File modelFile = new File(CustomModel.MODEL_DIR + "/" + entry);
 
-            try {
-                if (modelFile.isDirectory())
-                    pack = ModelPack.fromDirectory(textureManager, modelFile);
-                if (modelFile.isFile())
-                    pack = ModelPack.fromZipFile(textureManager, modelFile);
-            } catch (Exception e) {
-                MinecraftClient.getInstance().inGameHud.addChatMessage(MessageType.CHAT,
-                        new TranslatableText("error.custommodel.loadmodelpack", e.getMessage()));
-                LOGGER.warn(e.getMessage(), e);
-            }
+                try {
+                    if (modelFile.isDirectory())
+                        pack = ModelPack.fromDirectory(textureManager, modelFile, uuidEntry);
+                    if (modelFile.isFile())
+                        pack = ModelPack.fromZipFile(textureManager, modelFile, uuidEntry);
+                } catch (Exception e) {
+                    MinecraftClient.getInstance().inGameHud.addChatMessage(MessageType.CHAT,
+                            new TranslatableText("error.custommodel.loadmodelpack", e.getMessage()));
+                    LOGGER.warn(e.getMessage(), e);
+                }
 
-            if (pack != null && pack.successfulLoaded()) {
-                modelPacks.put(pack.getDirName(), pack);
-                break;
+                if (pack != null && pack.successfulLoaded()) {
+                    addModel(pack.getDirName(), pack);
+                    break;
+                }
             }
         }
-
-        if (!ModConfig.isClientFirst() && ClientSidePacketRegistry.INSTANCE.canServerReceive(PacketQuery.ID));
-            sendPacket(PacketQuery.ID, new PacketQuery(profile));
     }
 
     public static ModelPack getModelForPlayer(AbstractClientPlayerEntity player) {
         GameProfile profile = player.getGameProfile();
-        String nameEntry = profile.getName().toLowerCase();
-        UUID uuid = PlayerEntity.getUuidFromProfile(profile);
-        String uuidEntry = uuid.toString().toLowerCase();
-        List<String> names = ImmutableList.of(nameEntry, nameEntry + ".zip", uuidEntry, uuidEntry + ".zip");
+        if (profile != null) {
+            UUID uuid = PlayerEntity.getUuidFromProfile(profile);
+            String uuidEntry = uuid.toString().toLowerCase();
 
-        for (String name : names) {
-            ModelPack pack = modelPacks.get(nameEntry);
+            ModelPack pack = modelPacks.get(uuidEntry);
             if (pack != null)
                 return pack;
-        }
 
-        if (!queried.contains(profile))
-            reloadModel(profile);
+            if (!queried.contains(profile))
+                reloadModel(profile);
+        }
         return null;
     }
 
@@ -144,6 +159,17 @@ public class CustomModelClient implements ClientModInitializer {
                 for (AbstractClientPlayerEntity player : client.world.getPlayers()) {
                     PlayerEntityRenderer renderer = client.getEntityRenderManager().getRenderer(player);
                     ((ICustomPlayerRenderer) renderer).tick(player);
+                }
+
+                if (!configQueried && serverConfig == null) {
+                    if (ClientSidePacketRegistry.INSTANCE.canServerReceive(PacketQueryConfig.ID)) {
+                        sendPacket(PacketQueryConfig.ID, new PacketQueryConfig());
+                        configQueried = true;
+                    } else {
+                        serverConfig = new ModConfig();
+                        serverConfig.customEyeHeight = ModConfig.isCustomEyeHeight();
+                        serverConfig.customBoundingBox = false;
+                    }
                 }
             }
         });
@@ -162,13 +188,21 @@ public class CustomModelClient implements ClientModInitializer {
                         LOGGER.warn(e.getMessage(), e);
                     }
                     if (pack != null && pack.successfulLoaded())
-                        modelPacks.put(pack.getDirName(), pack);
+                        addModel(pack.getDirName(), pack);
                 });
             } catch (Exception e) {
                 LOGGER.warn(e.getMessage(), e);
             }
         });
 
-        AutoConfig.register(ModConfig.class, GsonConfigSerializer::new);
+        ClientSidePacketRegistry.INSTANCE.register(PacketReplyConfig.ID, (context, buffer) -> {
+            PacketReplyConfig packet = new PacketReplyConfig();
+            try {
+                packet.read(buffer);
+                serverConfig = packet.getConfig();
+            } catch (Exception e) {
+                LOGGER.warn(e.getMessage(), e);
+            }
+        });
     }
 }
