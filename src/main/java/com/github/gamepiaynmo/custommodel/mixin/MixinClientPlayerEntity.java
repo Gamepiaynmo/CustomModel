@@ -2,10 +2,12 @@ package com.github.gamepiaynmo.custommodel.mixin;
 
 import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.client.ModelPack;
+import com.github.gamepiaynmo.custommodel.network.PacketQuery;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.github.gamepiaynmo.custommodel.client.command.CottonClientCommandSource;
 import com.github.gamepiaynmo.custommodel.client.command.CommandCache;
+import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientCommandSource;
@@ -43,30 +45,32 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
 
     @Inject(method = "sendChatMessage", at = @At("HEAD"), cancellable = true)
     private void onChatMessage(String msg, CallbackInfo info) {
-        if (msg.length() < 2 || !msg.startsWith("/")) return;
-        if (!CommandCache.hasCommand(msg.substring(1).split(" ")[0])) return;
-        boolean cancel = false;
-        try {
-            // The game freezes when using heavy commands. Run your heavy code somewhere else pls
-            int result = CommandCache.execute(
-                msg.substring(1), (CottonClientCommandSource) new ClientCommandSource(networkHandler, client)
-            );
-            if (result != 0)
-                // Prevent sending the message
+        if (!ClientSidePacketRegistry.INSTANCE.canServerReceive(PacketQuery.ID)) {
+            if (msg.length() < 2 || !msg.startsWith("/")) return;
+            if (!CommandCache.hasCommand(msg.substring(1).split(" ")[0])) return;
+            boolean cancel = false;
+            try {
+                // The game freezes when using heavy commands. Run your heavy code somewhere else pls
+                int result = CommandCache.execute(
+                        msg.substring(1), (CottonClientCommandSource) new ClientCommandSource(networkHandler, client)
+                );
+                if (result != 0)
+                    // Prevent sending the message
+                    cancel = true;
+            } catch (CommandException e) {
+                addChatMessage(e.getMessageText().formatted(Formatting.RED), false);
                 cancel = true;
-        } catch (CommandException e) {
-            addChatMessage(e.getMessageText().formatted(Formatting.RED), false);
-            cancel = true;
-        } catch (CommandSyntaxException e) {
-            addChatMessage(new LiteralText(e.getMessage()).formatted(Formatting.RED), false);
-            cancel = true;
-        } catch (Exception e) {
-            addChatMessage(new TranslatableText("command.failed").formatted(Formatting.RED), false);
-            cancel = true;
-        }
+            } catch (CommandSyntaxException e) {
+                addChatMessage(new LiteralText(e.getMessage()).formatted(Formatting.RED), false);
+                cancel = true;
+            } catch (Exception e) {
+                addChatMessage(new TranslatableText("command.failed").formatted(Formatting.RED), false);
+                cancel = true;
+            }
 
-        if (cancel)
-            info.cancel();
+            if (cancel)
+                info.cancel();
+        }
     }
 
     private ModelPack currentPack = null;

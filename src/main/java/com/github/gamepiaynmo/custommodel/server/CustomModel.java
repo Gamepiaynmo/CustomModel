@@ -50,6 +50,8 @@ public class CustomModel implements ModInitializer {
     public void onInitialize() {
         new File(MODEL_DIR).mkdirs();
 
+        ServerCommand.register();
+
         ServerSidePacketRegistry.INSTANCE.register(PacketQuery.ID, (context, buffer) -> {
             PacketQuery packet = new PacketQuery();
             try {

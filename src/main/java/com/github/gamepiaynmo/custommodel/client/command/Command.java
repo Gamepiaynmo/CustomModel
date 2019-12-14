@@ -21,10 +21,11 @@ public class Command implements ClientCommandPlugin {
                     try {
                         List<GameProfile> players = ((IClientEntitySelector) (Object) context.getArgument("targets", EntitySelector.class)).getPlayers(context.getSource());
                         players.forEach(CustomModelClient::clearModel);
+                        return players.size();
                     } catch (Exception e) {
                         e.printStackTrace();
+                        return 0;
                     }
-                    return 1;
                 })
         )));
     }
