@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ClientPlayNetworkHandler.class)
-public class NetworkHandlerMixin {
+public class MixinNetworkHandler {
     @Shadow private CommandDispatcher<CommandSource> commandDispatcher;
 
     @Inject(method = "onCommandTree", at = @At("RETURN"))

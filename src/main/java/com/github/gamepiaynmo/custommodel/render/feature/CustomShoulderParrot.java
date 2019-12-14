@@ -50,6 +50,8 @@ public class CustomShoulderParrot<T extends AbstractClientPlayerEntity> extends 
             CustomJsonModel model = pack == null ? null : pack.getModel();
 
             for (IBone bone : model.getFeatureAttached(boolean_1 ? PlayerFeature.SHOULDER_PARROT_LEFT : PlayerFeature.SHOULDER_PARROT_RIGHT)) {
+                if (!bone.isVisible()) continue;
+
                 GlStateManager.pushMatrix();
                 if (bone.getPlayerBone() != null) {
                     GlStateManager.translatef(boolean_1 ? 0.4F : -0.4F, playerEntity_1.isInSneakingPose() ? -1.3F : -1.5F, 0.0F);

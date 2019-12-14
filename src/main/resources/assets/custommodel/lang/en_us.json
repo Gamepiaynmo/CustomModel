@@ -10,6 +10,7 @@
   "error.custommodel.loadmodelpack": "Failed to load model pack: %s",
   "error.custommodel.loadmodelpack.nomodel": "model.json not found.",
   "error.custommodel.loadmodelpack.nohidebone": "Bone %s not found.",
+  "error.custommodel.loadmodelpack.unknownpose": "Unknown pose %s",
   "error.custommodel.loadmodelpack.noboneid": "Bone ID is required.",
   "error.custommodel.loadmodelpack.noparent": "Parent bone is required.",
   "error.custommodel.loadmodelpack.noparentid": "Parent bone %s not found.",

@@ -7,6 +7,7 @@ import com.github.gamepiaynmo.custommodel.render.feature.*;
 import com.github.gamepiaynmo.custommodel.util.Matrix4;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.model.Cuboid;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
@@ -39,8 +40,11 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
         super(entityRenderDispatcher_1, entityModel_1, float_1);
     }
 
+    private boolean slim;
+
     @Inject(method = "<init>(Lnet/minecraft/client/render/entity/EntityRenderDispatcher;Z)V", at = @At(value = "RETURN"))
     public void addFeatures(EntityRenderDispatcher dispatcher, boolean slim, CallbackInfo info) {
+        this.slim = slim;
         for (int i = 0; i < this.features.size(); i++) {
             FeatureRenderer feature = this.features.get(i);
             if (feature instanceof ArmorBipedFeatureRenderer)
@@ -85,7 +89,6 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
             this.model.render(playerEntity, float_1, float_2, float_3, float_4, float_5, float_6);
 
             ModelPack model = CustomModelClient.getModelForPlayer(playerEntity);
-
             if (model != null) {
                 CustomModelClient.currentJsonModel = model.getModel();
                 CustomModelClient.currentJsonModel.clearTransform();
@@ -99,7 +102,10 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
 
                 CustomModelClient.currentParameter = calculateTransform(playerEntity);
                 CustomModelClient.currentInvTransform = transform.cpy().inv();
+
+                model.getModel().updateSkeleton();
                 CustomModelClient.currentJsonModel.render(transform);
+                resetSkeleton();
             }
 
             if (boolean_2) {
@@ -119,15 +125,17 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
             this.model.isChild = playerEntity.isBaby();
 
             this.partial = 1;
+            CustomModelClient.currentModel = getModel();
             CustomModelClient.currentParameter = calculateTransform(playerEntity);
 
             CustomModelClient.currentPlayer = playerEntity;
             CustomModelClient.currentRenderer = (PlayerEntityRenderer) (Object) this;
-            CustomModelClient.currentModel = getModel();
             CustomModelClient.currentJsonModel = model.getModel();
             CustomModelClient.currentInvTransform = transform.cpy().inv();
 
+            model.getModel().updateSkeleton();
             model.getModel().tick(transform);
+            resetSkeleton();
         }
     }
 
@@ -140,9 +148,37 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
         CustomModelClient.currentModel = getModel();
 
         disableSetModelPose = model != null;
-        if (disableSetModelPose)
+        if (disableSetModelPose) {
             this.setModelPose(playerEntity, model.getModel());
+        }
         this.partial = partial;
+    }
+
+    public void resetSkeleton() {
+        PlayerEntityModel model = CustomModelClient.currentModel;
+        model.head.setRotationPoint(0.0F, 0.0F, 0.0F);
+        model.headwear.setRotationPoint(0.0F, 0.0F, 0.0F);
+        model.body.setRotationPoint(0.0F, 0.0F, 0.0F);
+        model.rightArm.setRotationPoint(-5.0F, 2.0F, 0.0F);
+        model.leftArm.setRotationPoint(5.0F, 2.0F, 0.0F);
+        model.rightLeg.setRotationPoint(-1.9F, 12.0F, 0.0F);
+        model.leftLeg.setRotationPoint(1.9F, 12.0F, 0.0F);
+
+        if (slim) {
+            model.leftArm.setRotationPoint(5.0F, 2.5F, 0.0F);
+            model.rightArm.setRotationPoint(-5.0F, 2.5F, 0.0F);
+            model.leftArmOverlay.setRotationPoint(5.0F, 2.5F, 0.0F);
+            model.rightArmOverlay.setRotationPoint(-5.0F, 2.5F, 10.0F);
+        } else {
+            model.leftArm.setRotationPoint(5.0F, 2.0F, 0.0F);
+            model.leftArmOverlay.setRotationPoint(5.0F, 2.0F, 0.0F);
+            model.rightArmOverlay.setRotationPoint(-5.0F, 2.0F, 10.0F);
+        }
+
+        model.leftLeg.setRotationPoint(1.9F, 12.0F, 0.0F);
+        model.leftLegOverlay.setRotationPoint(1.9F, 12.0F, 0.0F);
+        model.rightLegOverlay.setRotationPoint(-1.9F, 12.0F, 0.0F);
+        model.bodyOverlay.setRotationPoint(0.0F, 0.0F, 0.0F);
     }
 
     private float partial;
@@ -382,7 +418,8 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
         }
 
         for (PlayerBone bone : model.getHiddenBones()) {
-            bone.getCuboid(playerEntityModel_1).visible = false;
+            if (bone != PlayerBone.NONE)
+                bone.getCuboid(playerEntityModel_1).visible = false;
         }
     }
 

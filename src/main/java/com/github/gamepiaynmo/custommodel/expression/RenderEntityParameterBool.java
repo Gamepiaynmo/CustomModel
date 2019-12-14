@@ -17,7 +17,7 @@ public enum RenderEntityParameterBool implements IExpressionBool {
    IS_INVISIBLE("is_invisible", Entity::isInvisible),
    IS_ON_GROUND("is_on_ground", entity -> entity.onGround),
    IS_RIDING("is_riding", Entity::hasVehicle),
-   IS_SNEAKING("is_sneaking", Entity::isSneaking),
+   IS_SNEAKING("is_sneaking", Entity::isInSneakingPose),
    IS_SPRINTING("is_sprinting", Entity::isSprinting),
    IS_WET("is_wet", Entity::isTouchingWater);
 

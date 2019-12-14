@@ -10,6 +10,7 @@
   "error.custommodel.loadmodelpack": "Laden der Modelldaten fehlgeschlagen: %s",
   "error.custommodel.loadmodelpack.nomodel": "model.json wurde nicht gefunden.",
   "error.custommodel.loadmodelpack.nohidebone": "Knochen %s wurde nicht gefunden.",
+  "error.custommodel.loadmodelpack.unknownpose": "Unbekannte Pose %s",
   "error.custommodel.loadmodelpack.noboneid": "Knochen-ID wird benötigt.",
   "error.custommodel.loadmodelpack.noparent": "Elternknochen wird benötigt.",
   "error.custommodel.loadmodelpack.noparentid": "Elternknochen %s wurde nicht gefunden.",

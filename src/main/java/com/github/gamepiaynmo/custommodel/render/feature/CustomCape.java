@@ -39,6 +39,7 @@ public class CustomCape extends CapeFeatureRenderer {
             if (itemStack_1.getItem() != Items.ELYTRA) {
                 GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
                 for (IBone bone : model.getFeatureAttached(PlayerFeature.CAPE)) {
+                    if (!bone.isVisible()) continue;
                     Identifier customCapeTex = bone.getTexture().get();
                     boolean customCape = !customCapeTex.equals(pack.getBaseTexture().get());
 

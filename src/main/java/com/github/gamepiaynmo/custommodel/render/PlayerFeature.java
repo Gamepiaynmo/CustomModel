@@ -67,7 +67,7 @@ public enum PlayerFeature {
         featureLists.put("armor_right_leg_all", Lists.newArrayList(LEGGINGS_RIGHT_LEG, BOOTS_RIGHT_LEG));
         featureLists.put("armor_legs_all", Lists.newArrayList(LEGGINGS_LEFT_LEG, LEGGINGS_RIGHT_LEG, BOOTS_LEFT_LEG, BOOTS_RIGHT_LEG));
         featureLists.put("armor_all", Lists.newArrayList(HELMET_HEAD, HELMET_HEAD_OVERLAY, CHESTPLATE_BODY, CHESTPLATE_LEFT_ARM,
-                CHESTPLATE_RIGHT_ARM, LEGGINGS_LEFT_LEG, LEGGINGS_RIGHT_LEG, BOOTS_LEFT_LEG, BOOTS_RIGHT_LEG));
+                CHESTPLATE_RIGHT_ARM, LEGGINGS_BODY, LEGGINGS_LEFT_LEG, LEGGINGS_RIGHT_LEG, BOOTS_LEFT_LEG, BOOTS_RIGHT_LEG));
 
         featureLists.put("held_item_all", Lists.newArrayList(HELD_ITEM_LEFT, HELD_ITEM_RIGHT));
 

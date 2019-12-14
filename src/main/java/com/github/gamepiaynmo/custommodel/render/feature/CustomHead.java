@@ -53,6 +53,8 @@ public class CustomHead<T extends AbstractClientPlayerEntity, M extends PlayerEn
             Item item_1 = itemStack_1.getItem();
 
             for (IBone bone : model.getFeatureAttached(PlayerFeature.HEAD_WEARING)) {
+                if (!bone.isVisible()) continue;
+
                 GlStateManager.pushMatrix();
                 if (livingEntity_1.isInSneakingPose()) {
                     GlStateManager.translatef(0.0F, 0.2F, 0.0F);

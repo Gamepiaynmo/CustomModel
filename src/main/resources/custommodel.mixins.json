@@ -10,9 +10,10 @@
     "MixinParticleManager",
     "MixinEntitySelector",
     "MixinInventoryScreen",
-    "ClientCommandSourceMixin",
-    "NetworkHandlerMixin",
-    "PlayerMixin"
+    "MixinClientCommandSource",
+    "MixinNetworkHandler",
+    "MixinPlayer",
+    "MixinCamera"
   ],
   "injectors": {
     "defaultRequire": 1

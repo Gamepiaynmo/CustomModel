@@ -4,6 +4,8 @@
 		{
 			"id": "head_c",
 			"parent": "head",
+			"texture": "tex.alex",
+			"textureSize": [64, 64],
 			"boxes": [
 				{
 					"textureOffset": [0, 0],
@@ -19,6 +21,8 @@
 		{
 			"id": "body_c",
 			"parent": "body",
+			"texture": "tex.alex",
+			"textureSize": [64, 64],
 			"boxes": [
 				{
 					"textureOffset": [16, 16],
@@ -34,6 +38,8 @@
 		{
 			"id": "left_arm_c",
 			"parent": "left_arm",
+			"texture": "tex.alex",
+			"textureSize": [64, 64],
 			"boxes": [
 				{
 					"textureOffset": [32, 48],
@@ -49,6 +55,8 @@
 		{
 			"id": "right_arm_c",
 			"parent": "right_arm",
+			"texture": "tex.alex",
+			"textureSize": [64, 64],
 			"boxes": [
 				{
 					"textureOffset": [40, 16],
@@ -64,14 +72,16 @@
 		{
 			"id": "left_leg_c",
 			"parent": "left_leg",
+			"texture": "tex.alex",
+			"textureSize": [64, 64],
 			"boxes": [
 				{
 					"textureOffset": [16, 48],
-					"coordinates": [-2, -12, 2, 4, 0, 4]
+					"coordinates": [-2, -12, 2, 4, 12, 4]
 				},
 				{
 					"textureOffset": [0, 48],
-					"coordinates": [-2, -12, 2, 4, 0, 4],
+					"coordinates": [-2, -12, 2, 4, 12, 4],
 					"sizeAdd": 0.25
 				}
 			]
@@ -79,14 +89,16 @@
 		{
 			"id": "right_leg_c",
 			"parent": "right_leg",
+			"texture": "tex.alex",
+			"textureSize": [64, 64],
 			"boxes": [
 				{
 					"textureOffset": [0, 16],
-					"coordinates": [-2, -12, 2, 4, 0, 4]
+					"coordinates": [-2, -12, 2, 4, 12, 4]
 				},
 				{
 					"textureOffset": [0, 32],
-					"coordinates": [-2, -12, 2, 4, 0, 4],
+					"coordinates": [-2, -12, 2, 4, 12, 4],
 					"sizeAdd": 0.25
 				}
 			]

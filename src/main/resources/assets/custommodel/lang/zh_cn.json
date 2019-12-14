@@ -11,6 +11,7 @@
   "error.custommodel.loadmodelpack": "加载模型包失败：%s",
   "error.custommodel.loadmodelpack.nomodel": "未找到model.json",
   "error.custommodel.loadmodelpack.nohidebone": "未找到骨骼%s",
+  "error.custommodel.loadmodelpack.unknownpose": "未找到姿势%s",
   "error.custommodel.loadmodelpack.noboneid": "骨骼必须拥有ID",
   "error.custommodel.loadmodelpack.noparent": "骨骼必须拥有父骨骼",
   "error.custommodel.loadmodelpack.noparentid": "未找到父骨骼%s",

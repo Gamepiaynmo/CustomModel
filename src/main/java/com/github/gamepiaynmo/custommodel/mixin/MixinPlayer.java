@@ -20,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ClientPlayerEntity.class)
-public abstract class PlayerMixin {
+public abstract class MixinPlayer {
     @Shadow @Final
     protected MinecraftClient client;
 

@@ -48,6 +48,8 @@ public class CustomElytra<T extends AbstractClientPlayerEntity, M extends Player
             GlStateManager.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
 
             for (IBone bone : model.getFeatureAttached(PlayerFeature.ELYTRA)) {
+                if (!bone.isVisible()) continue;
+
                 Identifier customElytraTex = bone.getTexture().get();
                 boolean customElytra = !customElytraTex.equals(pack.getBaseTexture().get());
                 if (customElytra) {

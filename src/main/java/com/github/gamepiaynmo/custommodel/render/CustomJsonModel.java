@@ -3,21 +3,21 @@ package com.github.gamepiaynmo.custommodel.render;
 import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.client.ModelPack;
 import com.github.gamepiaynmo.custommodel.expression.ExpressionParser;
+import com.github.gamepiaynmo.custommodel.expression.IExpressionFloat;
 import com.github.gamepiaynmo.custommodel.expression.ModelResolver;
 import com.github.gamepiaynmo.custommodel.expression.ParseException;
 import com.github.gamepiaynmo.custommodel.render.model.Bone;
 import com.github.gamepiaynmo.custommodel.render.model.IBone;
-import com.github.gamepiaynmo.custommodel.util.Matrix4;
-import com.github.gamepiaynmo.custommodel.util.Quaternion;
-import com.github.gamepiaynmo.custommodel.util.TranslatableException;
-import com.github.gamepiaynmo.custommodel.util.Vector3;
+import com.github.gamepiaynmo.custommodel.util.*;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.platform.GlStateManager;
+import net.minecraft.client.model.Cuboid;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
+import net.minecraft.entity.EntityPose;
 import net.minecraft.util.Identifier;
 import org.lwjgl.opengl.GL11;
 
@@ -28,6 +28,8 @@ import java.util.function.Supplier;
 
 public class CustomJsonModel {
     public static final String HIDE = "hide";
+    public static final String SKELETON = "skeleton";
+    public static final String EYE_HEIGHT = "eyeHeight";
     public static final String BOUNDING_BOX = "boundingBox";
     public static final String BONES = "bones";
     public static final String ID = "id";
@@ -64,6 +66,8 @@ public class CustomJsonModel {
     public static final String GRAVITY = "gravity";
     public static final String COLLIDE = "collide";
 
+    private static final Map<String, EntityPose> poseMap = Maps.newHashMap();
+
     public static CustomJsonModel fromJson(ModelPack pack, JsonObject jsonObj) throws ParseException {
         CustomJsonModel model = new CustomJsonModel(pack);
         model.baseTexture = pack.getBaseTexture();
@@ -83,6 +87,28 @@ public class CustomJsonModel {
                     for (PlayerBone bone : bones)
                         model.boneHideList.add(bone);
                 }
+            }
+        }
+
+        JsonElement skeletonObj = jsonObj.get(SKELETON);
+        if (skeletonObj != null) {
+            for (Map.Entry<String, JsonElement> entry : skeletonObj.getAsJsonObject().entrySet()) {
+                Collection<PlayerBone> bones = PlayerBone.getListById(entry.getKey());
+                IExpressionFloat[] vector = Json.parseFloatExpressionArray(entry.getValue(), 3, new float[]{0, 0, 0}, model.getParser());
+                if (bones == null)
+                    throw new TranslatableException("error.custommodel.loadmodelpack.nohidebone", entry.getKey());
+                for (PlayerBone bone : bones)
+                    model.skeleton.put(bone, vector);
+            }
+        }
+
+        JsonElement eyeHeightObj = jsonObj.get(EYE_HEIGHT);
+        if (eyeHeightObj != null) {
+            for (Map.Entry<String, JsonElement> entry : eyeHeightObj.getAsJsonObject().entrySet()) {
+                EntityPose pose = poseMap.get(entry.getKey());
+                if (pose == null)
+                    throw new TranslatableException("error.custommodel.loadmodelpack.unknownpose", entry.getKey());
+                model.eyeHeightMap.put(pose, entry.getValue().getAsFloat());
             }
         }
 
@@ -111,6 +137,8 @@ public class CustomJsonModel {
     private List<PlayerBone> boneHideList = Lists.newArrayList();
     private List<PlayerFeature> featureHideList = Lists.newArrayList();
     private Map<PlayerBone, Boolean> visibleBones = Maps.newEnumMap(PlayerBone.class);
+    private Map<PlayerBone, IExpressionFloat[]> skeleton = Maps.newEnumMap(PlayerBone.class);
+    public Map<EntityPose, Float> eyeHeightMap = Maps.newEnumMap(EntityPose.class);
 
     private Supplier<Identifier> baseTexture;
 
@@ -172,6 +200,18 @@ public class CustomJsonModel {
 
     public Matrix4 getTransform(IBone bone) {
         return tmpBoneMats.get(bone.getId());
+    }
+
+    public void updateSkeleton() {
+        for (PlayerBone bone : PlayerBone.values()) {
+            if (bone != PlayerBone.NONE) {
+                IExpressionFloat[] vec = skeleton.get(bone);
+                if (vec != null) {
+                    bone.getCuboid(CustomModelClient.currentModel).setRotationPoint(
+                            (float) -vec[0].eval(), (float) -vec[1].eval(), (float) vec[2].eval());
+                }
+            }
+        }
     }
 
     public void render(Matrix4 baseMat) {
@@ -309,6 +349,16 @@ public class CustomJsonModel {
         for (Bone bone : bones) {
             bone.release();
         }
+    }
+
+    static {
+        poseMap.put("standing", EntityPose.STANDING);
+        poseMap.put("fall_flying", EntityPose.FALL_FLYING);
+        poseMap.put("sleeping", EntityPose.SLEEPING);
+        poseMap.put("swimming", EntityPose.SWIMMING);
+        poseMap.put("spin_attack", EntityPose.SPIN_ATTACK);
+        poseMap.put("sneaking", EntityPose.SNEAKING);
+        poseMap.put("dying", EntityPose.DYING);
     }
 
 }

@@ -55,7 +55,7 @@ public class CustomStuckArrows<T extends AbstractClientPlayerEntity, M extends P
 
             List<PlayerBone> playerBones = Lists.newArrayList();
             for (PlayerBone bone : PlayerBone.values()) {
-                if (!model.isHidden(bone))
+                if (bone != PlayerBone.NONE && !model.isHidden(bone))
                     playerBones.add(bone);
             }
 

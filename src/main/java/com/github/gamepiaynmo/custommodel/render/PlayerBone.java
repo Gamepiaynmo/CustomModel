@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 public enum PlayerBone {
+    NONE("none", null),
     HEAD("head", () -> CustomModelClient.currentModel.head),
     HEAD_OVERLAY("head_overlay", () -> CustomModelClient.currentModel.headwear),
     BODY("body", () -> CustomModelClient.currentModel.body),
@@ -43,7 +44,7 @@ public enum PlayerBone {
     PlayerBone(String id, Supplier<Cuboid> cuboidGetter) {
         this.id = id;
         this.cuboidGetter = cuboidGetter;
-        bone = new OriginalBone(this, cuboidGetter);
+        bone = cuboidGetter == null ? new BlankBone() : new OriginalBone(this, cuboidGetter);
     }
 
     public String getId() {
@@ -119,6 +120,54 @@ public enum PlayerBone {
 
         @Override
         public PlayerBone getPlayerBone() { return playerBone; }
+    }
+
+    public static class BlankBone implements IBone {
+
+        @Override
+        public Vector3 getPosition() {
+            return Vector3.Zero.cpy();
+        }
+
+        @Override
+        public Vector3 getRotation() {
+            return Vector3.Zero.cpy();
+        }
+
+        @Override
+        public Vector3 getScale() {
+            return One.cpy();
+        }
+
+        @Override
+        public Vec2d getTextureSize() {
+            return TexSize;
+        }
+
+        @Override
+        public Supplier<Identifier> getTexture() {
+            return ModelPack.defGetter[0];
+        }
+
+        @Override
+        public IBone getParent() {
+            return null;
+        }
+
+        @Override
+        public PlayerBone getPlayerBone() {
+            return NONE;
+        }
+
+        @Override
+        public String getId() {
+            return NONE.id;
+        }
+
+        @Override
+        public boolean isVisible() {
+            return true;
+        }
     }
 
     static {

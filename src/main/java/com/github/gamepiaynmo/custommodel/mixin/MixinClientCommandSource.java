@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(ClientCommandSource.class)
-public abstract class ClientCommandSourceMixin implements CottonClientCommandSource {
+public abstract class MixinClientCommandSource implements CottonClientCommandSource {
     @Shadow @Final
     private MinecraftClient client;
 
