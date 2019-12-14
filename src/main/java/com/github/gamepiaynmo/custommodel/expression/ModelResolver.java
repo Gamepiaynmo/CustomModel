@@ -1,8 +1,14 @@
 package com.github.gamepiaynmo.custommodel.expression;
 
+import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.client.ModelPack;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
 import com.github.gamepiaynmo.custommodel.render.model.IBone;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
+
+import java.util.Map;
 
 public class ModelResolver implements IExpressionResolver {
    final ModelPack pack;
@@ -54,7 +60,37 @@ public class ModelResolver implements IExpressionResolver {
                return pack.getTexture(second);
             }
             case "inv": {
-               return null;
+               PlayerInventory inventory = CustomModelClient.currentPlayer.inventory;
+               switch (second) {
+                  case "mainhand": return () ->
+                          Registry.ITEM.getRawId(inventory.getMainHandStack().getItem());
+                  case "offhand": return () ->
+                          Registry.ITEM.getRawId(inventory.offHand.get(0).getItem());
+                  case "helmet": return () ->
+                          Registry.ITEM.getRawId(inventory.getArmorStack(3).getItem());
+                  case "chestplate": return () ->
+                          Registry.ITEM.getRawId(inventory.getArmorStack(2).getItem());
+                  case "leggings": return () ->
+                          Registry.ITEM.getRawId(inventory.getArmorStack(1).getItem());
+                  case "boots": return () ->
+                          Registry.ITEM.getRawId(inventory.getArmorStack(0).getItem());
+                  default:
+                     try {
+                        if (second.startsWith("main")) {
+                           int index = Integer.parseInt(second.substring(4));
+                           if (index >= 0 && index < inventory.main.size())
+                              return () -> Registry.ITEM.getRawId(inventory.main.get(index).getItem());
+                        }
+                        return null;
+                     } catch (NumberFormatException e) {
+                        return null;
+                     }
+               }
+            }
+            case "item": {
+               int rawid = Registry.ITEM.getRawId(Registry.ITEM.get(new Identifier(second)));
+               if (rawid < 0) return null;
+               return new ConstantFloat(rawid);
             }
             default: {
                IBone mr = this.getModelRenderer(first);
