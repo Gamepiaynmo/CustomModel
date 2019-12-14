@@ -127,7 +127,7 @@ public class CustomJsonModel {
         for (PlayerBone bone : PlayerBone.values())
             visibleBones.put(bone, true);
         this.pack = pack;
-        parser = new ExpressionParser(new ModelResolver(pack));
+        parser = new ExpressionParser(new ModelResolver(pack, this));
     }
 
     public Collection<PlayerBone> getHiddenBones() {

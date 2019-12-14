@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public class Bone implements IBone {
-    private final CustomJsonModel model;
+    public final CustomJsonModel model;
 
     private String id;
     private IBone parent;

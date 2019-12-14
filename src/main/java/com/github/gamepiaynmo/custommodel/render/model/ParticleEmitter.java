@@ -50,7 +50,6 @@ public class ParticleEmitter {
 
     protected double timer;
     private Random random = new Random();
-    private Supplier<Identifier> texture;
     protected final Bone bone;
     protected boolean released = false;
 
@@ -80,7 +79,6 @@ public class ParticleEmitter {
         emitter.sizeExpr = Json.parseFloatExpressionArray(jsonObj.get(CustomJsonModel.SIZE), 2, new float[] {1, 1}, parser);
         emitter.gravityExpr = Json.getFloatExpression(jsonObj, CustomJsonModel.GRAVITY, 0, parser);
         emitter.collideExpr = Json.getBooleanExpression(jsonObj, CustomJsonModel.COLLIDE, false, parser);
-        emitter.texture = bone.getTexture();
 
         return emitter;
     }

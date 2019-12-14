@@ -8,9 +8,9 @@ public class ModelResolver implements IExpressionResolver {
    final ModelPack pack;
    final CustomJsonModel model;
 
-   public ModelResolver(ModelPack pack) {
+   public ModelResolver(ModelPack pack, CustomJsonModel model) {
       this.pack = pack;
-      this.model = pack.getModel();
+      this.model = model;
    }
 
    public IExpression getParameter(String name) {
@@ -53,7 +53,7 @@ public class ModelResolver implements IExpressionResolver {
             case "tex": {
                return pack.getTexture(second);
             }
-            case "item": {
+            case "inv": {
                return null;
             }
             default: {
