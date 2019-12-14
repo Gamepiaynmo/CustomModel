@@ -91,6 +91,10 @@ public class CustomModelClient implements ClientModInitializer {
         for (ModelPack pack : modelPacks.values())
             pack.release();
         modelPacks.clear();
+        queried.clear();
+
+        serverConfig = null;
+        configQueried = false;
     }
 
     private static void addModel(String name, ModelPack pack) {

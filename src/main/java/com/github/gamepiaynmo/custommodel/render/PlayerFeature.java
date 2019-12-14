@@ -1,5 +1,6 @@
 package com.github.gamepiaynmo.custommodel.render;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -57,23 +58,23 @@ public enum PlayerFeature {
     static {
         for (PlayerFeature feature : PlayerFeature.values())
             id2Feature.put(feature.id, feature);
-        featureLists.put("helmet_all", Lists.newArrayList(HELMET_HEAD, HELMET_HEAD_OVERLAY));
-        featureLists.put("chestplate_all", Lists.newArrayList(CHESTPLATE_BODY, CHESTPLATE_LEFT_ARM, CHESTPLATE_RIGHT_ARM));
-        featureLists.put("leggings_all", Lists.newArrayList(LEGGINGS_BODY, LEGGINGS_LEFT_LEG, LEGGINGS_RIGHT_LEG));
-        featureLists.put("boots_all", Lists.newArrayList(BOOTS_LEFT_LEG, BOOTS_RIGHT_LEG));
-        featureLists.put("armor_body_all", Lists.newArrayList(CHESTPLATE_BODY, LEGGINGS_BODY));
-        featureLists.put("armor_arms_all", Lists.newArrayList(CHESTPLATE_LEFT_ARM, CHESTPLATE_RIGHT_ARM));
-        featureLists.put("armor_left_leg_all", Lists.newArrayList(LEGGINGS_LEFT_LEG, BOOTS_LEFT_LEG));
-        featureLists.put("armor_right_leg_all", Lists.newArrayList(LEGGINGS_RIGHT_LEG, BOOTS_RIGHT_LEG));
-        featureLists.put("armor_legs_all", Lists.newArrayList(LEGGINGS_LEFT_LEG, LEGGINGS_RIGHT_LEG, BOOTS_LEFT_LEG, BOOTS_RIGHT_LEG));
-        featureLists.put("armor_all", Lists.newArrayList(HELMET_HEAD, HELMET_HEAD_OVERLAY, CHESTPLATE_BODY, CHESTPLATE_LEFT_ARM,
+        featureLists.put("helmet_all", ImmutableList.of(HELMET_HEAD, HELMET_HEAD_OVERLAY));
+        featureLists.put("chestplate_all", ImmutableList.of(CHESTPLATE_BODY, CHESTPLATE_LEFT_ARM, CHESTPLATE_RIGHT_ARM));
+        featureLists.put("leggings_all", ImmutableList.of(LEGGINGS_BODY, LEGGINGS_LEFT_LEG, LEGGINGS_RIGHT_LEG));
+        featureLists.put("boots_all", ImmutableList.of(BOOTS_LEFT_LEG, BOOTS_RIGHT_LEG));
+        featureLists.put("armor_body_all", ImmutableList.of(CHESTPLATE_BODY, LEGGINGS_BODY));
+        featureLists.put("armor_arms_all", ImmutableList.of(CHESTPLATE_LEFT_ARM, CHESTPLATE_RIGHT_ARM));
+        featureLists.put("armor_left_leg_all", ImmutableList.of(LEGGINGS_LEFT_LEG, BOOTS_LEFT_LEG));
+        featureLists.put("armor_right_leg_all", ImmutableList.of(LEGGINGS_RIGHT_LEG, BOOTS_RIGHT_LEG));
+        featureLists.put("armor_legs_all", ImmutableList.of(LEGGINGS_LEFT_LEG, LEGGINGS_RIGHT_LEG, BOOTS_LEFT_LEG, BOOTS_RIGHT_LEG));
+        featureLists.put("armor_all", ImmutableList.of(HELMET_HEAD, HELMET_HEAD_OVERLAY, CHESTPLATE_BODY, CHESTPLATE_LEFT_ARM,
                 CHESTPLATE_RIGHT_ARM, LEGGINGS_BODY, LEGGINGS_LEFT_LEG, LEGGINGS_RIGHT_LEG, BOOTS_LEFT_LEG, BOOTS_RIGHT_LEG));
 
-        featureLists.put("held_item_all", Lists.newArrayList(HELD_ITEM_LEFT, HELD_ITEM_RIGHT));
+        featureLists.put("held_item_all", ImmutableList.of(HELD_ITEM_LEFT, HELD_ITEM_RIGHT));
 
-        featureLists.put("shoulder_parrot_all", Lists.newArrayList(SHOULDER_PARROT_LEFT, SHOULDER_PARROT_RIGHT));
+        featureLists.put("shoulder_parrot_all", ImmutableList.of(SHOULDER_PARROT_LEFT, SHOULDER_PARROT_RIGHT));
 
-        featureLists.put("feature_all", Lists.newArrayList(HELMET_HEAD, HELMET_HEAD_OVERLAY, CHESTPLATE_BODY, CHESTPLATE_LEFT_ARM,
+        featureLists.put("feature_all", ImmutableList.of(HELMET_HEAD, HELMET_HEAD_OVERLAY, CHESTPLATE_BODY, CHESTPLATE_LEFT_ARM,
                 CHESTPLATE_RIGHT_ARM, LEGGINGS_LEFT_LEG, LEGGINGS_RIGHT_LEG, BOOTS_LEFT_LEG, BOOTS_RIGHT_LEG, HELD_ITEM_LEFT,
                 HELD_ITEM_RIGHT, CAPE, HEAD_WEARING, ELYTRA, SHOULDER_PARROT_LEFT, SHOULDER_PARROT_RIGHT));
     }

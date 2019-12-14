@@ -9,7 +9,6 @@
   "text.autoconfig.custommodel.option.customBoundingBox": "允许改变碰撞体积",
   "text.autoconfig.custommodel.option.customBoundingBox.@Tooltip": "允许自定义模型改变碰撞体积，若服务端未允许或服务端未安装模组则无效",
 
-
   "error.custommodel.loadmodelpack": "加载模型包失败：%s",
   "error.custommodel.loadmodelpack.nomodel": "未找到model.json",
   "error.custommodel.loadmodelpack.nohidebone": "未找到骨骼%s",
@@ -37,5 +36,7 @@
   "error.custommodel.parse.missend": "缺少尾操作符：%s",
   "error.custommodel.parse.invalidchar": "无效的字符：‘%c’，位于：%s",
   "error.custommodel.parse.missexpr": "缺少表达式",
-  "error.custommodel.parse.invalidfunc": "未知函数：%s"
+  "error.custommodel.parse.invalidfunc": "未知函数：%s",
+
+  "command.custommodel.listmodels": "当前共有%d个模型：%s"
 }

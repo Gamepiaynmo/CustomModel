@@ -11,6 +11,7 @@ import com.github.gamepiaynmo.custommodel.render.model.IBone;
 import com.github.gamepiaynmo.custommodel.util.*;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Queues;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -25,6 +26,7 @@ import org.lwjgl.opengl.GL11;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.function.Supplier;
 
 public class CustomJsonModel {
@@ -124,6 +126,9 @@ public class CustomJsonModel {
             }
         }
 
+        for (PlayerBone bone : PlayerBone.values())
+            model.children.put(bone.getId(), Lists.newArrayList());
+
         JsonElement boneArray = jsonObj.get(BONES);
         if (boneArray != null) {
             for (JsonElement element : boneArray.getAsJsonArray()) {
@@ -131,6 +136,9 @@ public class CustomJsonModel {
                 Bone bone = Bone.getBoneFromJson(pack, model, boneObj);
                 model.id2Bone.put(bone.getId(), bone);
                 model.bones.add(bone);
+
+                model.children.put(bone.getId(), Lists.newArrayList());
+                model.children.get(bone.getParent().getId()).add(bone);
             }
         }
 
@@ -161,6 +169,8 @@ public class CustomJsonModel {
     private Map<String, Matrix4> boneMats = Maps.newHashMap();
     private Map<String, Matrix4> lastBoneMats = Maps.newHashMap();
     private Map<String, Matrix4> tmpBoneMats = Maps.newHashMap();
+
+    private Map<String, List<Bone>> children = Maps.newHashMap();
 
     private final ExpressionParser parser;
 
@@ -232,9 +242,6 @@ public class CustomJsonModel {
         RenderParameter params = CustomModelClient.currentParameter;
         PlayerEntityModel model = CustomModelClient.currentModel;
 
-        if (lastBoneMats.isEmpty())
-            ((ICustomPlayerRenderer) CustomModelClient.currentRenderer).tick(CustomModelClient.currentPlayer);
-
         update(baseMat);
 
         float partial = params.partial;
@@ -254,10 +261,45 @@ public class CustomJsonModel {
         GlStateManager.popMatrix();
     }
 
+    public void render(Matrix4 baseMat, IBone root) {
+        AbstractClientPlayerEntity entity = CustomModelClient.currentPlayer;
+        RenderParameter params = CustomModelClient.currentParameter;
+        PlayerEntityModel model = CustomModelClient.currentModel;
+
+        update(baseMat);
+
+        float partial = params.partial;
+        GlStateManager.pushMatrix();
+        GL11.glMultMatrixd(baseMat.cpy().inv().val);
+
+        Queue<Bone> queue = Queues.newArrayDeque();
+        for (Bone bone : children.get(root.getId()))
+            queue.offer(bone);
+
+        while (!queue.isEmpty()) {
+            Bone bone = queue.poll();
+            CustomModelClient.textureManager.bindTexture(bone.getTexture().get());
+            GlStateManager.pushMatrix();
+            Matrix4 transform = tmpBoneMats.get(bone.getId());
+
+            GL11.glMultMatrixd(transform.val);
+            if (bone.isVisible())
+                bone.render();
+            GlStateManager.popMatrix();
+
+            for (Bone child : children.get(bone.getId()))
+                queue.offer(bone);
+        }
+        GlStateManager.popMatrix();
+    }
+
     public void update(Matrix4 baseMat) {
         AbstractClientPlayerEntity entity = CustomModelClient.currentPlayer;
         PlayerEntityModel model = CustomModelClient.currentModel;
         float partial = CustomModelClient.currentParameter.partial;
+
+        if (lastBoneMats.isEmpty())
+            ((ICustomPlayerRenderer) CustomModelClient.currentRenderer).tick(CustomModelClient.currentPlayer);
 
         if (entity.isInSneakingPose())
             baseMat = baseMat.cpy().translate(0, 0.2f, 0);

@@ -13,6 +13,5 @@ public class MixinMinecraftClient {
     @Inject(method = "disconnect(Lnet/minecraft/client/gui/screen/Screen;)V", at = @At("TAIL"))
     public void clearModelPacks(Screen screen, CallbackInfo info) {
         CustomModelClient.clearModels();
-        CustomModelClient.serverConfig = null;
     }
 }

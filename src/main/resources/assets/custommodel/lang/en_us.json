@@ -36,5 +36,7 @@
   "error.custommodel.parse.missend": "Missing end token: %s",
   "error.custommodel.parse.invalidchar": "Invalid character: '%c', in: %s",
   "error.custommodel.parse.missexpr": "Missing expression",
-  "error.custommodel.parse.invalidfunc": "Unknown function: %s"
+  "error.custommodel.parse.invalidfunc": "Unknown function: %s",
+
+  "command.custommodel.listmodels": "There are %d model packs: %s"
 }

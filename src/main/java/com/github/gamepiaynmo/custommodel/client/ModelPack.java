@@ -11,8 +11,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.mojang.blaze3d.platform.TextureUtil;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.texture.NativeImage;
+import net.minecraft.client.texture.Texture;
 import net.minecraft.client.texture.TextureManager;
 import net.minecraft.util.Identifier;
 import org.apache.commons.io.IOUtils;
@@ -37,6 +39,7 @@ public class ModelPack {
     private CustomJsonModel model;
     private boolean success = false;
     private String dirName;
+    private List<Texture> texList = Lists.newArrayList();
 
     private ModelPack() {}
 
@@ -171,7 +174,9 @@ public class ModelPack {
             pack.textureIds.put(getFileName(texture.getName()), pack.textures.size());
             pack.textures.add(identifier);
             NativeImage image = NativeImage.read(texture.getInputStream());
-            textureManager.registerTexture(identifier, new CustomTexture(image));
+            CustomTexture tex = new CustomTexture(image);
+            pack.texList.add(tex);
+            textureManager.registerTexture(identifier, tex);
         }
 
         pack.model = CustomJsonModel.fromJson(pack, pack.modelJson);
@@ -227,8 +232,8 @@ public class ModelPack {
     }
 
     public void release() {
-        for (Identifier texture : textures)
-            CustomModelClient.textureManager.destroyTexture(texture);
+        for (Texture texture : texList)
+            TextureUtil.releaseTextureId(texture.getGlId());
         model.release();
     }
 

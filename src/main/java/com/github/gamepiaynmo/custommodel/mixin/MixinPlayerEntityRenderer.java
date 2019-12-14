@@ -29,6 +29,7 @@ import net.minecraft.util.UseAction;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -114,6 +115,68 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
         }
 
         this.setModelPose_c(playerEntity);
+    }
+
+    @Inject(method = "renderRightArm", at = @At("HEAD"), cancellable = true)
+    public void renderRightArm(AbstractClientPlayerEntity abstractClientPlayerEntity, CallbackInfo info) {
+        ModelPack pack = CustomModelClient.getModelForPlayer(abstractClientPlayerEntity);
+        if (pack != null) {
+            CustomJsonModel model = pack.getModel();
+            CustomModelClient.currentJsonModel = model;
+
+            GlStateManager.color3f(1.0F, 1.0F, 1.0F);
+            PlayerEntityModel<AbstractClientPlayerEntity> playerEntityModel = getModel();
+            GlStateManager.enableBlend();
+
+            playerEntityModel.isSneaking = false;
+            playerEntityModel.handSwingProgress = 0.0F;
+            playerEntityModel.field_3396 = 0.0F;
+            playerEntityModel.method_17087(abstractClientPlayerEntity, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F);
+            playerEntityModel.rightArm.pitch = 0.0F;
+            playerEntityModel.rightArmOverlay.pitch = 0.0F;
+
+            model.clearTransform();
+            model.update(this.transform);
+            if (!model.isHidden(PlayerBone.RIGHT_ARM))
+                playerEntityModel.rightArm.render(0.0625F);
+            if (!model.isHidden(PlayerBone.RIGHT_ARM_OVERLAY))
+                playerEntityModel.rightArmOverlay.render(0.0625F);
+            model.render(model.getTransform(PlayerBone.RIGHT_ARM.getBone()), PlayerBone.RIGHT_ARM.getBone());
+
+            GlStateManager.disableBlend();
+            info.cancel();
+        }
+    }
+
+    @Inject(method = "renderLeftArm", at = @At("HEAD"), cancellable = true)
+    public void renderLeftArm(AbstractClientPlayerEntity abstractClientPlayerEntity, CallbackInfo info) {
+        ModelPack pack = CustomModelClient.getModelForPlayer(abstractClientPlayerEntity);
+        if (pack != null) {
+            CustomJsonModel model = pack.getModel();
+            CustomModelClient.currentJsonModel = model;
+
+            GlStateManager.color3f(1.0F, 1.0F, 1.0F);
+            PlayerEntityModel<AbstractClientPlayerEntity> playerEntityModel = getModel();
+            GlStateManager.enableBlend();
+
+            playerEntityModel.isSneaking = false;
+            playerEntityModel.handSwingProgress = 0.0F;
+            playerEntityModel.field_3396 = 0.0F;
+            playerEntityModel.method_17087(abstractClientPlayerEntity, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F);
+            playerEntityModel.leftArm.pitch = 0.0F;
+            playerEntityModel.leftArmOverlay.pitch = 0.0F;
+
+            model.clearTransform();
+            model.update(this.transform);
+            if (!model.isHidden(PlayerBone.LEFT_ARM))
+                playerEntityModel.leftArm.render(0.0625F);
+            if (!model.isHidden(PlayerBone.LEFT_ARM_OVERLAY))
+                playerEntityModel.leftArmOverlay.render(0.0625F);
+            model.render(model.getTransform(PlayerBone.LEFT_ARM.getBone()), PlayerBone.LEFT_ARM.getBone());
+
+            GlStateManager.disableBlend();
+            info.cancel();
+        }
     }
 
     @Override

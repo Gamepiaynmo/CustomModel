@@ -6,6 +6,7 @@ import com.github.gamepiaynmo.custommodel.render.model.IBone;
 import com.github.gamepiaynmo.custommodel.util.Matrix4;
 import com.github.gamepiaynmo.custommodel.util.Vec2d;
 import com.github.gamepiaynmo.custommodel.util.Vector3;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.minecraft.client.model.Cuboid;
@@ -35,7 +36,7 @@ public enum PlayerBone {
     private final String id;
     private final Supplier<Cuboid> cuboidGetter;
     private static final Map<String, PlayerBone> id2Bone = Maps.newHashMap();
-    private static final Map<String, List<PlayerBone>> boneLists = Maps.newHashMap();
+    private static final Map<String, Collection<PlayerBone>> boneLists = Maps.newHashMap();
     private final IBone bone;
 
     private static final Vector3 One = new Vector3(1, 1, 1);
@@ -173,15 +174,15 @@ public enum PlayerBone {
     static {
         for (PlayerBone bone : PlayerBone.values())
             id2Bone.put(bone.getId(), bone);
-        boneLists.put("head_all", Lists.newArrayList(HEAD, HEAD_OVERLAY));
-        boneLists.put("body_all", Lists.newArrayList(BODY, BODY_OVERLAY));
-        boneLists.put("left_arm_all", Lists.newArrayList(LEFT_ARM, LEFT_ARM_OVERLAY));
-        boneLists.put("right_arm_all", Lists.newArrayList(RIGHT_ARM, RIGHT_ARM_OVERLAY));
-        boneLists.put("arms_all", Lists.newArrayList(LEFT_ARM, LEFT_ARM_OVERLAY, RIGHT_ARM, RIGHT_ARM_OVERLAY));
-        boneLists.put("left_leg_all", Lists.newArrayList(LEFT_LEG, LEFT_LEG_OVERLAY));
-        boneLists.put("right_leg_all", Lists.newArrayList(RIGHT_LEG, RIGHT_LEG_OVERLAY));
-        boneLists.put("legs_all", Lists.newArrayList(LEFT_LEG, LEFT_LEG_OVERLAY, RIGHT_LEG, RIGHT_LEG_OVERLAY));
-        boneLists.put("model_all", Lists.newArrayList(HEAD, HEAD_OVERLAY, BODY, BODY_OVERLAY, LEFT_ARM, LEFT_ARM_OVERLAY,
+        boneLists.put("head_all", ImmutableList.of(HEAD, HEAD_OVERLAY));
+        boneLists.put("body_all", ImmutableList.of(BODY, BODY_OVERLAY));
+        boneLists.put("left_arm_all", ImmutableList.of(LEFT_ARM, LEFT_ARM_OVERLAY));
+        boneLists.put("right_arm_all", ImmutableList.of(RIGHT_ARM, RIGHT_ARM_OVERLAY));
+        boneLists.put("arms_all", ImmutableList.of(LEFT_ARM, LEFT_ARM_OVERLAY, RIGHT_ARM, RIGHT_ARM_OVERLAY));
+        boneLists.put("left_leg_all", ImmutableList.of(LEFT_LEG, LEFT_LEG_OVERLAY));
+        boneLists.put("right_leg_all", ImmutableList.of(RIGHT_LEG, RIGHT_LEG_OVERLAY));
+        boneLists.put("legs_all", ImmutableList.of(LEFT_LEG, LEFT_LEG_OVERLAY, RIGHT_LEG, RIGHT_LEG_OVERLAY));
+        boneLists.put("model_all", ImmutableList.of(HEAD, HEAD_OVERLAY, BODY, BODY_OVERLAY, LEFT_ARM, LEFT_ARM_OVERLAY,
                 RIGHT_ARM, RIGHT_ARM_OVERLAY, LEFT_LEG, LEFT_LEG_OVERLAY, RIGHT_LEG, RIGHT_LEG_OVERLAY));
     }
 }
