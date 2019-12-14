@@ -149,7 +149,7 @@
 			"parent": "head_c",
 			"position": [-5, -3, 2],
 			"rotation": [90, 70, 0],
-			"texture": "if(health<=10,tex.eye_part1,tex.eye_part2)",
+			"texture": "if(inv.chestplate==item.elytra,tex.eye_part1,tex.eye_part2)",
 			"textureSize": [50, 50],
 			"particles": [
 				{
