@@ -7,18 +7,19 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.PacketByteBuf;
 
 import java.io.*;
+import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 public class PacketModel implements Packet<ClientPlayPacketListener> {
     public static final Identifier ID = new Identifier(CustomModel.MODID, "packet_model");
-    private String name;
+    private UUID uuid;
     private byte[] data;
     public boolean success;
 
-    public PacketModel(File modelFile, String name) {
+    public PacketModel(File modelFile, UUID name) {
         try {
-            this.name = name;
+            this.uuid = name;
             if (modelFile.isFile()) {
                 InputStream stream = new FileInputStream(modelFile);
                 int len = stream.available();
@@ -57,7 +58,7 @@ public class PacketModel implements Packet<ClientPlayPacketListener> {
 
     @Override
     public void read(PacketByteBuf buf) throws IOException {
-        name = buf.readString();
+        uuid = buf.readUuid();
         int len = buf.readInt();
         data = new byte[len];
         buf.readBytes(data);
@@ -65,7 +66,7 @@ public class PacketModel implements Packet<ClientPlayPacketListener> {
 
     @Override
     public void write(PacketByteBuf buf) throws IOException {
-        buf.writeString(name);
+        buf.writeUuid(uuid);
         buf.writeInt(data.length);
         buf.writeBytes(data);
     }
@@ -75,8 +76,8 @@ public class PacketModel implements Packet<ClientPlayPacketListener> {
 
     }
 
-    public String getName() {
-        return name;
+    public UUID getUuid() {
+        return uuid;
     }
 
     public byte[] getData() {

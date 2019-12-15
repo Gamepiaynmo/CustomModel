@@ -38,5 +38,7 @@
   "error.custommodel.parse.missexpr": "缺少表达式",
   "error.custommodel.parse.invalidfunc": "未知函数：%s",
 
-  "command.custommodel.listmodels": "当前共有%d个模型：%s"
+  "command.custommodel.listmodels": "当前共有%d个模型：%s",
+  "command.custommodel.reload": "重新加载了%d个玩家的模型",
+  "command.custommodel.select": "将%d个玩家的模型设置为%s"
 }

@@ -1,20 +1,17 @@
-package net.minecraft.server;
+package com.github.gamepiaynmo.custommodel.server.selector;
 
 import com.github.gamepiaynmo.custommodel.api.IModelSelector;
 import com.github.gamepiaynmo.custommodel.server.CustomModel;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.ModelList;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 import java.util.UUID;
 
 public class DefaultModelSelector implements IModelSelector {

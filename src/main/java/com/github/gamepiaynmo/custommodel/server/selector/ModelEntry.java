@@ -1,8 +1,7 @@
-package net.minecraft.server;
+package com.github.gamepiaynmo.custommodel.server.selector;
 
 import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
-import net.minecraft.server.ServerConfigEntry;
 
 import java.util.UUID;
 

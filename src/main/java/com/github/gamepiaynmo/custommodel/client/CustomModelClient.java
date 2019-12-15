@@ -4,10 +4,7 @@ import com.github.gamepiaynmo.custommodel.network.PacketModel;
 import com.github.gamepiaynmo.custommodel.network.PacketQuery;
 import com.github.gamepiaynmo.custommodel.network.PacketQueryConfig;
 import com.github.gamepiaynmo.custommodel.network.PacketReplyConfig;
-import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
-import com.github.gamepiaynmo.custommodel.render.EntityParameter;
-import com.github.gamepiaynmo.custommodel.render.ICustomPlayerRenderer;
-import com.github.gamepiaynmo.custommodel.render.RenderParameter;
+import com.github.gamepiaynmo.custommodel.render.*;
 import com.github.gamepiaynmo.custommodel.server.CustomModel;
 import com.github.gamepiaynmo.custommodel.server.ModConfig;
 import com.github.gamepiaynmo.custommodel.util.Matrix4;
@@ -34,18 +31,16 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class CustomModelClient implements ClientModInitializer {
-    private static final Map<String, ModelPack> modelPacks = Maps.newHashMap();
+    private static final Map<UUID, ModelPack> modelPacks = Maps.newHashMap();
+    private static int clearCounter = 0;
 
     public static TextureManager textureManager;
     public static Map<String, PlayerEntityRenderer> playerRenderers;
 
-    private static final Set<GameProfile> queried = Sets.newHashSet();
+    private static final Set<UUID> queried = Sets.newHashSet();
     public static ModConfig serverConfig;
     public static boolean configQueried = false;
 
@@ -71,22 +66,6 @@ public class CustomModelClient implements ClientModInitializer {
         }
     }
 
-    public static void clearModel(GameProfile profile) {
-        String nameEntry = profile.getName().toLowerCase();
-        UUID uuid = PlayerEntity.getUuidFromProfile(profile);
-        String uuidEntry = uuid.toString().toLowerCase();
-        List<String> files = ImmutableList.of(nameEntry, uuidEntry);
-        queried.remove(profile);
-
-        for (String entry : files) {
-            ModelPack pack = modelPacks.get(nameEntry);
-            if (pack != null) {
-                modelPacks.remove(nameEntry);
-                pack.release();
-            }
-        }
-    }
-
     public static void clearModels() {
         for (ModelPack pack : modelPacks.values())
             pack.release();
@@ -97,60 +76,78 @@ public class CustomModelClient implements ClientModInitializer {
         configQueried = false;
     }
 
-    private static void addModel(String name, ModelPack pack) {
+    private static void addModel(UUID name, ModelPack pack) {
         ModelPack old = modelPacks.get(name);
         if (old != null)
             old.release();
         modelPacks.put(name, pack);
     }
 
-    private static void reloadModel(GameProfile profile) {
-        queried.add(profile);
+    private static boolean loadModel(UUID uuid, String model) {
+        File modelFile = new File(CustomModel.MODEL_DIR + "/" + model);
+        ModelPack pack = null;
+
+        try {
+            if (modelFile.isDirectory())
+                pack = ModelPack.fromDirectory(textureManager, modelFile, uuid);
+            if (modelFile.isFile())
+                pack = ModelPack.fromZipFile(textureManager, modelFile, uuid);
+        } catch (Exception e) {
+            MinecraftClient.getInstance().inGameHud.addChatMessage(MessageType.CHAT,
+                    new TranslatableText("error.custommodel.loadmodelpack", e.getMessage()));
+            LOGGER.warn(e.getMessage(), e);
+        }
+
+        if (pack != null && pack.successfulLoaded()) {
+            addModel(uuid, pack);
+            return true;
+        }
+
+        return false;
+    }
+
+    public static void queryModel(GameProfile profile) {
+        UUID uuid = PlayerEntity.getUuidFromProfile(profile);
+        queried.add(uuid);
+
         if (ClientSidePacketRegistry.INSTANCE.canServerReceive(PacketQuery.ID))
             sendPacket(PacketQuery.ID, new PacketQuery(profile));
-        else {
-            String nameEntry = profile.getName().toLowerCase();
-            UUID uuid = PlayerEntity.getUuidFromProfile(profile);
-            String uuidEntry = uuid.toString().toLowerCase();
-            List<String> files = ImmutableList.of(nameEntry, uuidEntry, nameEntry + ".zip", uuidEntry + ".zip");
+        else reloadModel(profile);
+    }
 
-            ModelPack pack = null;
-            for (String entry : files) {
-                File modelFile = new File(CustomModel.MODEL_DIR + "/" + entry);
+    public static void selectModel(GameProfile profile, String model) {
+        UUID uuid = PlayerEntity.getUuidFromProfile(profile);
+        loadModel(uuid, model);
+    }
 
-                try {
-                    if (modelFile.isDirectory())
-                        pack = ModelPack.fromDirectory(textureManager, modelFile, uuidEntry);
-                    if (modelFile.isFile())
-                        pack = ModelPack.fromZipFile(textureManager, modelFile, uuidEntry);
-                } catch (Exception e) {
-                    MinecraftClient.getInstance().inGameHud.addChatMessage(MessageType.CHAT,
-                            new TranslatableText("error.custommodel.loadmodelpack", e.getMessage()));
-                    LOGGER.warn(e.getMessage(), e);
-                }
+    public static void reloadModel(GameProfile profile) {
+        UUID uuid = PlayerEntity.getUuidFromProfile(profile);
+        String nameEntry = profile.getName().toLowerCase();
+        String uuidEntry = uuid.toString().toLowerCase();
+        List<String> files = ImmutableList.of(nameEntry, uuidEntry, nameEntry + ".zip", uuidEntry + ".zip");
 
-                if (pack != null && pack.successfulLoaded()) {
-                    addModel(pack.getDirName(), pack);
-                    break;
-                }
-            }
-        }
+        for (String entry : files)
+            if (loadModel(uuid, entry))
+                break;
     }
 
     public static ModelPack getModelForPlayer(AbstractClientPlayerEntity player) {
         GameProfile profile = player.getGameProfile();
         if (profile != null) {
             UUID uuid = PlayerEntity.getUuidFromProfile(profile);
-            String uuidEntry = uuid.toString().toLowerCase();
 
-            ModelPack pack = modelPacks.get(uuidEntry);
+            ModelPack pack = modelPacks.get(uuid);
             if (pack != null)
                 return pack;
 
-            if (!queried.contains(profile))
-                reloadModel(profile);
+            if (!queried.contains(uuid))
+                queryModel(profile);
         }
         return null;
+    }
+
+    public static float getPartial() {
+        return ((IPartial) (Object) MinecraftClient.getInstance()).getPartial();
     }
 
     @Override
@@ -175,6 +172,21 @@ public class CustomModelClient implements ClientModInitializer {
                         serverConfig.customBoundingBox = false;
                     }
                 }
+
+                if (clearCounter++ > 200) {
+                    clearCounter = 0;
+                    Set<UUID> uuids = Sets.newHashSet();
+                    for (AbstractClientPlayerEntity playerEntity : client.world.getPlayers())
+                        uuids.add(PlayerEntity.getUuidFromProfile(playerEntity.getGameProfile()));
+                    for (Iterator<Map.Entry<UUID, ModelPack>> iter = modelPacks.entrySet().iterator(); iter.hasNext();) {
+                        Map.Entry<UUID, ModelPack> entry = iter.next();
+                        if (!uuids.contains(entry.getKey())) {
+                            entry.getValue().release();
+                            queried.remove(entry.getKey());
+                            iter.remove();
+                        }
+                    }
+                }
             }
         });
 
@@ -185,14 +197,14 @@ public class CustomModelClient implements ClientModInitializer {
                 context.getTaskQueue().execute(() -> {
                     ModelPack pack = null;
                     try {
-                        pack = ModelPack.fromZipMemory(textureManager, packet.getName(), packet.getData());
+                        pack = ModelPack.fromZipMemory(textureManager, packet.getUuid(), packet.getData());
                     } catch (Exception e) {
                         MinecraftClient.getInstance().inGameHud.addChatMessage(MessageType.CHAT,
                                 new TranslatableText("error.custommodel.loadmodelpack", e.getMessage()));
                         LOGGER.warn(e.getMessage(), e);
                     }
                     if (pack != null && pack.successfulLoaded())
-                        addModel(pack.getDirName(), pack);
+                        addModel(packet.getUuid(), pack);
                 });
             } catch (Exception e) {
                 LOGGER.warn(e.getMessage(), e);

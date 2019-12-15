@@ -1,10 +1,10 @@
-package net.minecraft.server;
+package com.github.gamepiaynmo.custommodel.server.selector;
 
+import com.github.gamepiaynmo.custommodel.server.selector.ModelEntry;
 import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
 
 import java.io.File;
-import java.util.Iterator;
 
 public class ModelList extends ServerConfigList<GameProfile, ModelEntry> {
     public ModelList(File file) {

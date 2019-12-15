@@ -38,5 +38,7 @@
   "error.custommodel.parse.missexpr": "Missing expression",
   "error.custommodel.parse.invalidfunc": "Unknown function: %s",
 
-  "command.custommodel.listmodels": "There are %d model packs: %s"
+  "command.custommodel.listmodels": "There are %d model packs: %s",
+  "command.custommodel.reload": "Reloaded models for %d player(s)",
+  "command.custommodel.select": "Changed the model of %d player(s) to %s"
 }

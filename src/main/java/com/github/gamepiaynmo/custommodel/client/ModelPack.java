@@ -23,6 +23,7 @@ import java.io.*;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -43,7 +44,7 @@ public class ModelPack {
 
     private ModelPack() {}
 
-    public static ModelPack fromDirectory(TextureManager textureManager, File dir, String name) throws IOException, ParseException {
+    public static ModelPack fromDirectory(TextureManager textureManager, File dir, UUID uuid) throws IOException, ParseException {
         IModelResource modelFile = null;
         List<IModelResource> textureFiles = Lists.newArrayList();
 
@@ -75,10 +76,10 @@ public class ModelPack {
                 textureFiles.add(new FileResource(modelPackItem));
         }
 
-        return fromResource(textureManager, name, modelFile, textureFiles);
+        return fromResource(textureManager, uuid, modelFile, textureFiles);
     }
 
-    public static ModelPack fromZipFile(TextureManager textureManager, File zipFile, String name) throws IOException, ParseException {
+    public static ModelPack fromZipFile(TextureManager textureManager, File zipFile, UUID uuid) throws IOException, ParseException {
         ZipInputStream zip = new ZipInputStream(new BufferedInputStream(new FileInputStream(zipFile)));
         ZipFile file = new ZipFile(zipFile);
         ZipEntry entry;
@@ -113,10 +114,10 @@ public class ModelPack {
                 textureFiles.add(new ZipResource(entry));
         }
 
-        return fromResource(textureManager, name, modelFile, textureFiles);
+        return fromResource(textureManager, uuid, modelFile, textureFiles);
     }
 
-    public static ModelPack fromZipMemory(TextureManager textureManager, String name, byte[] data) throws IOException, ParseException {
+    public static ModelPack fromZipMemory(TextureManager textureManager, UUID uuid, byte[] data) throws IOException, ParseException {
         ZipInputStream zip = new ZipInputStream(new ByteArrayInputStream(data));
         ZipEntry entry;
         byte[] buffer = new byte[1024];
@@ -158,12 +159,12 @@ public class ModelPack {
                 textureFiles.add(new MemoryResource(entry));
         }
 
-        return fromResource(textureManager, name, modelFile, textureFiles);
+        return fromResource(textureManager, uuid, modelFile, textureFiles);
     }
 
-    public static ModelPack fromResource(TextureManager textureManager, String name, IModelResource model, Collection<IModelResource> textures) throws IOException, ParseException {
+    public static ModelPack fromResource(TextureManager textureManager, UUID uuid, IModelResource model, Collection<IModelResource> textures) throws IOException, ParseException {
         ModelPack pack = new ModelPack();
-        pack.dirName = getFileName(name);
+        pack.dirName = uuid.toString().toLowerCase();
         if (model == null)
             throw new TranslatableException("error.custommodel.loadmodelpack.nomodel");
         InputStream modelInputStream = model.getInputStream();
@@ -235,10 +236,6 @@ public class ModelPack {
         for (Texture texture : texList)
             TextureUtil.releaseTextureId(texture.getGlId());
         model.release();
-    }
-
-    public String getDirName() {
-        return dirName;
     }
 
     public interface TextureGetter {

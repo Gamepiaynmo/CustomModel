@@ -122,7 +122,14 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
         ModelPack pack = CustomModelClient.getModelForPlayer(abstractClientPlayerEntity);
         if (pack != null) {
             CustomJsonModel model = pack.getModel();
+            partial = CustomModelClient.getPartial();
             CustomModelClient.currentJsonModel = model;
+            CustomModelClient.currentModel = getModel();
+            CustomModelClient.currentParameter = calculateTransform(abstractClientPlayerEntity);
+            CustomModelClient.currentPlayer = abstractClientPlayerEntity;
+            CustomModelClient.currentRenderer = (PlayerEntityRenderer) (Object) this;
+            model.clearTransform();
+            model.update(this.transform);
 
             GlStateManager.color3f(1.0F, 1.0F, 1.0F);
             PlayerEntityModel<AbstractClientPlayerEntity> playerEntityModel = getModel();
@@ -135,8 +142,6 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
             playerEntityModel.rightArm.pitch = 0.0F;
             playerEntityModel.rightArmOverlay.pitch = 0.0F;
 
-            model.clearTransform();
-            model.update(this.transform);
             if (!model.isHidden(PlayerBone.RIGHT_ARM))
                 playerEntityModel.rightArm.render(0.0625F);
             if (!model.isHidden(PlayerBone.RIGHT_ARM_OVERLAY))
@@ -153,7 +158,14 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
         ModelPack pack = CustomModelClient.getModelForPlayer(abstractClientPlayerEntity);
         if (pack != null) {
             CustomJsonModel model = pack.getModel();
+            partial = CustomModelClient.getPartial();
             CustomModelClient.currentJsonModel = model;
+            CustomModelClient.currentModel = getModel();
+            CustomModelClient.currentParameter = calculateTransform(abstractClientPlayerEntity);
+            CustomModelClient.currentPlayer = abstractClientPlayerEntity;
+            CustomModelClient.currentRenderer = (PlayerEntityRenderer) (Object) this;
+            model.clearTransform();
+            model.update(this.transform);
 
             GlStateManager.color3f(1.0F, 1.0F, 1.0F);
             PlayerEntityModel<AbstractClientPlayerEntity> playerEntityModel = getModel();
@@ -166,8 +178,6 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
             playerEntityModel.leftArm.pitch = 0.0F;
             playerEntityModel.leftArmOverlay.pitch = 0.0F;
 
-            model.clearTransform();
-            model.update(this.transform);
             if (!model.isHidden(PlayerBone.LEFT_ARM))
                 playerEntityModel.leftArm.render(0.0625F);
             if (!model.isHidden(PlayerBone.LEFT_ARM_OVERLAY))

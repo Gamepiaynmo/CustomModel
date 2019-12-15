@@ -35,10 +35,12 @@ public class ServerCommand {
             dispatcher.register(CommandManager.literal(CustomModel.MODID
             ).then(CommandManager.literal("reload").executes(context -> {
                 CustomModel.reloadModel(context.getSource().getPlayer(), true);
+                context.getSource().sendFeedback(new TranslatableText("command.custommodel.reload", 1), true);
                 return 1;
             }).then(CommandManager.argument("targets", EntityArgumentType.players()).requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(2)).executes(context -> {
                 Collection<ServerPlayerEntity> players = EntityArgumentType.getPlayers(context, "targets");
                 players.forEach(player -> CustomModel.reloadModel(player, true));
+                context.getSource().sendFeedback(new TranslatableText("command.custommodel.reload", players.size()), true);
                 return players.size();
             }))).then(CommandManager.literal("list").requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(2)).executes(context -> {
                 List<File> fileList = Lists.newArrayList(new File(CustomModel.MODEL_DIR).listFiles());
@@ -48,12 +50,15 @@ public class ServerCommand {
                 })), false);
                 return fileList.size();
             })).then(CommandManager.literal("select").then(CommandManager.argument("model", new ModelArgumentType()).requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(2)).executes(context -> {
-                CustomModel.selectModel(context.getSource().getPlayer(), context.getArgument("model", String.class));
+                String model = context.getArgument("model", String.class);
+                CustomModel.selectModel(context.getSource().getPlayer(), model);
+                context.getSource().sendFeedback(new TranslatableText("command.custommodel.select", 1, model), true);
                 return 1;
             }).then(CommandManager.argument("targets", EntityArgumentType.players()).requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(2)).executes(context -> {
                 Collection<ServerPlayerEntity> players = EntityArgumentType.getPlayers(context, "targets");
                 String model = context.getArgument("model", String.class);
                 players.forEach(player -> CustomModel.selectModel(player, model));
+                context.getSource().sendFeedback(new TranslatableText("command.custommodel.select", players.size(), model), true);
                 return players.size();
             })))));
         });

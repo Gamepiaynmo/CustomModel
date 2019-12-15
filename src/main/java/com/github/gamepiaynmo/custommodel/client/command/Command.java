@@ -5,7 +5,13 @@ import com.github.gamepiaynmo.custommodel.server.CustomModel;
 import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.EntitySelector;
 import net.minecraft.command.arguments.EntityArgumentType;
 import net.minecraft.server.command.CommandSource;
@@ -15,20 +21,21 @@ import net.minecraft.text.TranslatableText;
 
 import java.io.File;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public class Command implements ClientCommandPlugin {
     @Override
     public void registerCommands(CommandDispatcher<CottonClientCommandSource> dispatcher) {
         dispatcher.register(ArgumentBuilders.literal(CustomModel.MODID
-        ).then(ArgumentBuilders.literal("reload").then(ArgumentBuilders.argument("targets", EntityArgumentType.players()).executes(context -> {
-            try {
-                List<GameProfile> players = ((IClientEntitySelector) (Object) context.getArgument("targets", EntitySelector.class)).getPlayers(context.getSource());
-                players.forEach(CustomModelClient::clearModel);
-                return players.size();
-            } catch (Exception e) {
-                e.printStackTrace();
-                return 0;
-            }
+        ).then(ArgumentBuilders.literal("reload").executes(context -> {
+            CustomModelClient.reloadModel(MinecraftClient.getInstance().player.getGameProfile());
+            context.getSource().sendFeedback(new TranslatableText("command.custommodel.reload", 1));
+            return 1;
+        }).then(ArgumentBuilders.argument("targets", EntityArgumentType.players()).executes(context -> {
+            List<GameProfile> players = ((IClientEntitySelector) (Object) context.getArgument("targets", EntitySelector.class)).getPlayers(context.getSource());
+            players.forEach(player -> CustomModelClient.reloadModel(player));
+            context.getSource().sendFeedback(new TranslatableText("command.custommodel.reload", players.size()));
+            return players.size();
         }))).then(ArgumentBuilders.literal("list").executes(context -> {
             List<File> fileList = Lists.newArrayList(new File(CustomModel.MODEL_DIR).listFiles());
             context.getSource().sendFeedback(new TranslatableText("command.custommodel.listmodels",
@@ -36,10 +43,36 @@ public class Command implements ClientCommandPlugin {
                 return new LiteralText(file.getName());
             })));
             return fileList.size();
-        })));
+        })).then(ArgumentBuilders.literal("select").then(ArgumentBuilders.argument("model", new ModelArgumentType()).executes(context -> {
+            String model = context.getArgument("model", String.class);
+            CustomModelClient.selectModel(MinecraftClient.getInstance().player.getGameProfile(), model);
+            context.getSource().sendFeedback(new TranslatableText("command.custommodel.select", 1, model));
+            return 1;
+        }).then(ArgumentBuilders.argument("targets", EntityArgumentType.players()).executes(context -> {
+            List<GameProfile> players = ((IClientEntitySelector) (Object) context.getArgument("targets", EntitySelector.class)).getPlayers(context.getSource());
+            String model = context.getArgument("model", String.class);
+            players.forEach(player -> CustomModelClient.selectModel(player, model));
+            context.getSource().sendFeedback(new TranslatableText("command.custommodel.select", players.size(), model));
+            return players.size();
+        })))));
     }
 
     public static interface IClientEntitySelector {
         List<GameProfile> getPlayers(CommandSource commandSource) throws CommandSyntaxException;
+    }
+
+    public static class ModelArgumentType implements ArgumentType<String> {
+        @Override
+        public String parse(StringReader reader) throws CommandSyntaxException {
+            return reader.readUnquotedString();
+        }
+
+        @Override
+        public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
+            S source = context.getSource();
+            if (source instanceof CommandSource) {
+                return ((CommandSource) source).getCompletions((CommandContext<CommandSource>) context, builder);
+            } else return Suggestions.empty();
+        }
     }
 }
