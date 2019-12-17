@@ -1,4 +1,8 @@
 {
+	"modelId": "black_rock_shooter",
+	"modelName": "Black Rock Shooter",
+	"version": "1.0",
+	"author": "Gamepiaynmo",
 	"hide": ["model_all", "armor_all"],
 	"bones": [
 		{

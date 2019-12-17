@@ -1,4 +1,8 @@
 {
+	"modelId": "noctis",
+	"modelName": "Noctis",
+	"version": "1.0",
+	"author": "Gamepiaynmo, AoHiroshi",
 	"hide": ["model_all", "armor_all"],
 	"bones": [
 		{
