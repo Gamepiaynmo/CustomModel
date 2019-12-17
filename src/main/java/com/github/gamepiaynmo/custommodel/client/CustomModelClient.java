@@ -25,6 +25,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.MessageType;
 import net.minecraft.network.Packet;
 import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.PacketByteBuf;
 import org.apache.logging.log4j.LogManager;
@@ -94,7 +95,7 @@ public class CustomModelClient implements ClientModInitializer {
                 pack = ModelPack.fromZipFile(textureManager, modelFile, uuid);
         } catch (Exception e) {
             MinecraftClient.getInstance().inGameHud.addChatMessage(MessageType.CHAT,
-                    new TranslatableText("error.custommodel.loadmodelpack", e.getMessage()));
+                    new TranslatableText("error.custommodel.loadmodelpack", modelFile.getName(), e.getMessage()).formatted(Formatting.RED));
             LOGGER.warn(e.getMessage(), e);
         }
 
@@ -200,7 +201,7 @@ public class CustomModelClient implements ClientModInitializer {
                         pack = ModelPack.fromZipMemory(textureManager, packet.getUuid(), packet.getData());
                     } catch (Exception e) {
                         MinecraftClient.getInstance().inGameHud.addChatMessage(MessageType.CHAT,
-                                new TranslatableText("error.custommodel.loadmodelpack", e.getMessage()));
+                                new TranslatableText("error.custommodel.loadmodelpack", "", e.getMessage()).formatted(Formatting.RED));
                         LOGGER.warn(e.getMessage(), e);
                     }
                     if (pack != null && pack.successfulLoaded())

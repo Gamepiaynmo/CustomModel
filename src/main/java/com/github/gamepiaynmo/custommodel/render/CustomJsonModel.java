@@ -8,6 +8,7 @@ import com.github.gamepiaynmo.custommodel.expression.ModelResolver;
 import com.github.gamepiaynmo.custommodel.expression.ParseException;
 import com.github.gamepiaynmo.custommodel.render.model.Bone;
 import com.github.gamepiaynmo.custommodel.render.model.IBone;
+import com.github.gamepiaynmo.custommodel.server.ModelInfo;
 import com.github.gamepiaynmo.custommodel.util.*;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -30,6 +31,11 @@ import java.util.Queue;
 import java.util.function.Supplier;
 
 public class CustomJsonModel {
+    public static final String MODEL_ID = "modelId";
+    public static final String MODEL_NAME = "modelName";
+    public static final String AUTHOR = "author";
+    public static final String VERSION = "version";
+
     public static final String HIDE = "hide";
     public static final String SKELETON = "skeleton";
     public static final String EYE_HEIGHT = "eyeHeight";
@@ -77,6 +83,8 @@ public class CustomJsonModel {
         CustomJsonModel model = new CustomJsonModel(pack);
         model.baseTexture = pack.getBaseTexture();
 
+        model.modelInfo = ModelInfo.fromJson(jsonObj);
+
         JsonElement hideArray = jsonObj.get(HIDE);
         if (hideArray != null) {
             for (JsonElement element : hideArray.getAsJsonArray()) {
@@ -104,27 +112,6 @@ public class CustomJsonModel {
                     throw new TranslatableException("error.custommodel.loadmodelpack.nohidebone", entry.getKey());
                 for (PlayerBone bone : bones)
                     model.skeleton.put(bone, vector);
-            }
-        }
-
-        JsonElement eyeHeightObj = jsonObj.get(EYE_HEIGHT);
-        if (eyeHeightObj != null) {
-            for (Map.Entry<String, JsonElement> entry : eyeHeightObj.getAsJsonObject().entrySet()) {
-                EntityPose pose = poseMap.get(entry.getKey());
-                if (pose == null)
-                    throw new TranslatableException("error.custommodel.loadmodelpack.unknownpose", entry.getKey());
-                model.eyeHeightMap.put(pose, entry.getValue().getAsFloat());
-            }
-        }
-
-        JsonElement dimensionObj = jsonObj.get(BOUNDING_BOX);
-        if (dimensionObj != null) {
-            for (Map.Entry<String, JsonElement> entry : dimensionObj.getAsJsonObject().entrySet()) {
-                EntityPose pose = poseMap.get(entry.getKey());
-                if (pose == null)
-                    throw new TranslatableException("error.custommodel.loadmodelpack.unknownpose", entry.getKey());
-                float[] dimension = Json.parseFloatArray(entry.getValue(), 2);
-                model.dimensionsMap.put(pose, new EntityDimensions(dimension[0], dimension[1], true));
             }
         }
 
@@ -156,12 +143,11 @@ public class CustomJsonModel {
 
     public final ModelPack pack;
 
+    private ModelInfo modelInfo;
     private List<PlayerBone> boneHideList = Lists.newArrayList();
     private List<PlayerFeature> featureHideList = Lists.newArrayList();
     private Map<PlayerBone, Boolean> visibleBones = Maps.newEnumMap(PlayerBone.class);
     private Map<PlayerBone, IExpressionFloat[]> skeleton = Maps.newEnumMap(PlayerBone.class);
-    public Map<EntityPose, Float> eyeHeightMap = Maps.newEnumMap(EntityPose.class);
-    public Map<EntityPose, EntityDimensions> dimensionsMap = Maps.newEnumMap(EntityPose.class);
 
     private Supplier<Identifier> baseTexture;
 
@@ -181,6 +167,10 @@ public class CustomJsonModel {
             visibleBones.put(bone, true);
         this.pack = pack;
         parser = new ExpressionParser(new ModelResolver(pack, this));
+    }
+
+    public ModelInfo getModelInfo() {
+        return modelInfo;
     }
 
     public Collection<PlayerBone> getHiddenBones() {

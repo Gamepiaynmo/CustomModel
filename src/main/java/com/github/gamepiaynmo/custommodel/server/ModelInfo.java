@@ -1,10 +1,8 @@
 package com.github.gamepiaynmo.custommodel.server;
 
-import com.github.gamepiaynmo.custommodel.client.ModelPack;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
 import com.github.gamepiaynmo.custommodel.util.Json;
 import com.github.gamepiaynmo.custommodel.util.TranslatableException;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -14,21 +12,20 @@ import net.minecraft.entity.EntityPose;
 import org.apache.commons.io.IOUtils;
 
 import java.io.*;
-import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
-public class CustomBoundingBox {
+public class ModelInfo {
 
-    public static CustomBoundingBox fromFile(File file) throws IOException {
+    public static ModelInfo fromFile(File file) throws IOException {
         if (file.isDirectory())
             return fromFolder(file);
         else return fromZipFile(file);
     }
 
-    private static CustomBoundingBox fromZipFile(File file) throws IOException {
+    private static ModelInfo fromZipFile(File file) throws IOException {
         ZipInputStream zip = new ZipInputStream(new BufferedInputStream(new FileInputStream(file)));
         ZipFile zf = new ZipFile(file);
         ZipEntry entry;
@@ -48,7 +45,7 @@ public class CustomBoundingBox {
         return fromJson(jsonObj);
     }
 
-    private static CustomBoundingBox fromFolder(File file) throws IOException {
+    private static ModelInfo fromFolder(File file) throws IOException {
         File model = null;
         for (File f : file.listFiles()) {
             if (f.getName().equals("model.json")) {
@@ -65,8 +62,22 @@ public class CustomBoundingBox {
         return fromJson(jsonObj);
     }
 
-    private static CustomBoundingBox fromJson(JsonObject jsonObj) {
-        CustomBoundingBox res = new CustomBoundingBox();
+    private static boolean isValidId(String id) {
+        return id.length() > 0 && (id.charAt(0) < '0' || id.charAt(0) > '9') && id.chars().allMatch(c -> {
+            return (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_';
+        });
+    }
+
+    public static ModelInfo fromJson(JsonObject jsonObj) {
+        ModelInfo res = new ModelInfo();
+
+        res.modelId = Json.getString(jsonObj, CustomJsonModel.MODEL_ID);
+        if (res.modelId == null || !isValidId(res.modelId))
+            throw new TranslatableException("error.custommodel.loadmodelpack.invalidid", res.modelId);
+
+        res.modelName = Json.getString(jsonObj, CustomJsonModel.MODEL_NAME, "");
+        res.version = Json.getString(jsonObj, CustomJsonModel.VERSION, "");
+        res.author = Json.getString(jsonObj, CustomJsonModel.AUTHOR, "");
 
         JsonElement eyeHeightObj = jsonObj.get(CustomJsonModel.EYE_HEIGHT);
         if (eyeHeightObj != null) {
@@ -92,8 +103,17 @@ public class CustomBoundingBox {
         return res;
     }
 
+    public String getInfoStr() {
+        return new StringBuilder().append(modelId).append(": ").append(modelName).append(" ").append(version).append(" [").append(author).append("]").toString();
+    }
+
+    public String modelId;
+    public String modelName;
+    public String version;
+    public String author;
+
     public Map<EntityPose, Float> eyeHeightMap = Maps.newEnumMap(EntityPose.class);
     public Map<EntityPose, EntityDimensions> dimensionsMap = Maps.newEnumMap(EntityPose.class);
 
-    private CustomBoundingBox() {}
+    private ModelInfo() {}
 }

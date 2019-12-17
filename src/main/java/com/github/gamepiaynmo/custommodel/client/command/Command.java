@@ -16,10 +16,12 @@ import net.minecraft.command.EntitySelector;
 import net.minecraft.command.arguments.EntityArgumentType;
 import net.minecraft.server.command.CommandSource;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import net.minecraft.text.Texts;
 import net.minecraft.text.TranslatableText;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -37,12 +39,11 @@ public class Command implements ClientCommandPlugin {
             context.getSource().sendFeedback(new TranslatableText("command.custommodel.reload", players.size()));
             return players.size();
         }))).then(ArgumentBuilders.literal("list").executes(context -> {
-            List<File> fileList = Lists.newArrayList(new File(CustomModel.MODEL_DIR).listFiles());
-            context.getSource().sendFeedback(new TranslatableText("command.custommodel.listmodels",
-                    fileList.size(), Texts.join(fileList, (file) -> {
-                return new LiteralText(file.getName());
-            })));
-            return fileList.size();
+            Collection<Text> info = CustomModel.getModelInfoList();
+            context.getSource().sendFeedback(new TranslatableText("command.custommodel.listmodels", info.size()));
+            for (Text str : info)
+                context.getSource().sendFeedback(str);
+            return info.size();
         })).then(ArgumentBuilders.literal("select").then(ArgumentBuilders.argument("model", new ModelArgumentType()).executes(context -> {
             String model = context.getArgument("model", String.class);
             CustomModelClient.selectModel(MinecraftClient.getInstance().player.getGameProfile(), model);
@@ -71,7 +72,7 @@ public class Command implements ClientCommandPlugin {
         public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
             S source = context.getSource();
             if (source instanceof CommandSource) {
-                return ((CommandSource) source).getCompletions((CommandContext<CommandSource>) context, builder);
+                return CommandSource.suggestMatching(CustomModel.getModelIdList(), builder);
             } else return Suggestions.empty();
         }
     }

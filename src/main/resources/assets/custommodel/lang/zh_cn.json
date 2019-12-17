@@ -9,7 +9,12 @@
   "text.autoconfig.custommodel.option.customBoundingBox": "允许改变碰撞体积",
   "text.autoconfig.custommodel.option.customBoundingBox.@Tooltip": "允许自定义模型改变碰撞体积，若服务端未允许或服务端未安装模组则无效",
 
-  "error.custommodel.loadmodelpack": "加载模型包失败：%s",
+  "text.custommodel.modelinfo.id": "ID：%s",
+  "text.custommodel.modelinfo.name": "名称：%s",
+  "text.custommodel.modelinfo.version": "版本：%s",
+  "text.custommodel.modelinfo.author": "作者：%s",
+
+  "error.custommodel.loadmodelpack": "加载模型包%s失败：%s",
   "error.custommodel.loadmodelpack.nomodel": "未找到model.json",
   "error.custommodel.loadmodelpack.nohidebone": "未找到骨骼%s",
   "error.custommodel.loadmodelpack.unknownpose": "未找到姿势%s",
@@ -19,6 +24,7 @@
   "error.custommodel.loadmodelpack.notexture": "未找到贴图文件%s",
   "error.custommodel.loadmodelpack.notexturesize": "贴图%s必须指明大小",
   "error.custommodel.loadmodelpack.jsonarraylen": "数组%s的长度不正确：应为%d",
+  "error.custommodel.loadmodelpack.invalidid": "无效的模型ID：%s",
 
   "error.custommodel.parse.notfloat": "不是浮点数表达式：%s",
   "error.custommodel.parse.notbool": "不是布尔表达式：%s",
@@ -38,7 +44,7 @@
   "error.custommodel.parse.missexpr": "缺少表达式",
   "error.custommodel.parse.invalidfunc": "未知函数：%s",
 
-  "command.custommodel.listmodels": "当前共有%d个模型：%s",
+  "command.custommodel.listmodels": "当前共有%d个模型：",
   "command.custommodel.reload": "重新加载了%d个玩家的模型",
   "command.custommodel.select": "将%d个玩家的模型设置为%s"
 }

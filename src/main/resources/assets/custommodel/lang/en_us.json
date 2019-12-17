@@ -9,7 +9,12 @@
   "text.autoconfig.custommodel.option.customBoundingBox": "Custom Bounding Box",
   "text.autoconfig.custommodel.option.customBoundingBox.@Tooltip": "Allow model packs to change bounding box. Will not take effect if server side is not modded or not allowed.",
 
-  "error.custommodel.loadmodelpack": "Failed to load model pack: %s",
+  "text.custommodel.modelinfo.id": "ID: %s",
+  "text.custommodel.modelinfo.name": "Name: %s",
+  "text.custommodel.modelinfo.version": "Version: %s",
+  "text.custommodel.modelinfo.author": "Author: %s",
+
+  "error.custommodel.loadmodelpack": "Failed to load model pack %s: %s",
   "error.custommodel.loadmodelpack.nomodel": "model.json not found.",
   "error.custommodel.loadmodelpack.nohidebone": "Bone %s not found.",
   "error.custommodel.loadmodelpack.unknownpose": "Unknown pose %s",
@@ -19,6 +24,7 @@
   "error.custommodel.loadmodelpack.notexture": "Texture %s not found.",
   "error.custommodel.loadmodelpack.notexturesize": "Texture size of %s is required.",
   "error.custommodel.loadmodelpack.jsonarraylen": "Wrong array length for %s: should be %d.",
+  "error.custommodel.loadmodelpack.invalidid": "Invalid model id：%s",
 
   "error.custommodel.parse.notfloat": "Not a float expression: %s",
   "error.custommodel.parse.notbool": "Not a boolean expression: %s",
@@ -38,7 +44,7 @@
   "error.custommodel.parse.missexpr": "Missing expression",
   "error.custommodel.parse.invalidfunc": "Unknown function: %s",
 
-  "command.custommodel.listmodels": "There are %d model packs: %s",
+  "command.custommodel.listmodels": "There are %d model packs: ",
   "command.custommodel.reload": "Reloaded models for %d player(s)",
   "command.custommodel.select": "Changed the model of %d player(s) to %s"
 }

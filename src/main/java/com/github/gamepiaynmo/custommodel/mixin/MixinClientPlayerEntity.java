@@ -89,7 +89,7 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
     @Override
     public float getActiveEyeHeight(EntityPose entityPose, EntityDimensions entityDimensions) {
         if (currentPack != null && CustomModelClient.serverConfig.customEyeHeight) {
-            Float eyeHeight = currentPack.getModel().eyeHeightMap.get(entityPose);
+            Float eyeHeight = currentPack.getModel().getModelInfo().eyeHeightMap.get(entityPose);
             if (eyeHeight != null) {
                 return eyeHeight;
             }
@@ -101,7 +101,7 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
     @Override
     public EntityDimensions getDimensions(EntityPose entityPose) {
         if (currentPack != null && CustomModelClient.serverConfig.customBoundingBox) {
-            EntityDimensions dimensions = currentPack.getModel().dimensionsMap.get(entityPose);
+            EntityDimensions dimensions = currentPack.getModel().getModelInfo().dimensionsMap.get(entityPose);
             if (dimensions != null)
                 return dimensions;
         }

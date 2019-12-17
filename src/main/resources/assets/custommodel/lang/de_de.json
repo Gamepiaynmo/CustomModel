@@ -9,7 +9,12 @@
   "text.autoconfig.custommodel.option.customBoundingBox": "Benutzerdefinierter Begrenzungsrahmen",
   "text.autoconfig.custommodel.option.customBoundingBox.@Tooltip": "Ermöglichen Sie Modellpaketen, den Begrenzungsrahmen zu ändern. Wird nicht wirksam, wenn die Serverseite nicht modifiziert oder unzulässig ist.",
 
-  "error.custommodel.loadmodelpack": "Laden der Modelldaten fehlgeschlagen: %s",
+  "text.custommodel.modelinfo.id": "ID: %s",
+  "text.custommodel.modelinfo.name": "Name: %s",
+  "text.custommodel.modelinfo.version": "Version: %s",
+  "text.custommodel.modelinfo.author": "Autor: %s",
+
+  "error.custommodel.loadmodelpack": "Laden der Modelldaten fehlgeschlagen %s: %s",
   "error.custommodel.loadmodelpack.nomodel": "model.json wurde nicht gefunden.",
   "error.custommodel.loadmodelpack.nohidebone": "Knochen %s wurde nicht gefunden.",
   "error.custommodel.loadmodelpack.unknownpose": "Unbekannte Pose %s",
@@ -19,6 +24,7 @@
   "error.custommodel.loadmodelpack.notexture": "Textur %s wurde nicht gefunden.",
   "error.custommodel.loadmodelpack.notexturesize": "Eine Texturengröße von %s wird benötigt.",
   "error.custommodel.loadmodelpack.jsonarraylen": "Falsche Arraylänge für %s: sollte %d sein.",
+  "error.custommodel.loadmodelpack.invalidid": "Ungültige Modell-ID: %s",
 
   "error.custommodel.parse.notfloat": "Kein fließkommazahl-Ausdruck: %s",
   "error.custommodel.parse.notbool": "Kein boolscher Ausdruck: %s",
@@ -38,7 +44,7 @@
   "error.custommodel.parse.missexpr": "Ausdruck fehlt",
   "error.custommodel.parse.invalidfunc": "Unbekannte Funktion: %s",
 
-  "command.custommodel.listmodels": "Es gibt %d Modellpakete: %s",
+  "command.custommodel.listmodels": "Es gibt %d Modellpakete: ",
   "command.custommodel.reload": "Reloaded Modelle für %d Spieler",
   "command.custommodel.select": "Das Modell von %d Spielern wurde zu %s geändert"
 }
