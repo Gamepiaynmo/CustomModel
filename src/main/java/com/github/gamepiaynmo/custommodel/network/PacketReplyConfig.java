@@ -11,13 +11,13 @@ import java.io.IOException;
 
 public class PacketReplyConfig implements Packet<ClientPlayPacketListener> {
     public static final Identifier ID = new Identifier(CustomModel.MODID, "packet_reply_config");
-    private ModConfig config;
+    private ModConfig.ServerConfig config;
 
     public PacketReplyConfig() {
-        this.config = new ModConfig();
+        this.config = new ModConfig.ServerConfig();
     }
 
-    public PacketReplyConfig(ModConfig config) {
+    public PacketReplyConfig(ModConfig.ServerConfig config) {
         this.config = config;
     }
 
@@ -38,7 +38,7 @@ public class PacketReplyConfig implements Packet<ClientPlayPacketListener> {
 
     }
 
-    public ModConfig getConfig() {
+    public ModConfig.ServerConfig getConfig() {
         return config;
     }
 }

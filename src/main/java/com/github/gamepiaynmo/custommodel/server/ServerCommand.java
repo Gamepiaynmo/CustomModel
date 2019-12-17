@@ -37,7 +37,7 @@ public class ServerCommand {
     public static void register() {
         CommandRegistry.INSTANCE.register(false, (dispatcher) -> {
             dispatcher.register(CommandManager.literal(CustomModel.MODID
-            ).then(CommandManager.literal("reload").executes(context -> {
+            ).then(CommandManager.literal("reload").requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(ModConfig.getReloadSelfPermission())).executes(context -> {
                 try {
                     CustomModel.reloadModel(context.getSource().getPlayer(), true);
                 } catch (LoadModelException e) {
@@ -45,7 +45,7 @@ public class ServerCommand {
                 }
                 context.getSource().sendFeedback(new TranslatableText("command.custommodel.reload", 1), true);
                 return 1;
-            }).then(CommandManager.argument("targets", EntityArgumentType.players()).requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(2)).executes(context -> {
+            }).then(CommandManager.argument("targets", EntityArgumentType.players()).requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(ModConfig.getReloadOthersPermission())).executes(context -> {
                 Collection<ServerPlayerEntity> players = EntityArgumentType.getPlayers(context, "targets");
                 try {
                     for (ServerPlayerEntity player : players)
@@ -55,13 +55,13 @@ public class ServerCommand {
                 }
                 context.getSource().sendFeedback(new TranslatableText("command.custommodel.reload", players.size()), true);
                 return players.size();
-            }))).then(CommandManager.literal("list").requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(2)).executes(context -> {
+            }))).then(CommandManager.literal("list").requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(ModConfig.getListModelsPermission())).executes(context -> {
                 Collection<Text> info = CustomModel.getModelInfoList();
                 context.getSource().sendFeedback(new TranslatableText("command.custommodel.listmodels", info.size()), false);
                 for (Text str : info)
                     context.getSource().sendFeedback(str, false);
                 return info.size();
-            })).then(CommandManager.literal("select").then(CommandManager.argument("model", new ModelArgumentType()).requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(2)).executes(context -> {
+            })).then(CommandManager.literal("select").then(CommandManager.argument("model", new ModelArgumentType()).requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(ModConfig.getSelectSelfPermission())).executes(context -> {
                 String model = context.getArgument("model", String.class);
                 try {
                     CustomModel.selectModel(context.getSource().getPlayer(), model);
@@ -70,7 +70,7 @@ public class ServerCommand {
                 }
                 context.getSource().sendFeedback(new TranslatableText("command.custommodel.select", 1, model), true);
                 return 1;
-            }).then(CommandManager.argument("targets", EntityArgumentType.players()).requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(2)).executes(context -> {
+            }).then(CommandManager.argument("targets", EntityArgumentType.players()).requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(ModConfig.getSelectOthersPermission())).executes(context -> {
                 Collection<ServerPlayerEntity> players = EntityArgumentType.getPlayers(context, "targets");
                 String model = context.getArgument("model", String.class);
                 try {

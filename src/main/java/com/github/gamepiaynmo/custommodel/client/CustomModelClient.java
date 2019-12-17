@@ -42,7 +42,7 @@ public class CustomModelClient implements ClientModInitializer {
     public static Map<String, PlayerEntityRenderer> playerRenderers;
 
     private static final Set<UUID> queried = Sets.newHashSet();
-    public static ModConfig serverConfig;
+    public static ModConfig.ServerConfig serverConfig;
     public static boolean configQueried = false;
 
     public static final Logger LOGGER = LogManager.getLogger();
@@ -168,7 +168,7 @@ public class CustomModelClient implements ClientModInitializer {
                         sendPacket(PacketQueryConfig.ID, new PacketQueryConfig());
                         configQueried = true;
                     } else {
-                        serverConfig = new ModConfig();
+                        serverConfig = new ModConfig.ServerConfig();
                         serverConfig.customEyeHeight = ModConfig.isCustomEyeHeight();
                         serverConfig.customBoundingBox = false;
                     }

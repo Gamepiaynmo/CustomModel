@@ -202,7 +202,7 @@ public class CustomModel implements ModInitializer {
         });
 
         ServerSidePacketRegistry.INSTANCE.register(PacketQueryConfig.ID, (context, buffer) -> {
-            sendPacket(context.getPlayer(), PacketReplyConfig.ID, new PacketReplyConfig(ModConfig.getConfig()));
+            sendPacket(context.getPlayer(), PacketReplyConfig.ID, new PacketReplyConfig(ModConfig.getConfig().server));
         });
 
         ServerStartCallback.EVENT.register(minecraftServer -> server = minecraftServer);
