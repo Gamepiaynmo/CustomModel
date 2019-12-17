@@ -33,11 +33,10 @@ public class CustomJsonModel {
     public static final String VERSION = "version";
 
     public static final String HIDE = "hide";
+    public static final String VARIABLES = "variables";
     public static final String SKELETON = "skeleton";
     public static final String EYE_HEIGHT = "eyeHeight";
     public static final String BOUNDING_BOX = "boundingBox";
-    public static final String BOOL_VARS = "boolVars";
-    public static final String FLOAT_VARS = "floatVars";
     public static final String BONES = "bones";
     public static final String ID = "id";
     public static final String PARENT = "parent";
@@ -99,6 +98,10 @@ public class CustomJsonModel {
             }
         });
 
+        Json.parseJsonObject(jsonObj.get(VARIABLES), (name, element) -> {
+            model.variables.put(name, model.getParser().parse(element.getAsString()));
+        });
+
         Json.parseJsonObject(jsonObj.get(SKELETON), (key, value) -> {
             Collection<PlayerBone> bones = PlayerBone.getListById(key);
             IExpressionFloat[] vector = Json.parseFloatExpressionArray(value, 3, new float[]{0, 0, 0}, model.getParser());
@@ -106,14 +109,6 @@ public class CustomJsonModel {
                 throw new TranslatableException("error.custommodel.loadmodelpack.nohidebone", key);
             for (PlayerBone bone : bones)
                 model.skeleton.put(bone, vector);
-        });
-
-        Json.parseJsonObject(jsonObj.get(BOOL_VARS), (name, element) -> {
-            model.boolVars.put(name, Json.getBooleanExpression(element, false, model.getParser()));
-        });
-
-        Json.parseJsonObject(jsonObj.get(FLOAT_VARS), (name, element) -> {
-            model.floatVars.put(name, Json.getFloatExpression(element, 0, model.getParser()));
         });
 
         for (PlayerBone bone : PlayerBone.values())
@@ -169,8 +164,7 @@ public class CustomJsonModel {
     private Map<Arm, List<Bone>> firstPersonList = Maps.newEnumMap(Arm.class);
 
     private Supplier<Identifier> baseTexture;
-    private Map<String, IExpressionBool> boolVars = Maps.newHashMap();
-    private Map<String, IExpressionFloat> floatVars = Maps.newHashMap();
+    private Map<String, IExpression> variables = Maps.newHashMap();
 
     private Map<String, Bone> id2Bone = Maps.newHashMap();
     private List<Bone> bones = Lists.newArrayList();
@@ -193,6 +187,8 @@ public class CustomJsonModel {
     public ModelInfo getModelInfo() {
         return modelInfo;
     }
+
+    public IExpression getVariable(String name) { return variables.get(name); }
 
     public Collection<PlayerBone> getHiddenBones() {
         return boneHideList;

@@ -47,7 +47,7 @@ public class ModelResolver implements IExpressionResolver {
       return str.split(delim);
    }
 
-   public IExpressionFloat getModelVariable(String name) {
+   public IExpression getModelVariable(String name) {
       String[] parts = tokenize(name, "\\.");
       if (parts.length != 2) {
          return null;
@@ -61,36 +61,40 @@ public class ModelResolver implements IExpressionResolver {
             }
             case "inv": {
                PlayerInventory inventory = CustomModelClient.currentPlayer.inventory;
+               IExpressionFloat result = null;
                switch (second) {
-                  case "mainhand": return () ->
-                          Registry.ITEM.getRawId(inventory.getMainHandStack().getItem());
-                  case "offhand": return () ->
-                          Registry.ITEM.getRawId(inventory.offHand.get(0).getItem());
-                  case "helmet": return () ->
-                          Registry.ITEM.getRawId(inventory.getArmorStack(3).getItem());
-                  case "chestplate": return () ->
-                          Registry.ITEM.getRawId(inventory.getArmorStack(2).getItem());
-                  case "leggings": return () ->
-                          Registry.ITEM.getRawId(inventory.getArmorStack(1).getItem());
-                  case "boots": return () ->
-                          Registry.ITEM.getRawId(inventory.getArmorStack(0).getItem());
+                  case "mainhand": result = () ->
+                          Registry.ITEM.getRawId(inventory.getMainHandStack().getItem()); break;
+                  case "offhand": result = () ->
+                          Registry.ITEM.getRawId(inventory.offHand.get(0).getItem()); break;
+                  case "helmet": result = () ->
+                          Registry.ITEM.getRawId(inventory.getArmorStack(3).getItem()); break;
+                  case "chestplate": result = () ->
+                          Registry.ITEM.getRawId(inventory.getArmorStack(2).getItem()); break;
+                  case "leggings": result = () ->
+                          Registry.ITEM.getRawId(inventory.getArmorStack(1).getItem()); break;
+                  case "boots": result = () ->
+                          Registry.ITEM.getRawId(inventory.getArmorStack(0).getItem()); break;
                   default:
                      try {
                         if (second.startsWith("main")) {
                            int index = Integer.parseInt(second.substring(4));
                            if (index >= 0 && index < inventory.main.size())
-                              return () -> Registry.ITEM.getRawId(inventory.main.get(index).getItem());
+                              result = () -> Registry.ITEM.getRawId(inventory.main.get(index).getItem());
                         }
-                        return null;
                      } catch (NumberFormatException e) {
-                        return null;
                      }
                }
+
+               return result;
             }
             case "item": {
                int rawid = Registry.ITEM.getRawId(Registry.ITEM.get(new Identifier(second)));
                if (rawid < 0) return null;
                return new ConstantFloat(rawid);
+            }
+            case "var": {
+               return model.getVariable(second);
             }
             default: {
                IBone mr = this.getModelRenderer(first);
