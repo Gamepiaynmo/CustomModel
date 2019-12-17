@@ -1,5 +1,6 @@
 package com.github.gamepiaynmo.custommodel.server;
 
+import com.github.gamepiaynmo.custommodel.expression.ParseException;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
 import com.github.gamepiaynmo.custommodel.util.Json;
 import com.github.gamepiaynmo.custommodel.util.TranslatableException;
@@ -19,13 +20,13 @@ import java.util.zip.ZipInputStream;
 
 public class ModelInfo {
 
-    public static ModelInfo fromFile(File file) throws IOException {
+    public static ModelInfo fromFile(File file) throws IOException, ParseException {
         if (file.isDirectory())
             return fromFolder(file);
         else return fromZipFile(file);
     }
 
-    private static ModelInfo fromZipFile(File file) throws IOException {
+    private static ModelInfo fromZipFile(File file) throws IOException, ParseException {
         ZipInputStream zip = new ZipInputStream(new BufferedInputStream(new FileInputStream(file)));
         ZipFile zf = new ZipFile(file);
         ZipEntry entry;
@@ -45,7 +46,7 @@ public class ModelInfo {
         return fromJson(jsonObj);
     }
 
-    private static ModelInfo fromFolder(File file) throws IOException {
+    private static ModelInfo fromFolder(File file) throws IOException, ParseException {
         File model = null;
         for (File f : file.listFiles()) {
             if (f.getName().equals("model.json")) {
@@ -68,7 +69,7 @@ public class ModelInfo {
         });
     }
 
-    public static ModelInfo fromJson(JsonObject jsonObj) {
+    public static ModelInfo fromJson(JsonObject jsonObj) throws ParseException {
         ModelInfo res = new ModelInfo();
 
         res.modelId = Json.getString(jsonObj, CustomJsonModel.MODEL_ID);
@@ -79,26 +80,20 @@ public class ModelInfo {
         res.version = Json.getString(jsonObj, CustomJsonModel.VERSION, "");
         res.author = Json.getString(jsonObj, CustomJsonModel.AUTHOR, "");
 
-        JsonElement eyeHeightObj = jsonObj.get(CustomJsonModel.EYE_HEIGHT);
-        if (eyeHeightObj != null) {
-            for (Map.Entry<String, JsonElement> entry : eyeHeightObj.getAsJsonObject().entrySet()) {
-                EntityPose pose = CustomJsonModel.poseMap.get(entry.getKey());
-                if (pose == null)
-                    throw new TranslatableException("error.custommodel.loadmodelpack.unknownpose", entry.getKey());
-                res.eyeHeightMap.put(pose, entry.getValue().getAsFloat());
-            }
-        }
+        Json.parseJsonObject(jsonObj.get(CustomJsonModel.EYE_HEIGHT), (key, value) -> {
+            EntityPose pose = CustomJsonModel.poseMap.get(key);
+            if (pose == null)
+                throw new TranslatableException("error.custommodel.loadmodelpack.unknownpose", key);
+            res.eyeHeightMap.put(pose, value.getAsFloat());
+        });
 
-        JsonElement dimensionObj = jsonObj.get(CustomJsonModel.BOUNDING_BOX);
-        if (dimensionObj != null) {
-            for (Map.Entry<String, JsonElement> entry : dimensionObj.getAsJsonObject().entrySet()) {
-                EntityPose pose = CustomJsonModel.poseMap.get(entry.getKey());
-                if (pose == null)
-                    throw new TranslatableException("error.custommodel.loadmodelpack.unknownpose", entry.getKey());
-                float[] dimension = Json.parseFloatArray(entry.getValue(), 2);
-                res.dimensionsMap.put(pose, new EntityDimensions(dimension[0], dimension[1], true));
-            }
-        }
+        Json.parseJsonObject(jsonObj.get(CustomJsonModel.BOUNDING_BOX), (key, value) -> {
+            EntityPose pose = CustomJsonModel.poseMap.get(key);
+            if (pose == null)
+                throw new TranslatableException("error.custommodel.loadmodelpack.unknownpose", key);
+            float[] dimension = Json.parseFloatArray(value, 2);
+            res.dimensionsMap.put(pose, new EntityDimensions(dimension[0], dimension[1], true));
+        });
 
         return res;
     }

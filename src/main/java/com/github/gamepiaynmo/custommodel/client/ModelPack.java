@@ -34,7 +34,6 @@ public class ModelPack {
             () -> CustomModelClient.currentPlayer.getCapeTexture(),
             () -> CustomModelClient.currentPlayer.getElytraTexture() };
 
-    private JsonObject modelJson;
     private Map<String, Integer> textureIds = Maps.newHashMap();
     private List<Identifier> textures = Lists.newArrayList();
     private CustomJsonModel model;
@@ -168,7 +167,7 @@ public class ModelPack {
         if (model == null)
             throw new TranslatableException("error.custommodel.loadmodelpack.nomodel");
         InputStream modelInputStream = model.getInputStream();
-        pack.modelJson = new JsonParser().parse(new InputStreamReader(modelInputStream)).getAsJsonObject();
+        JsonObject modelJson = new JsonParser().parse(new InputStreamReader(modelInputStream)).getAsJsonObject();
         IOUtils.closeQuietly(modelInputStream);
         for (IModelResource texture : textures) {
             Identifier identifier = new Identifier(CustomModel.MODID, (pack.dirName + "/" + texture.getName()).toLowerCase());
@@ -180,7 +179,7 @@ public class ModelPack {
             textureManager.registerTexture(identifier, tex);
         }
 
-        pack.model = CustomJsonModel.fromJson(pack, pack.modelJson);
+        pack.model = CustomJsonModel.fromJson(pack, modelJson);
         pack.success = true;
         return pack;
     }
@@ -190,10 +189,6 @@ public class ModelPack {
         int idx2 = path.indexOf('.', idx1);
         if (idx2 < 0) idx2 = path.length();
         return path.substring(idx1, idx2);
-    }
-
-    public JsonObject getModelJson() {
-        return modelJson;
     }
 
     public Supplier<Identifier> getBaseTexture() {

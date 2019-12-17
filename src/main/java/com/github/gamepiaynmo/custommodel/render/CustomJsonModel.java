@@ -2,10 +2,7 @@ package com.github.gamepiaynmo.custommodel.render;
 
 import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.client.ModelPack;
-import com.github.gamepiaynmo.custommodel.expression.ExpressionParser;
-import com.github.gamepiaynmo.custommodel.expression.IExpressionFloat;
-import com.github.gamepiaynmo.custommodel.expression.ModelResolver;
-import com.github.gamepiaynmo.custommodel.expression.ParseException;
+import com.github.gamepiaynmo.custommodel.expression.*;
 import com.github.gamepiaynmo.custommodel.render.model.Bone;
 import com.github.gamepiaynmo.custommodel.render.model.IBone;
 import com.github.gamepiaynmo.custommodel.server.ModelInfo;
@@ -39,6 +36,8 @@ public class CustomJsonModel {
     public static final String SKELETON = "skeleton";
     public static final String EYE_HEIGHT = "eyeHeight";
     public static final String BOUNDING_BOX = "boundingBox";
+    public static final String BOOL_VARS = "boolVars";
+    public static final String FLOAT_VARS = "floatVars";
     public static final String BONES = "bones";
     public static final String ID = "id";
     public static final String PARENT = "parent";
@@ -83,54 +82,52 @@ public class CustomJsonModel {
     public static CustomJsonModel fromJson(ModelPack pack, JsonObject jsonObj) throws ParseException {
         CustomJsonModel model = new CustomJsonModel(pack);
         model.baseTexture = pack.getBaseTexture();
-
         model.modelInfo = ModelInfo.fromJson(jsonObj);
 
-        JsonElement hideArray = jsonObj.get(HIDE);
-        if (hideArray != null) {
-            for (JsonElement element : hideArray.getAsJsonArray()) {
-                String id = element.getAsString();
-                Collection<PlayerBone> bones = PlayerBone.getListById(id);
-                if (bones == null) {
-                    Collection<PlayerFeature> features = PlayerFeature.getListById(id);
-                    if (features == null)
-                        throw new TranslatableException("error.custommodel.loadmodelpack.nohidebone", id);
-                    for (PlayerFeature feature : features)
-                        model.featureHideList.add(feature);
-                } else {
-                    for (PlayerBone bone : bones)
-                        model.boneHideList.add(bone);
-                }
-            }
-        }
-
-        JsonElement skeletonObj = jsonObj.get(SKELETON);
-        if (skeletonObj != null) {
-            for (Map.Entry<String, JsonElement> entry : skeletonObj.getAsJsonObject().entrySet()) {
-                Collection<PlayerBone> bones = PlayerBone.getListById(entry.getKey());
-                IExpressionFloat[] vector = Json.parseFloatExpressionArray(entry.getValue(), 3, new float[]{0, 0, 0}, model.getParser());
-                if (bones == null)
-                    throw new TranslatableException("error.custommodel.loadmodelpack.nohidebone", entry.getKey());
+        Json.parseJsonArray(jsonObj.get(HIDE), element -> {
+            String id = element.getAsString();
+            Collection<PlayerBone> bones = PlayerBone.getListById(id);
+            if (bones == null) {
+                Collection<PlayerFeature> features = PlayerFeature.getListById(id);
+                if (features == null)
+                    throw new TranslatableException("error.custommodel.loadmodelpack.nohidebone", id);
+                for (PlayerFeature feature : features)
+                    model.featureHideList.add(feature);
+            } else {
                 for (PlayerBone bone : bones)
-                    model.skeleton.put(bone, vector);
+                    model.boneHideList.add(bone);
             }
-        }
+        });
+
+        Json.parseJsonObject(jsonObj.get(SKELETON), (key, value) -> {
+            Collection<PlayerBone> bones = PlayerBone.getListById(key);
+            IExpressionFloat[] vector = Json.parseFloatExpressionArray(value, 3, new float[]{0, 0, 0}, model.getParser());
+            if (bones == null)
+                throw new TranslatableException("error.custommodel.loadmodelpack.nohidebone", key);
+            for (PlayerBone bone : bones)
+                model.skeleton.put(bone, vector);
+        });
+
+        Json.parseJsonObject(jsonObj.get(BOOL_VARS), (name, element) -> {
+            model.boolVars.put(name, Json.getBooleanExpression(element, false, model.getParser()));
+        });
+
+        Json.parseJsonObject(jsonObj.get(FLOAT_VARS), (name, element) -> {
+            model.floatVars.put(name, Json.getFloatExpression(element, 0, model.getParser()));
+        });
 
         for (PlayerBone bone : PlayerBone.values())
             model.children.put(bone.getId(), Lists.newArrayList());
 
-        JsonElement boneArray = jsonObj.get(BONES);
-        if (boneArray != null) {
-            for (JsonElement element : boneArray.getAsJsonArray()) {
-                JsonObject boneObj = element.getAsJsonObject();
-                Bone bone = Bone.getBoneFromJson(pack, model, boneObj);
-                model.id2Bone.put(bone.getId(), bone);
-                model.bones.add(bone);
+        Json.parseJsonArray(jsonObj.get(BONES), element -> {
+            JsonObject boneObj = element.getAsJsonObject();
+            Bone bone = Bone.getBoneFromJson(pack, model, boneObj);
+            model.id2Bone.put(bone.getId(), bone);
+            model.bones.add(bone);
 
-                model.children.put(bone.getId(), Lists.newArrayList());
-                model.children.get(bone.getParent().getId()).add(bone);
-            }
-        }
+            model.children.put(bone.getId(), Lists.newArrayList());
+            model.children.get(bone.getParent().getId()).add(bone);
+        });
 
         JsonElement leftArray = jsonObj.get(FP_LEFT);
         if (leftArray != null) {
@@ -172,6 +169,8 @@ public class CustomJsonModel {
     private Map<Arm, List<Bone>> firstPersonList = Maps.newEnumMap(Arm.class);
 
     private Supplier<Identifier> baseTexture;
+    private Map<String, IExpressionBool> boolVars = Maps.newHashMap();
+    private Map<String, IExpressionFloat> floatVars = Maps.newHashMap();
 
     private Map<String, Bone> id2Bone = Maps.newHashMap();
     private List<Bone> bones = Lists.newArrayList();
@@ -267,14 +266,15 @@ public class CustomJsonModel {
         GL11.glMultMatrixd(baseMat.cpy().inv().val);
 
         for (Bone bone : bones) {
-            CustomModelClient.textureManager.bindTexture(bone.getTexture().get());
-            GlStateManager.pushMatrix();
-            Matrix4 transform = tmpBoneMats.get(bone.getId());
+            if (bone.isVisible()) {
+                CustomModelClient.textureManager.bindTexture(bone.getTexture().get());
+                GlStateManager.pushMatrix();
+                Matrix4 transform = tmpBoneMats.get(bone.getId());
 
-            GL11.glMultMatrixd(transform.val);
-            if (bone.isVisible())
+                GL11.glMultMatrixd(transform.val);
                 bone.render();
-            GlStateManager.popMatrix();
+                GlStateManager.popMatrix();
+            }
         }
         GlStateManager.popMatrix();
     }
@@ -291,14 +291,15 @@ public class CustomJsonModel {
         GL11.glMultMatrixd(baseMat.cpy().inv().val);
 
         for (Bone bone : firstPersonList.get(arm)) {
-            CustomModelClient.textureManager.bindTexture(bone.getTexture().get());
-            GlStateManager.pushMatrix();
-            Matrix4 transform = tmpBoneMats.get(bone.getId());
+            if (bone.isVisible()) {
+                CustomModelClient.textureManager.bindTexture(bone.getTexture().get());
+                GlStateManager.pushMatrix();
+                Matrix4 transform = tmpBoneMats.get(bone.getId());
 
-            GL11.glMultMatrixd(transform.val);
-            if (bone.isVisible())
+                GL11.glMultMatrixd(transform.val);
                 bone.render();
-            GlStateManager.popMatrix();
+                GlStateManager.popMatrix();
+            }
         }
         GlStateManager.popMatrix();
     }

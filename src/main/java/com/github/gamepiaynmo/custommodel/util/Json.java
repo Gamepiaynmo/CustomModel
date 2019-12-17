@@ -6,6 +6,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
+import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+
 public class Json {
    public static float getFloat(JsonObject obj, String field, float def) {
       JsonElement elem = obj.get(field);
@@ -39,6 +43,10 @@ public class Json {
 
    public static IExpressionBool getBooleanExpression(JsonObject obj, String field, boolean def, ExpressionParser parser) throws ParseException {
       JsonElement elem = obj.get(field);
+      return getBooleanExpression(elem, def, parser);
+   }
+
+   public static IExpressionBool getBooleanExpression(JsonElement elem, boolean def, ExpressionParser parser) throws ParseException {
       if (elem == null) return getConstantBoolean(def);
       JsonPrimitive primitive = elem.getAsJsonPrimitive();
       if (primitive.isBoolean()) return getConstantBoolean(primitive.getAsBoolean());
@@ -138,6 +146,34 @@ public class Json {
             }
 
             return intArr;
+         }
+      }
+   }
+
+   public static void parseJsonArray(JsonElement jsonElement, ExceptionConsumer<JsonElement, ParseException> consumer) throws ParseException {
+      if (jsonElement != null) {
+         if (jsonElement.isJsonArray()) {
+            for (JsonElement element : jsonElement.getAsJsonArray()) {
+               try {
+                  consumer.accept(element);
+               } catch (Exception e) {
+                  throw e;
+               }
+            }
+         }
+      }
+   }
+
+   public static void parseJsonObject(JsonElement jsonElement, ExceptionBiConsumer<String, JsonElement, ParseException> consumer) throws ParseException {
+      if (jsonElement != null) {
+         if (jsonElement.isJsonObject()) {
+            for (Map.Entry<String, JsonElement> entry : jsonElement.getAsJsonObject().entrySet()) {
+               try {
+                  consumer.accept(entry.getKey(), entry.getValue());
+               } catch (Exception e) {
+                  throw e;
+               }
+            }
          }
       }
    }

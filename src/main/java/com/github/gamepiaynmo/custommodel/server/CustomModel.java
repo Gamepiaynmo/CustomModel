@@ -87,7 +87,7 @@ public class CustomModel implements ModInitializer {
                 ModelInfo old = models.get(info.modelId);
                 if (old == null || info.version.compareTo(old.version) > 0)
                     models.put(info.modelId, info);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 LOGGER.warn(e.getMessage(), e);
             }
         }

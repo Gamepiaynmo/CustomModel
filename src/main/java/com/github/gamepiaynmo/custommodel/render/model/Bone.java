@@ -15,7 +15,9 @@ import com.google.gson.JsonObject;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.util.GlAllocationUtils;
 import net.minecraft.util.Identifier;
+import org.lwjgl.opengl.GL11;
 
 import java.util.Collection;
 import java.util.List;
@@ -51,6 +53,9 @@ public class Bone implements IBone {
 
     private IExpressionFloat texture = null;
     private Vec2d textureSize;
+
+    private boolean compiled = false;
+    private int glList;
 
     public static Bone getBoneFromJson(ModelPack pack, CustomJsonModel model, JsonObject jsonObj) throws ParseException {
         Bone bone = new Bone(model);
@@ -90,41 +95,30 @@ public class Bone implements IBone {
             bone.physicsParams = new double[bone.physicsExpr.length];
         }
 
-        JsonElement attachArray = jsonObj.get(CustomJsonModel.ATTACHED);
-        if (attachArray != null) {
-            for (JsonElement element : attachArray.getAsJsonArray()) {
-                String id = element.getAsString();
-                Collection<PlayerFeature> features = PlayerFeature.getListById(id);
-                if (features == null)
-                    throw new TranslatableException("error.custommodel.loadmodelpack.nohidebone", id);
-                for (PlayerFeature feature : features)
-                    bone.attachments.add(feature);
-            }
-        }
+        Json.parseJsonArray(jsonObj.get(CustomJsonModel.ATTACHED), element -> {
+            String id = element.getAsString();
+            Collection<PlayerFeature> features = PlayerFeature.getListById(id);
+            if (features == null)
+                throw new TranslatableException("error.custommodel.loadmodelpack.nohidebone", id);
+            for (PlayerFeature feature : features)
+                bone.attachments.add(feature);
+        });
 
-        JsonElement boxArray = jsonObj.get(CustomJsonModel.BOXES);
-        if (boxArray != null) {
-            for (JsonElement element : boxArray.getAsJsonArray())
-                bone.boxes.add(Box.getBoxFromJson(bone, element.getAsJsonObject()));
-        }
+        Json.parseJsonArray(jsonObj.get(CustomJsonModel.BOXES), element -> {
+            bone.boxes.add(Box.getBoxFromJson(bone, element.getAsJsonObject()));
+        });
 
-        JsonElement quadArray = jsonObj.get(CustomJsonModel.QUADS);
-        if (quadArray != null) {
-            for (JsonElement element : quadArray.getAsJsonArray())
-                bone.quads.add(Quad.getQuadFromJson(bone, element.getAsJsonObject()));
-        }
+        Json.parseJsonArray(jsonObj.get(CustomJsonModel.QUADS), element -> {
+            bone.quads.add(Quad.getQuadFromJson(bone, element.getAsJsonObject()));
+        });
 
-        JsonElement partArray = jsonObj.get(CustomJsonModel.PARTICLES);
-        if (partArray != null) {
-            for (JsonElement element : partArray.getAsJsonArray())
-                bone.particles.add(ParticleEmitter.getParticleFromJson(bone, element.getAsJsonObject()));
-        }
+        Json.parseJsonArray(jsonObj.get(CustomJsonModel.PARTICLES), element -> {
+            bone.particles.add(ParticleEmitter.getParticleFromJson(bone, element.getAsJsonObject()));
+        });
 
-        JsonElement itemArray = jsonObj.get(CustomJsonModel.ITEMS);
-        if (itemArray != null) {
-            for (JsonElement element : itemArray.getAsJsonArray())
-                bone.items.add(ItemPart.fromJson(bone, element.getAsJsonObject()));
-        }
+        Json.parseJsonArray(jsonObj.get(CustomJsonModel.ITEMS), element -> {
+            bone.items.add(ItemPart.fromJson(bone, element.getAsJsonObject()));
+        });
 
         return bone;
     }
@@ -192,21 +186,34 @@ public class Bone implements IBone {
     public double getLength() { return length; }
 
     public void render() {
-        BufferBuilder bufferBuilder = Tessellator.getInstance().getBufferBuilder();
         float scaleFactor = CustomModelClient.currentParameter.scale;
+        if (!compiled)
+            compile(scaleFactor);
+        GlStateManager.callList(glList);
 
-        for (Box box : boxes)
-            box.render(bufferBuilder, scaleFactor);
-        for (Quad quad : quads)
-            quad.render(bufferBuilder, scaleFactor);
         for (ItemPart item : items)
             item.render();
         GlStateManager.enableRescaleNormal();
     }
 
+    private void compile(float scaleFactor) {
+        glList = GlAllocationUtils.genLists(1);
+        GlStateManager.newList(glList, GL11.GL_COMPILE);
+        BufferBuilder bufferBuilder = Tessellator.getInstance().getBufferBuilder();
+
+        for (Box box : boxes)
+            box.render(bufferBuilder, scaleFactor);
+        for (Quad quad : quads)
+            quad.render(bufferBuilder, scaleFactor);
+
+        GlStateManager.endList();
+        this.compiled = true;
+    }
+
+    private static double degToRad = Math.PI / 180;
+
     public void update() {
         position.set(positionExpr[0].eval(), positionExpr[1].eval(), positionExpr[2].eval()).scl(-1, -1, 1);
-        double degToRad = Math.PI / 180;
         rotation.set(rotationExpr[0].eval(), rotationExpr[1].eval(), rotationExpr[2].eval()).scl(degToRad);
         scale.set(scaleExpr[0].eval(), scaleExpr[1].eval(), scaleExpr[2].eval());
         visible = parent.isVisible() && visibleExpr.eval();
