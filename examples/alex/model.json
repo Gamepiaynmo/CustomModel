@@ -1,4 +1,8 @@
 {
+	"modelId": "alex",
+	"modelName": "Alex",
+	"version": "1.0",
+	"author": "Gamepiaynmo",
 	"hide": ["model_all"],
 	"bones": [
 		{

@@ -1,4 +1,8 @@
 {
+	"modelId": "enderman",
+	"modelName": "Enderman",
+	"version": "1.0",
+	"author": "Gamepiaynmo",
 	"hide": ["model_all", "armor_arms_all", "armor_legs_all", "held_item_all"],
 	"skeleton": {
 		"head_all": [0, 14, 0],
