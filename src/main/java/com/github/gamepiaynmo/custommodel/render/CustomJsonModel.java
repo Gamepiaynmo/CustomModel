@@ -46,7 +46,7 @@ public class CustomJsonModel {
     public static final String BOXES = "boxes";
     public static final String QUADS = "quads";
     public static final String PARTICLES = "particles";
-    public static final String ANIMATIONS = "animations";
+    public static final String ITEMS = "items";
     public static final String TEXTURE_OFFSET = "textureOffset";
     public static final String COORDINATES = "coordinates";
     public static final String SIZE_ADD = "sizeAdd";
@@ -68,6 +68,8 @@ public class CustomJsonModel {
     public static final String SIZE = "size";
     public static final String GRAVITY = "gravity";
     public static final String COLLIDE = "collide";
+    public static final String ITEM_ID = "itemId";
+    public static final String ENCHANTED = "enchanted";
 
     public static final Map<String, EntityPose> poseMap = Maps.newHashMap();
 

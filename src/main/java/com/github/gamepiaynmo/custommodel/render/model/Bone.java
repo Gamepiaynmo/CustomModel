@@ -12,6 +12,7 @@ import com.github.gamepiaynmo.custommodel.util.*;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.util.Identifier;
@@ -42,6 +43,7 @@ public class Bone implements IBone {
     private List<Box> boxes = Lists.newArrayList();
     private List<Quad> quads = Lists.newArrayList();
     private List<ParticleEmitter> particles = Lists.newArrayList();
+    private List<ItemPart> items = Lists.newArrayList();
 
     private boolean physicalize = false;
     public Vector3 velocity = Vector3.Zero.cpy();
@@ -118,6 +120,12 @@ public class Bone implements IBone {
                 bone.particles.add(ParticleEmitter.getParticleFromJson(bone, element.getAsJsonObject()));
         }
 
+        JsonElement itemArray = jsonObj.get(CustomJsonModel.ITEMS);
+        if (itemArray != null) {
+            for (JsonElement element : itemArray.getAsJsonArray())
+                bone.items.add(ItemPart.fromJson(bone, element.getAsJsonObject()));
+        }
+
         return bone;
     }
 
@@ -191,6 +199,9 @@ public class Bone implements IBone {
             box.render(bufferBuilder, scaleFactor);
         for (Quad quad : quads)
             quad.render(bufferBuilder, scaleFactor);
+        for (ItemPart item : items)
+            item.render();
+        GlStateManager.enableRescaleNormal();
     }
 
     public void update() {
@@ -218,6 +229,4 @@ public class Bone implements IBone {
     public List<Box> getBoxes() { return boxes; }
 
     public List<Quad> getQuads() { return quads; }
-
-    public List<ParticleEmitter> getParticles() { return particles; }
 }

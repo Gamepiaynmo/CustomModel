@@ -24,6 +24,7 @@ public enum RenderEntityParameterFloat implements IExpressionFloat {
    SPEED_Y("speed_y", (entity, params) -> (float) entity.getVelocity().y),
    SPEED_Z("speed_z", (entity, params) -> (float) entity.getVelocity().z),
    YAW("yaw", (entity, params) -> MathHelper.lerp(params.partial, entity.prevYaw, entity.yaw)),
+   BODY_YAW("body_yaw", (entity, params) -> MathHelper.lerp(params.partial, entity.field_6220, entity.field_6283)),
    PITCH("pitch", (entity, params) -> MathHelper.lerp(params.partial, entity.prevPitch, entity.pitch)),
    SWING_PROGRESS("swing_progress", (entity, params) -> entity.getHandSwingProgress(params.partial));
 
