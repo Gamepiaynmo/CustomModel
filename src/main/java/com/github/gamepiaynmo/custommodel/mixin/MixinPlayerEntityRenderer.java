@@ -119,6 +119,7 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
     public void renderRightArm(AbstractClientPlayerEntity abstractClientPlayerEntity, CallbackInfo info) {
         ModelPack pack = CustomModelClient.getModelForPlayer(abstractClientPlayerEntity);
         if (pack != null && pack.getModel().getFirstPersonList(Arm.RIGHT) != null) {
+            CustomModelClient.isRenderingFirstPerson = true;
             CustomJsonModel model = pack.getModel();
             partial = CustomModelClient.getPartial();
             CustomModelClient.currentJsonModel = model;
@@ -126,8 +127,6 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
             CustomModelClient.currentParameter = calculateTransform(abstractClientPlayerEntity);
             CustomModelClient.currentPlayer = abstractClientPlayerEntity;
             CustomModelClient.currentRenderer = (PlayerEntityRenderer) (Object) this;
-            model.clearTransform();
-            model.update(this.transform);
 
             GlStateManager.color3f(1.0F, 1.0F, 1.0F);
             PlayerEntityModel<AbstractClientPlayerEntity> playerEntityModel = getModel();
@@ -137,8 +136,11 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
             playerEntityModel.handSwingProgress = 0.0F;
             playerEntityModel.field_3396 = 0.0F;
             playerEntityModel.method_17087(abstractClientPlayerEntity, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F);
-            playerEntityModel.rightArm.pitch = 0.0F;
-            playerEntityModel.rightArmOverlay.pitch = 0.0F;
+            playerEntityModel.rightArm.pitch = 0;
+            playerEntityModel.rightArmOverlay.pitch = 0;
+
+            model.clearTransform();
+            model.update(this.transform);
 
             if (!model.isHidden(PlayerBone.RIGHT_ARM))
                 playerEntityModel.rightArm.render(0.0625F);
@@ -147,6 +149,7 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
             model.renderArm(model.getTransform(PlayerBone.RIGHT_ARM.getBone()), Arm.RIGHT);
 
             GlStateManager.disableBlend();
+            CustomModelClient.isRenderingFirstPerson = false;
             info.cancel();
         }
     }
@@ -155,6 +158,7 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
     public void renderLeftArm(AbstractClientPlayerEntity abstractClientPlayerEntity, CallbackInfo info) {
         ModelPack pack = CustomModelClient.getModelForPlayer(abstractClientPlayerEntity);
         if (pack != null && pack.getModel().getFirstPersonList(Arm.LEFT) != null) {
+            CustomModelClient.isRenderingFirstPerson = true;
             CustomJsonModel model = pack.getModel();
             partial = CustomModelClient.getPartial();
             CustomModelClient.currentJsonModel = model;
@@ -162,8 +166,6 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
             CustomModelClient.currentParameter = calculateTransform(abstractClientPlayerEntity);
             CustomModelClient.currentPlayer = abstractClientPlayerEntity;
             CustomModelClient.currentRenderer = (PlayerEntityRenderer) (Object) this;
-            model.clearTransform();
-            model.update(this.transform);
 
             GlStateManager.color3f(1.0F, 1.0F, 1.0F);
             PlayerEntityModel<AbstractClientPlayerEntity> playerEntityModel = getModel();
@@ -176,6 +178,9 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
             playerEntityModel.leftArm.pitch = 0.0F;
             playerEntityModel.leftArmOverlay.pitch = 0.0F;
 
+            model.clearTransform();
+            model.update(this.transform);
+
             if (!model.isHidden(PlayerBone.LEFT_ARM))
                 playerEntityModel.leftArm.render(0.0625F);
             if (!model.isHidden(PlayerBone.LEFT_ARM_OVERLAY))
@@ -183,6 +188,7 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
             model.renderArm(model.getTransform(PlayerBone.LEFT_ARM.getBone()), Arm.LEFT);
 
             GlStateManager.disableBlend();
+            CustomModelClient.isRenderingFirstPerson = false;
             info.cancel();
         }
     }

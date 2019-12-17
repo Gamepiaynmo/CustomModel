@@ -37,6 +37,7 @@
   "error.custommodel.loadmodelpack.notexturesize": "贴图%s必须指明大小",
   "error.custommodel.loadmodelpack.jsonarraylen": "数组%s的长度不正确：应为%d",
   "error.custommodel.loadmodelpack.invalidid": "无效的模型ID：%s",
+  "error.custommodel.loadmodelpack.invalidname": "模型名称不能为空",
 
   "error.custommodel.parse.notfloat": "不是浮点数表达式：%s",
   "error.custommodel.parse.notbool": "不是布尔表达式：%s",

@@ -36,7 +36,8 @@
   "error.custommodel.loadmodelpack.notexture": "Texture %s not found.",
   "error.custommodel.loadmodelpack.notexturesize": "Texture size of %s is required.",
   "error.custommodel.loadmodelpack.jsonarraylen": "Wrong array length for %s: should be %d.",
-  "error.custommodel.loadmodelpack.invalidid": "Invalid model id：%s",
+  "error.custommodel.loadmodelpack.invalidid": "Invalid model id: %s",
+  "error.custommodel.loadmodelpack.invalidname": "Model name cannot be empty",
 
   "error.custommodel.parse.notfloat": "Not a float expression: %s",
   "error.custommodel.parse.notbool": "Not a boolean expression: %s",

@@ -99,9 +99,8 @@ public class CustomModel implements ModInitializer {
         for (Map.Entry<String, ModelInfo> entry : models.entrySet()) {
             ModelInfo info = entry.getValue();
             res.add(new LiteralText(info.modelName).styled(style -> {
-                Text hoverText = new TranslatableText("text.custommodel.modelinfo.id", info.modelId);
-                if (info.modelName.length() > 0)
-                    hoverText.append("\n").append(new TranslatableText("text.custommodel.modelinfo.name", info.modelName));
+                Text hoverText = new TranslatableText("text.custommodel.modelinfo.name", info.modelName);
+                hoverText.append("\n").append(new TranslatableText("text.custommodel.modelinfo.id", info.modelId));
                 if (info.version.length() > 0)
                     hoverText.append("\n").append(new TranslatableText("text.custommodel.modelinfo.version", info.version));
                 if (info.author.length() > 0)

@@ -308,7 +308,7 @@ public class CustomJsonModel {
         if (lastBoneMats.isEmpty())
             ((ICustomPlayerRenderer) CustomModelClient.currentRenderer).tick(CustomModelClient.currentPlayer);
 
-        if (entity.isInSneakingPose())
+        if (entity.isInSneakingPose() && !CustomModelClient.isRenderingFirstPerson)
             baseMat = baseMat.cpy().translate(0, 0.2f, 0);
 
         Map<String, Matrix4> curBoneMats = Maps.newHashMap();

@@ -76,7 +76,10 @@ public class ModelInfo {
         if (res.modelId == null || !isValidId(res.modelId))
             throw new TranslatableException("error.custommodel.loadmodelpack.invalidid", res.modelId);
 
-        res.modelName = Json.getString(jsonObj, CustomJsonModel.MODEL_NAME, "");
+        res.modelName = Json.getString(jsonObj, CustomJsonModel.MODEL_NAME);
+        if (res.modelName == null)
+            throw new TranslatableException("error.custommodel.loadmodelpack.invalidname");
+
         res.version = Json.getString(jsonObj, CustomJsonModel.VERSION, "");
         res.author = Json.getString(jsonObj, CustomJsonModel.AUTHOR, "");
 
