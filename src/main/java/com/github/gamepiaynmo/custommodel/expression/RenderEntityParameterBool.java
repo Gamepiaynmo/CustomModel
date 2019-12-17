@@ -19,7 +19,9 @@ public enum RenderEntityParameterBool implements IExpressionBool {
    IS_RIDING("is_riding", Entity::hasVehicle),
    IS_SNEAKING("is_sneaking", Entity::isInSneakingPose),
    IS_SPRINTING("is_sprinting", Entity::isSprinting),
-   IS_WET("is_wet", Entity::isTouchingWater);
+   IS_WET("is_wet", Entity::isTouchingWater),
+   IS_INVENTORY("is_inventory", entity -> CustomModelClient.isRenderingInventory),
+   IS_FIRST_PERSON("is_first_person", entity -> CustomModelClient.isRenderingFirstPerson);
 
    private String name;
    private static final RenderEntityParameterBool[] VALUES = values();

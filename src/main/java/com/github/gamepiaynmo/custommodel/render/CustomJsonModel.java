@@ -16,11 +16,10 @@ import com.google.common.collect.Queues;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.platform.GlStateManager;
-import net.minecraft.client.model.Cuboid;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
-import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityPose;
+import net.minecraft.util.Arm;
 import net.minecraft.util.Identifier;
 import org.lwjgl.opengl.GL11;
 
@@ -58,6 +57,8 @@ public class CustomJsonModel {
     public static final String SIZE_ADD = "sizeAdd";
     public static final String PHYSICS = "physics";
     public static final String ATTACHED = "attached";
+    public static final String FP_LEFT = "fpLeft";
+    public static final String FP_RIGHT = "fpRight";
 
     public static final String POS_RANGE = "posRange";
     public static final String DIR_RANGE = "dirRange";
@@ -131,6 +132,26 @@ public class CustomJsonModel {
             }
         }
 
+        JsonElement leftArray = jsonObj.get(FP_LEFT);
+        if (leftArray != null) {
+            model.firstPersonList.put(Arm.LEFT, Lists.newArrayList());
+            for (JsonElement element : leftArray.getAsJsonArray()) {
+                Bone bone = model.id2Bone.get(element.getAsString());
+                if (bone != null)
+                    model.firstPersonList.get(Arm.LEFT).add(bone);
+            }
+        }
+
+        JsonElement rightArray = jsonObj.get(FP_RIGHT);
+        if (rightArray != null) {
+            model.firstPersonList.put(Arm.RIGHT, Lists.newArrayList());
+            for (JsonElement element : rightArray.getAsJsonArray()) {
+                Bone bone = model.id2Bone.get(element.getAsString());
+                if (bone != null)
+                    model.firstPersonList.get(Arm.RIGHT).add(bone);
+            }
+        }
+
         for (PlayerFeature feature : PlayerFeature.values())
             model.features.put(feature, model.isHidden(feature) ? Lists.newArrayList()
                     : Lists.newArrayList(feature.getAttachedBone().getBone()));
@@ -148,6 +169,7 @@ public class CustomJsonModel {
     private List<PlayerFeature> featureHideList = Lists.newArrayList();
     private Map<PlayerBone, Boolean> visibleBones = Maps.newEnumMap(PlayerBone.class);
     private Map<PlayerBone, IExpressionFloat[]> skeleton = Maps.newEnumMap(PlayerBone.class);
+    private Map<Arm, List<Bone>> firstPersonList = Maps.newEnumMap(Arm.class);
 
     private Supplier<Identifier> baseTexture;
 
@@ -180,6 +202,10 @@ public class CustomJsonModel {
 
     public boolean isHidden(PlayerBone bone) { return boneHideList.contains(bone); }
     public boolean isHidden(PlayerFeature feature) { return featureHideList.contains(feature); }
+
+    public Collection<Bone> getFirstPersonList(Arm arm) {
+        return firstPersonList.get(arm);
+    }
 
     public Collection<Bone> getBones() { return bones; }
 
@@ -253,7 +279,7 @@ public class CustomJsonModel {
         GlStateManager.popMatrix();
     }
 
-    public void render(Matrix4 baseMat, IBone root) {
+    public void renderArm(Matrix4 baseMat, Arm arm) {
         AbstractClientPlayerEntity entity = CustomModelClient.currentPlayer;
         RenderParameter params = CustomModelClient.currentParameter;
         PlayerEntityModel model = CustomModelClient.currentModel;
@@ -264,12 +290,7 @@ public class CustomJsonModel {
         GlStateManager.pushMatrix();
         GL11.glMultMatrixd(baseMat.cpy().inv().val);
 
-        Queue<Bone> queue = Queues.newArrayDeque();
-        for (Bone bone : children.get(root.getId()))
-            queue.offer(bone);
-
-        while (!queue.isEmpty()) {
-            Bone bone = queue.poll();
+        for (Bone bone : firstPersonList.get(arm)) {
             CustomModelClient.textureManager.bindTexture(bone.getTexture().get());
             GlStateManager.pushMatrix();
             Matrix4 transform = tmpBoneMats.get(bone.getId());
@@ -278,9 +299,6 @@ public class CustomJsonModel {
             if (bone.isVisible())
                 bone.render();
             GlStateManager.popMatrix();
-
-            for (Bone child : children.get(bone.getId()))
-                queue.offer(bone);
         }
         GlStateManager.popMatrix();
     }

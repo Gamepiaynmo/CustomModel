@@ -56,6 +56,7 @@ public class CustomModelClient implements ClientModInitializer {
 
     public static boolean isRenderingInventory;
     public static EntityParameter inventoryEntityParameter;
+    public static boolean isRenderingFirstPerson;
 
     private static void sendPacket(Identifier id, Packet<?> packet) {
         PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());

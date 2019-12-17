@@ -7,7 +7,6 @@ import com.github.gamepiaynmo.custommodel.render.feature.*;
 import com.github.gamepiaynmo.custommodel.util.Matrix4;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.model.Cuboid;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
@@ -29,7 +28,6 @@ import net.minecraft.util.UseAction;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
-import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -120,7 +118,7 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
     @Inject(method = "renderRightArm", at = @At("HEAD"), cancellable = true)
     public void renderRightArm(AbstractClientPlayerEntity abstractClientPlayerEntity, CallbackInfo info) {
         ModelPack pack = CustomModelClient.getModelForPlayer(abstractClientPlayerEntity);
-        if (pack != null) {
+        if (pack != null && pack.getModel().getFirstPersonList(Arm.RIGHT) != null) {
             CustomJsonModel model = pack.getModel();
             partial = CustomModelClient.getPartial();
             CustomModelClient.currentJsonModel = model;
@@ -146,7 +144,7 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
                 playerEntityModel.rightArm.render(0.0625F);
             if (!model.isHidden(PlayerBone.RIGHT_ARM_OVERLAY))
                 playerEntityModel.rightArmOverlay.render(0.0625F);
-            model.render(model.getTransform(PlayerBone.RIGHT_ARM.getBone()), PlayerBone.RIGHT_ARM.getBone());
+            model.renderArm(model.getTransform(PlayerBone.RIGHT_ARM.getBone()), Arm.RIGHT);
 
             GlStateManager.disableBlend();
             info.cancel();
@@ -156,7 +154,7 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
     @Inject(method = "renderLeftArm", at = @At("HEAD"), cancellable = true)
     public void renderLeftArm(AbstractClientPlayerEntity abstractClientPlayerEntity, CallbackInfo info) {
         ModelPack pack = CustomModelClient.getModelForPlayer(abstractClientPlayerEntity);
-        if (pack != null) {
+        if (pack != null && pack.getModel().getFirstPersonList(Arm.LEFT) != null) {
             CustomJsonModel model = pack.getModel();
             partial = CustomModelClient.getPartial();
             CustomModelClient.currentJsonModel = model;
@@ -182,7 +180,7 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
                 playerEntityModel.leftArm.render(0.0625F);
             if (!model.isHidden(PlayerBone.LEFT_ARM_OVERLAY))
                 playerEntityModel.leftArmOverlay.render(0.0625F);
-            model.render(model.getTransform(PlayerBone.LEFT_ARM.getBone()), PlayerBone.LEFT_ARM.getBone());
+            model.renderArm(model.getTransform(PlayerBone.LEFT_ARM.getBone()), Arm.LEFT);
 
             GlStateManager.disableBlend();
             info.cancel();
