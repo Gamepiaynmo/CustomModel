@@ -43,7 +43,9 @@ public class ModelInfo {
         InputStream modelInputStream = zf.getInputStream(entry);
         JsonObject jsonObj = new JsonParser().parse(new InputStreamReader(modelInputStream)).getAsJsonObject();
         IOUtils.closeQuietly(modelInputStream);
-        return fromJson(jsonObj);
+        ModelInfo info = fromJson(jsonObj);
+        info.fileName = file.getName();
+        return info;
     }
 
     private static ModelInfo fromFolder(File file) throws IOException, ParseException {
@@ -60,7 +62,9 @@ public class ModelInfo {
         InputStream modelInputStream = new FileInputStream(model);
         JsonObject jsonObj = new JsonParser().parse(new InputStreamReader(modelInputStream)).getAsJsonObject();
         IOUtils.closeQuietly(modelInputStream);
-        return fromJson(jsonObj);
+        ModelInfo info = fromJson(jsonObj);
+        info.fileName = file.getName();
+        return info;
     }
 
     private static boolean isValidId(String id) {
@@ -104,6 +108,8 @@ public class ModelInfo {
     public String getInfoStr() {
         return new StringBuilder().append(modelId).append(": ").append(modelName).append(" ").append(version).append(" [").append(author).append("]").toString();
     }
+
+    public String fileName;
 
     public String modelId;
     public String modelName;

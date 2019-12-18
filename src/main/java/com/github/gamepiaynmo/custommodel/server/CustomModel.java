@@ -132,7 +132,10 @@ public class CustomModel implements ModInitializer {
         uuid = PlayerEntity.getUuidFromProfile(profile);
 
         for (String entry : modelSelector.getModelForPlayer(server, playerEntity)) {
-            File modelFile = new File(CustomModel.MODEL_DIR + "/" + entry);
+            ModelInfo info = models.get(entry);
+            if (info == null)
+                continue;
+            File modelFile = new File(CustomModel.MODEL_DIR + "/" + info.fileName);
 
             try {
                 if (modelFile.exists()) {
@@ -158,7 +161,10 @@ public class CustomModel implements ModInitializer {
     public static void selectModel(ServerPlayerEntity playerEntity, String model) throws LoadModelException {
         GameProfile profile = playerEntity.getGameProfile();
         UUID uuid = PlayerEntity.getUuidFromProfile(profile);
-        File modelFile = new File(CustomModel.MODEL_DIR + "/" + model);
+        ModelInfo info = models.get(model);
+        if (info == null)
+            return;
+        File modelFile = new File(CustomModel.MODEL_DIR + "/" + info.fileName);
 
         try {
             if (modelFile.exists()) {
