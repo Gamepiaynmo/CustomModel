@@ -1,5 +1,6 @@
 package com.github.gamepiaynmo.custommodel.server;
 
+import com.github.gamepiaynmo.custommodel.api.ModelPackInfo;
 import com.github.gamepiaynmo.custommodel.expression.ParseException;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
 import com.github.gamepiaynmo.custommodel.util.Json;
@@ -105,8 +106,8 @@ public class ModelInfo {
         return res;
     }
 
-    public String getInfoStr() {
-        return new StringBuilder().append(modelId).append(": ").append(modelName).append(" ").append(version).append(" [").append(author).append("]").toString();
+    public ModelPackInfo getInfo() {
+        return new ModelPackInfo(fileName, modelId, modelName, version, author);
     }
 
     public String fileName;

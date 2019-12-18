@@ -7,7 +7,9 @@ import com.github.gamepiaynmo.custommodel.network.PacketReplyConfig;
 import com.github.gamepiaynmo.custommodel.render.*;
 import com.github.gamepiaynmo.custommodel.server.CustomModel;
 import com.github.gamepiaynmo.custommodel.server.ModConfig;
+import com.github.gamepiaynmo.custommodel.server.ModelInfo;
 import com.github.gamepiaynmo.custommodel.util.Matrix4;
+import com.github.gamepiaynmo.custommodel.util.ModelNotFoundException;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -86,17 +88,21 @@ public class CustomModelClient implements ClientModInitializer {
     }
 
     private static boolean loadModel(UUID uuid, String model) {
-        File modelFile = new File(CustomModel.MODEL_DIR + "/" + model);
+        ModelInfo info = CustomModel.models.get(model);
         ModelPack pack = null;
 
         try {
+            if (info == null)
+                throw new ModelNotFoundException(model);
+            File modelFile = new File(CustomModel.MODEL_DIR + "/" + model);
+
             if (modelFile.isDirectory())
                 pack = ModelPack.fromDirectory(textureManager, modelFile, uuid);
             if (modelFile.isFile())
                 pack = ModelPack.fromZipFile(textureManager, modelFile, uuid);
         } catch (Exception e) {
             MinecraftClient.getInstance().inGameHud.addChatMessage(MessageType.CHAT,
-                    new TranslatableText("error.custommodel.loadmodelpack", modelFile.getName(), e.getMessage()).formatted(Formatting.RED));
+                    new TranslatableText("error.custommodel.loadmodelpack", model, e.getMessage()).formatted(Formatting.RED));
             LOGGER.warn(e.getMessage(), e);
         }
 
@@ -124,13 +130,9 @@ public class CustomModelClient implements ClientModInitializer {
 
     public static void reloadModel(GameProfile profile) {
         UUID uuid = PlayerEntity.getUuidFromProfile(profile);
-        String nameEntry = profile.getName().toLowerCase();
-        String uuidEntry = uuid.toString().toLowerCase();
-        List<String> files = ImmutableList.of(nameEntry, uuidEntry, nameEntry + ".zip", uuidEntry + ".zip");
-
-        for (String entry : files)
-            if (loadModel(uuid, entry))
-                break;
+        if (modelPacks.containsKey(uuid))
+            loadModel(uuid, modelPacks.get(uuid).getModel().getModelInfo().modelId);
+        else loadModel(uuid, ModConfig.getDefaultModel());
     }
 
     public static ModelPack getModelForPlayer(AbstractClientPlayerEntity player) {

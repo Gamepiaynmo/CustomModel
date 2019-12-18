@@ -10,6 +10,8 @@
   "text.autoconfig.custommodel.option.server.customEyeHeight.@Tooltip": "允许自定义模型改变视角高度，若服务端未允许则仅在客户端生效",
   "text.autoconfig.custommodel.option.server.customBoundingBox": "允许改变碰撞体积",
   "text.autoconfig.custommodel.option.server.customBoundingBox.@Tooltip": "允许自定义模型改变碰撞体积，若服务端未允许或服务端未安装模组则无效",
+  "text.autoconfig.custommodel.option.server.defaultModel": "默认加载模型",
+  "text.autoconfig.custommodel.option.server.defaultModel.@Tooltip": "未给玩家指定模型时，默认选择的模型",
   "text.autoconfig.custommodel.option.permission.reloadSelfPermission": "重载自己的模型",
   "text.autoconfig.custommodel.option.permission.reloadSelfPermission.@Tooltip": "重载自己的模型所需要的权限等级",
   "text.autoconfig.custommodel.option.permission.reloadOthersPermission": "重载他人的模型",
@@ -38,6 +40,7 @@
   "error.custommodel.loadmodelpack.jsonarraylen": "数组%s的长度不正确：应为%d",
   "error.custommodel.loadmodelpack.invalidid": "无效的模型ID：%s",
   "error.custommodel.loadmodelpack.invalidname": "模型名称不能为空",
+  "error.custommodel.loadmodelpack.notfound": "未找到模型文件：%s",
 
   "error.custommodel.parse.notfloat": "不是浮点数表达式：%s",
   "error.custommodel.parse.notbool": "不是布尔表达式：%s",
@@ -57,7 +60,7 @@
   "error.custommodel.parse.missexpr": "缺少表达式",
   "error.custommodel.parse.invalidfunc": "未知函数：%s",
 
-  "command.custommodel.listmodels": "当前共有%d个模型：",
+  "command.custommodel.listmodels": "当前共有%d个模型",
   "command.custommodel.reload": "重新加载了%d个玩家的模型",
   "command.custommodel.select": "将%d个玩家的模型设置为%s"
 }

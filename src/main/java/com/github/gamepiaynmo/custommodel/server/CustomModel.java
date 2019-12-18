@@ -6,6 +6,7 @@ import com.github.gamepiaynmo.custommodel.network.PacketQuery;
 import com.github.gamepiaynmo.custommodel.network.PacketQueryConfig;
 import com.github.gamepiaynmo.custommodel.network.PacketReplyConfig;
 import com.github.gamepiaynmo.custommodel.util.LoadModelException;
+import com.github.gamepiaynmo.custommodel.util.ModelNotFoundException;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -31,6 +32,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 
@@ -49,12 +51,14 @@ public class CustomModel implements ModInitializer {
     private static IModelSelector modelSelector = defaultSelector;
 
     private static void sendPacket(PlayerEntity player, Identifier id, Packet<?> packet) {
-        PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
-        try {
-            packet.write(buf);
-            ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, id, buf);
-        } catch (Exception e) {
-            LOGGER.warn(e.getMessage(), e);
+        if (ServerSidePacketRegistry.INSTANCE.canPlayerReceive(player, id)) {
+            PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
+            try {
+                packet.write(buf);
+                ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, id, buf);
+            } catch (Exception e) {
+                LOGGER.warn(e.getMessage(), e);
+            }
         }
     }
 
@@ -73,6 +77,10 @@ public class CustomModel implements ModInitializer {
         CustomModel.modelSelector = modelSelector;
         if (modelSelector == null)
             CustomModel.modelSelector = defaultSelector;
+    }
+
+    public static IModelSelector getModelSelector() {
+        return CustomModel.modelSelector;
     }
 
     public static ModelInfo getBoundingBoxForPlayer(PlayerEntity playerEntity) {
@@ -94,7 +102,6 @@ public class CustomModel implements ModInitializer {
     }
 
     public static Collection<Text> getModelInfoList() {
-        refreshModelList();
         List<Text> res = Lists.newArrayList();
         for (Map.Entry<String, ModelInfo> entry : models.entrySet()) {
             ModelInfo info = entry.getValue();
@@ -115,7 +122,6 @@ public class CustomModel implements ModInitializer {
     }
 
     public static Collection<String> getModelIdList() {
-        refreshModelList();
         List<String> res = Lists.newArrayList();
         for (Map.Entry<String, ModelInfo> entry : models.entrySet())
             res.add(entry.getKey());
@@ -131,30 +137,29 @@ public class CustomModel implements ModInitializer {
         GameProfile profile = playerEntity.getGameProfile();
         uuid = PlayerEntity.getUuidFromProfile(profile);
 
-        for (String entry : modelSelector.getModelForPlayer(server, playerEntity)) {
-            ModelInfo info = models.get(entry);
+        String entry = modelSelector.getModelForPlayer(profile);
+        ModelInfo info = models.get(entry);
+
+        try {
             if (info == null)
-                continue;
+                throw new ModelNotFoundException(entry);
             File modelFile = new File(CustomModel.MODEL_DIR + "/" + info.fileName);
 
-            try {
-                if (modelFile.exists()) {
-                    PacketModel packetModel = new PacketModel(modelFile, uuid);
-                    if (packetModel.success) {
-                        modelMap.put(uuid, ModelInfo.fromFile(modelFile));
-                        modelSelector.onModelSelected(server, playerEntity, entry);
+            if (modelFile.exists()) {
+                PacketModel packetModel = new PacketModel(modelFile, uuid);
+                if (packetModel.success) {
+                    modelMap.put(uuid, ModelInfo.fromFile(modelFile));
+                    modelSelector.setModelForPlayer(profile, entry);
 
-                        Packet send = formPacket(PacketModel.ID, packetModel);
-                        if (broadcast)
-                            playerEntity.getServerWorld().method_14178().sendToOtherNearbyPlayers(playerEntity, send);
-                        ServerSidePacketRegistry.INSTANCE.sendToPlayer(receiver, send);
-                        break;
-                    }
+                    Packet send = formPacket(PacketModel.ID, packetModel);
+                    if (broadcast)
+                        playerEntity.getServerWorld().method_14178().sendToOtherNearbyPlayers(playerEntity, send);
+                    ServerSidePacketRegistry.INSTANCE.sendToPlayer(receiver, send);
                 }
-            } catch (Exception e) {
-                LOGGER.warn(e.getMessage(), e);
-                throw new LoadModelException(modelFile.getName(), e);
             }
+        } catch (Exception e) {
+            LOGGER.warn(e.getMessage(), e);
+            throw new LoadModelException(entry, e);
         }
     }
 
@@ -163,7 +168,7 @@ public class CustomModel implements ModInitializer {
         UUID uuid = PlayerEntity.getUuidFromProfile(profile);
         ModelInfo info = models.get(model);
         if (info == null)
-            return;
+            throw new ModelNotFoundException(model);
         File modelFile = new File(CustomModel.MODEL_DIR + "/" + info.fileName);
 
         try {
@@ -171,7 +176,7 @@ public class CustomModel implements ModInitializer {
                 PacketModel packetModel = new PacketModel(modelFile, uuid);
                 if (packetModel.success) {
                     modelMap.put(uuid, ModelInfo.fromFile(modelFile));
-                    modelSelector.onModelSelected(server, playerEntity, model);
+                    modelSelector.setModelForPlayer(profile, model);
 
                     Packet send = formPacket(PacketModel.ID, packetModel);
                     playerEntity.getServerWorld().method_14178().sendToNearbyPlayers(playerEntity, send);
@@ -179,7 +184,7 @@ public class CustomModel implements ModInitializer {
             }
         } catch (Exception e) {
             LOGGER.warn(e.getMessage(), e);
-            throw new LoadModelException(modelFile.getName(), e);
+            throw new LoadModelException(model, e);
         }
     }
 
@@ -227,5 +232,6 @@ public class CustomModel implements ModInitializer {
         });
 
         AutoConfig.register(ModConfig.class, GsonConfigSerializer::new);
+        refreshModelList();
     }
 }

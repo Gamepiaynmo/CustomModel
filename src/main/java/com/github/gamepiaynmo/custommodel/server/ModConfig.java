@@ -33,6 +33,9 @@ public class ModConfig implements ConfigData {
 
         @ConfigEntry.Gui.Tooltip
         public boolean customBoundingBox = true;
+
+        @ConfigEntry.Gui.Tooltip
+        public String defaultModel = "default";
     }
 
     @Config(name = "permission")
@@ -59,6 +62,7 @@ public class ModConfig implements ConfigData {
 
     public static boolean isCustomEyeHeight() { return getConfig().server.customEyeHeight; }
     public static boolean isCustomBoundingBox() { return getConfig().server.customBoundingBox; }
+    public static String getDefaultModel() { return getConfig().server.defaultModel; }
 
     public static int getReloadSelfPermission() { return getConfig().permission.reloadSelfPermission; }
     public static int getReloadOthersPermission() { return getConfig().permission.reloadOthersPermission; }

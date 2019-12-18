@@ -81,7 +81,11 @@ public class ServerCommand {
                 }
                 context.getSource().sendFeedback(new TranslatableText("command.custommodel.select", players.size(), model), true);
                 return players.size();
-            })))));
+            })))).then(CommandManager.literal("refresh").requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(ModConfig.getListModelsPermission())).executes(context -> {
+                CustomModel.refreshModelList();
+                context.getSource().sendFeedback(new TranslatableText("command.custommodel.listmodels", CustomModel.models.size()), false);
+                return 1;
+            })));
         });
     }
 

@@ -2,6 +2,7 @@ package com.github.gamepiaynmo.custommodel.server.selector;
 
 import com.github.gamepiaynmo.custommodel.api.IModelSelector;
 import com.github.gamepiaynmo.custommodel.server.CustomModel;
+import com.github.gamepiaynmo.custommodel.server.ModConfig;
 import com.google.common.collect.ImmutableList;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.entity.player.PlayerEntity;
@@ -39,20 +40,16 @@ public class DefaultModelSelector implements IModelSelector {
     }
 
     @Override
-    public Collection<String> getModelForPlayer(MinecraftServer server, ServerPlayerEntity playerEntity) {
-        GameProfile profile = playerEntity.getGameProfile();
+    public String getModelForPlayer(GameProfile profile) {
         if (models.contains(profile))
-            return ImmutableList.of(models.get(profile).getModelPack());
+            return models.get(profile).getModelPack();
 
-        String nameEntry = profile.getName().toLowerCase();
-        UUID uuid = PlayerEntity.getUuidFromProfile(profile);
-        String uuidEntry = uuid.toString().toLowerCase();
-        return ImmutableList.of(nameEntry, uuidEntry, nameEntry + ".zip", uuidEntry + ".zip");
+        return ModConfig.getDefaultModel();
     }
 
     @Override
-    public void onModelSelected(MinecraftServer server, ServerPlayerEntity playerEntity, String model) {
-        models.add(new ModelEntry(playerEntity.getGameProfile(), model));
+    public void setModelForPlayer(GameProfile profile, String modelId) {
+        models.add(new ModelEntry(profile, modelId));
         saveModelList();
     }
 }

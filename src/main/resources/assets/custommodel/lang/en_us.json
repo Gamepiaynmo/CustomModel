@@ -10,6 +10,8 @@
   "text.autoconfig.custommodel.option.server.customEyeHeight.@Tooltip": "Allow model packs to change eye height. Only effects client side if not allowed at server side.",
   "text.autoconfig.custommodel.option.server.customBoundingBox": "Custom Bounding Box",
   "text.autoconfig.custommodel.option.server.customBoundingBox.@Tooltip": "Allow model packs to change bounding box. Will not take effect if server side is not modded or not allowed.",
+  "text.autoconfig.custommodel.option.server.defaultModel": "Default Model",
+  "text.autoconfig.custommodel.option.server.defaultModel.@Tooltip": "Default model when no model has been select by the player.",
   "text.autoconfig.custommodel.option.permission.reloadSelfPermission": "Reload Own Model",
   "text.autoconfig.custommodel.option.permission.reloadSelfPermission.@Tooltip": "Permission level needed to reload model of oneself.",
   "text.autoconfig.custommodel.option.permission.reloadOthersPermission": "Reload Other's Model",
@@ -38,6 +40,7 @@
   "error.custommodel.loadmodelpack.jsonarraylen": "Wrong array length for %s: should be %d.",
   "error.custommodel.loadmodelpack.invalidid": "Invalid model id: %s",
   "error.custommodel.loadmodelpack.invalidname": "Model name cannot be empty",
+  "error.custommodel.loadmodelpack.notfound": "Model file not found: %s",
 
   "error.custommodel.parse.notfloat": "Not a float expression: %s",
   "error.custommodel.parse.notbool": "Not a boolean expression: %s",
@@ -57,7 +60,7 @@
   "error.custommodel.parse.missexpr": "Missing expression",
   "error.custommodel.parse.invalidfunc": "Unknown function: %s",
 
-  "command.custommodel.listmodels": "There are %d model packs: ",
+  "command.custommodel.listmodels": "There are %d model packs.",
   "command.custommodel.reload": "Reloaded models for %d player(s)",
   "command.custommodel.select": "Changed the model of %d player(s) to %s"
 }

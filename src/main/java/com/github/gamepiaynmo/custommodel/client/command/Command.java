@@ -2,6 +2,7 @@ package com.github.gamepiaynmo.custommodel.client.command;
 
 import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.server.CustomModel;
+import com.github.gamepiaynmo.custommodel.util.ModelNotFoundException;
 import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
@@ -19,6 +20,7 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.text.Texts;
 import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Formatting;
 
 import java.io.File;
 import java.util.Collection;
@@ -35,7 +37,8 @@ public class Command implements ClientCommandPlugin {
             return 1;
         }).then(ArgumentBuilders.argument("targets", EntityArgumentType.players()).executes(context -> {
             List<GameProfile> players = ((IClientEntitySelector) (Object) context.getArgument("targets", EntitySelector.class)).getPlayers(context.getSource());
-            players.forEach(player -> CustomModelClient.reloadModel(player));
+            for (GameProfile player : players)
+                CustomModelClient.reloadModel(player);
             context.getSource().sendFeedback(new TranslatableText("command.custommodel.reload", players.size()));
             return players.size();
         }))).then(ArgumentBuilders.literal("list").executes(context -> {
@@ -52,10 +55,15 @@ public class Command implements ClientCommandPlugin {
         }).then(ArgumentBuilders.argument("targets", EntityArgumentType.players()).executes(context -> {
             List<GameProfile> players = ((IClientEntitySelector) (Object) context.getArgument("targets", EntitySelector.class)).getPlayers(context.getSource());
             String model = context.getArgument("model", String.class);
-            players.forEach(player -> CustomModelClient.selectModel(player, model));
+            for (GameProfile player : players)
+                CustomModelClient.selectModel(player, model);
             context.getSource().sendFeedback(new TranslatableText("command.custommodel.select", players.size(), model));
             return players.size();
-        })))));
+        })))).then(ArgumentBuilders.literal("refresh").executes(context -> {
+            CustomModel.refreshModelList();
+            context.getSource().sendFeedback(new TranslatableText("command.custommodel.listmodels", CustomModel.models.size()));
+            return 1;
+        })));
     }
 
     public static interface IClientEntitySelector {
