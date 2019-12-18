@@ -34,12 +34,16 @@ public class Bone implements IBone {
     private Vector3 scale = new Vector3(1, 1, 1);
     private boolean visible;
     private double[] physicsParams;
+    private float[] color = new float[] { 1, 1, 1 };
+    private float alpha = 1;
 
     private IExpressionFloat[] positionExpr;
     private IExpressionFloat[] rotationExpr;
     private IExpressionFloat[] scaleExpr;
     private IExpressionBool visibleExpr;
     private IExpressionFloat[] physicsExpr;
+    private IExpressionFloat[] colorExpr;
+    private IExpressionFloat alphaExpr;
 
     public List<PlayerFeature> attachments = Lists.newArrayList();
     private List<Box> boxes = Lists.newArrayList();
@@ -94,6 +98,9 @@ public class Bone implements IBone {
             bone.physicsExpr = Json.parseFloatExpressionArray(physical, 5, new float[] { 0, 0, 0, 0, 0 }, model.getParser());
             bone.physicsParams = new double[bone.physicsExpr.length];
         }
+
+        bone.colorExpr = Json.parseFloatExpressionArray(jsonObj.get(CustomJsonModel.COLOR), 3, new float[] { 1, 1, 1 }, model.getParser());
+        bone.alphaExpr = Json.getFloatExpression(jsonObj, CustomJsonModel.ALPHA, 1, model.getParser());
 
         Json.parseJsonArray(jsonObj.get(CustomJsonModel.ATTACHED), element -> {
             String id = element.getAsString();
@@ -189,6 +196,7 @@ public class Bone implements IBone {
         float scaleFactor = CustomModelClient.currentParameter.scale;
         if (!compiled)
             compile(scaleFactor);
+        GlStateManager.color4f(color[0], color[1], color[2], alpha);
         GlStateManager.callList(glList);
 
         for (ItemPart item : items)
@@ -218,9 +226,14 @@ public class Bone implements IBone {
         scale.set(scaleExpr[0].eval(), scaleExpr[1].eval(), scaleExpr[2].eval());
         visible = parent.isVisible() && visibleExpr.eval();
         length = position.len() * 0.0625;
-        if (physicalize)
+        color[0] = colorExpr[0].eval();
+        color[1] = colorExpr[1].eval();
+        color[2] = colorExpr[2].eval();
+        alpha = alphaExpr.eval();
+        if (physicalize) {
             for (int i = 0; i < physicsParams.length; i++)
                 physicsParams[i] = physicsExpr[i].eval();
+        }
     }
 
     public void tick(Matrix4 transform) {

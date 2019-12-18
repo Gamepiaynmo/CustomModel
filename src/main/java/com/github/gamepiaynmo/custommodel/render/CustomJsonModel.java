@@ -46,6 +46,8 @@ public class CustomJsonModel {
     public static final String ROTATION = "rotation";
     public static final String SCALE = "scale";
     public static final String VISIBLE = "visible";
+    public static final String COLOR = "color";
+    public static final String ALPHA = "alpha";
     public static final String BOXES = "boxes";
     public static final String QUADS = "quads";
     public static final String PARTICLES = "particles";
