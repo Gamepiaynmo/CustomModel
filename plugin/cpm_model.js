@@ -25,36 +25,6 @@
 					var deg2rad = Math.PI / 180
 					var rad2deg = 180 / Math.PI
 
-					function getTransform(group, parent, parentMatrix) {
-						cl(group.name)
-						var euler = new THREE.Euler(-group.rotation[1] * deg2rad,
-							-group.rotation[0] * deg2rad, group.rotation[2] * deg2rad)
-						cl(euler)
-						var matrix = new THREE.Matrix4()
-						matrix.makeRotationFromEuler(euler)
-						var trans = new THREE.Vector3(group.origin[0] - parent.origin[0],
-							group.origin[1] - parent.origin[1],
-							group.origin[2] - parent.origin[2])
-						cl(trans)
-						matrix.setPosition(trans)
-						var result = new THREE.Matrix4()
-						return result.multiplyMatrices(parentMatrix, matrix)
-					}
-
-					function decomposeTransform(matrix) {
-						cl(matrix)
-						var position = new THREE.Vector3()
-						var quaternion = new THREE.Quaternion()
-						var scale = new THREE.Vector3
-						matrix.decompose(position, quaternion, scale)
-						cl(position)
-						cl(euler)
-						cl(scale)
-						var euler = new THREE.Euler()
-						euler.setFromQuaternion(quaternion)
-						return [position, euler]
-					}
-
 					function processGroup(group, parent) {
 						var bone = { "id" : group.name }
 
@@ -66,7 +36,7 @@
 							var rot = parent.rotation
 							bone["rotation"] = [-rot[1], -rot[0], rot[2]]
 						} else {
-							bone["position"] = [pos[0], pos[1] - 12, pos[2]]
+							bone["position"] = [pos[0], pos[1] - 24, pos[2]]
 							if (texture) {
 								bone["texture"] = texture
 								bone["textureSize"] = textureSize
@@ -168,7 +138,7 @@
 				}
 			})
 
-			MenuBar.addAction(import_action, 'file.import')
+			// MenuBar.addAction(import_action, 'file.import')
 			MenuBar.addAction(export_action, 'file.export')
 		},
 

@@ -4,6 +4,8 @@
 	"version": "1.0",
 	"author": "Gamepiaynmo",
 	"hide": ["model_all", "armor_all"],
+	"fpLeft": ["left_arm_c"],
+	"fpRight": ["right_arm_c"],
 	"bones": [
 		{
 			"id": "head_c",

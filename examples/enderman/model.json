@@ -3,7 +3,9 @@
 	"modelName": "Enderman",
 	"version": "1.0",
 	"author": "Gamepiaynmo",
-	"hide": ["model_all", "armor_arms_all", "armor_legs_all", "held_item_all"],
+	"hide": ["model_all", "armor_arms_all", "armor_legs_all", "held_item_all", "shoulder_parrot_all"],
+	"fpLeft": ["left_arm_c"],
+	"fpRight": ["right_arm_c"],
 	"skeleton": {
 		"head_all": [0, 14, 0],
 		"body_all": [0, 14, 0],
@@ -20,7 +22,7 @@
 	"boundingBox": {
 		"standing": [0.6, 2.9],
 		"dying": [0.6, 2.9],
-		"sneaking": [0.6, 2.5]
+		"sneaking": [0.6, 2.49]
 	},
 	"bones": [
 		{
@@ -64,6 +66,18 @@
 					"coordinates": [-4, -12, 2, 8, 12, 4]
 				}
 			]
+		},
+		{
+			"id": "body_left_parrot",
+			"parent": "body_c",
+			"attached": ["shoulder_parrot_left"],
+			"position": [-5, 0, 0]
+		},
+		{
+			"id": "body_right_parrot",
+			"parent": "body_c",
+			"attached": ["shoulder_parrot_right"],
+			"position": [5, 0, 0]
 		},
 		{
 			"id": "left_arm_c",
