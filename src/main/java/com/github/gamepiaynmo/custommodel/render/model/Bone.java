@@ -82,10 +82,10 @@ public class Bone implements IBone {
                 throw new TranslatableException("error.custommodel.loadmodelpack.notexture", textureId);
 
             JsonElement texSizeArray = jsonObj.get(CustomJsonModel.TEXTURE_SIZE);
-            if (texSizeArray == null)
-                throw new TranslatableException("error.custommodel.loadmodelpack.notexturesize", textureId);
-            double[] texSize = Json.parseDoubleArray(texSizeArray, 2);
-            bone.textureSize = new Vec2d(texSize[0], texSize[1]);
+            if (texSizeArray != null) {
+                double[] texSize = Json.parseDoubleArray(texSizeArray, 2);
+                bone.textureSize = new Vec2d(texSize[0], texSize[1]);
+            }
         }
 
         bone.positionExpr = Json.parseFloatExpressionArray(jsonObj.get(CustomJsonModel.POSITION), 3, new float[] { 0, 0, 0 }, model.getParser());
@@ -162,7 +162,7 @@ public class Bone implements IBone {
     @Override
     public Vec2d getTextureSize() {
         if (textureSize == null) {
-            return textureSize = parent.getTextureSize();
+            return textureSize = model.pack.getTextureSize(getTexture().get());
         }
         return textureSize;
     }

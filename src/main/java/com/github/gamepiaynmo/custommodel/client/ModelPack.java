@@ -7,11 +7,13 @@ import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
 import com.github.gamepiaynmo.custommodel.render.CustomTexture;
 import com.github.gamepiaynmo.custommodel.server.CustomModel;
 import com.github.gamepiaynmo.custommodel.util.TranslatableException;
+import com.github.gamepiaynmo.custommodel.util.Vec2d;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.blaze3d.platform.TextureUtil;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.Texture;
@@ -40,6 +42,7 @@ public class ModelPack {
     private boolean success = false;
     private String dirName;
     private List<Texture> texList = Lists.newArrayList();
+    private Map<Identifier, Vec2d> textureSizes = Maps.newHashMap();
 
     private ModelPack() {}
 
@@ -174,11 +177,13 @@ public class ModelPack {
             pack.textureIds.put(getFileName(texture.getName()), pack.textures.size());
             pack.textures.add(identifier);
             NativeImage image = NativeImage.read(texture.getInputStream());
+            pack.textureSizes.put(identifier, new Vec2d(image.getWidth(), image.getHeight()));
             CustomTexture tex = new CustomTexture(image);
             pack.texList.add(tex);
             textureManager.registerTexture(identifier, tex);
         }
 
+        CustomModelClient.currentPlayer = (AbstractClientPlayerEntity) MinecraftClient.getInstance().world.getPlayerByUuid(uuid);
         pack.model = CustomJsonModel.fromJson(pack, modelJson);
         pack.success = true;
         return pack;
@@ -217,6 +222,11 @@ public class ModelPack {
         if (id != null)
             return new ConstantFloat(id + defGetter.length);
         return null;
+    }
+
+    public Vec2d getTextureSize(Identifier texture) {
+        Vec2d res = textureSizes.get(texture);
+        return res == null ? new Vec2d(64, 64) : res;
     }
 
     public boolean successfulLoaded() {

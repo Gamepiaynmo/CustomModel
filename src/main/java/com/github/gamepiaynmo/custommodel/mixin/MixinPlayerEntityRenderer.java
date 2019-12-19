@@ -345,7 +345,9 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
             if (double_1 > 0.0D && double_2 > 0.0D) {
                 double double_3 = (vec3d_2.x * vec3d_1.x + vec3d_2.z * vec3d_1.z) / (Math.sqrt(double_1) * Math.sqrt(double_2));
                 double double_4 = vec3d_2.x * vec3d_1.z - vec3d_2.z * vec3d_1.x;
-                transform.rotate(0.0F, 1.0F, 0.0F, (float)(Math.signum(double_4) * Math.acos(double_3)) * 180.0F / 3.1415927F);
+                float degrees = (float)(Math.signum(double_4) * Math.acos(double_3)) * 180.0F / 3.1415927F;
+                if (!Float.isNaN(degrees))
+                    transform.rotate(0.0F, 1.0F, 0.0F, (float)(Math.signum(double_4) * Math.acos(double_3)) * 180.0F / 3.1415927F);
             }
         } else if (float_4 > 0.0F) {
             setupTransforms_c(abstractClientPlayerEntity_1, float_1, float_2, float_3);
