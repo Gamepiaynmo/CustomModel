@@ -15,7 +15,9 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.fabricmc.fabric.api.registry.CommandRegistry;
 import net.minecraft.command.EntitySelector;
+import net.minecraft.command.arguments.ArgumentTypes;
 import net.minecraft.command.arguments.EntityArgumentType;
+import net.minecraft.command.arguments.serialize.ConstantArgumentSerializer;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.CommandSource;
@@ -35,6 +37,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class ServerCommand {
     public static void register() {
+        ArgumentTypes.register(CustomModel.MODID, ModelArgumentType.class, new ConstantArgumentSerializer(ModelArgumentType::new));
         CommandRegistry.INSTANCE.register(false, (dispatcher) -> {
             dispatcher.register(CommandManager.literal(CustomModel.MODID
             ).then(CommandManager.literal("reload").requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(ModConfig.getReloadSelfPermission())).executes(context -> {
