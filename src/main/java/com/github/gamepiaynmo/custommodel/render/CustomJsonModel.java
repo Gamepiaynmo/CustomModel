@@ -19,6 +19,7 @@ import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.util.Arm;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Pair;
 import org.lwjgl.opengl.GL11;
 
 import java.util.Collection;
@@ -105,10 +106,12 @@ public class CustomJsonModel {
         Json.parseJsonObject(jsonObj.get(TICK_VARS), (name, element) -> {
             String typeStr = element.getAsJsonArray().get(0).getAsString();
             ExpressionType type = typeStr.equals("float") ? ExpressionType.FLOAT : ExpressionType.BOOL;
-            model.tickVars.put(name, new TickVariable(type));
+            TickVariable variable = new TickVariable(type);
+            model.tickVars.add(new Pair<>(name, variable));
+            model.tickVarMap.put(name, variable);
         });
         Json.parseJsonObject(jsonObj.get(TICK_VARS), (name, element) -> {
-            TickVariable variable = model.tickVars.get(name);
+            TickVariable variable = model.tickVarMap.get(name);
             JsonArray array = element.getAsJsonArray();
             variable.setInitValue(array.get(1));
             variable.setExpression(Json.getExpression(array.get(2), 0, model.getParser()));
@@ -181,7 +184,8 @@ public class CustomJsonModel {
 
     private Supplier<Identifier> baseTexture;
     private Map<String, IExpression> variables = Maps.newHashMap();
-    private Map<String, TickVariable> tickVars = Maps.newHashMap();
+    private List<Pair<String, TickVariable>> tickVars = Lists.newArrayList();
+    private Map<String, TickVariable> tickVarMap = Maps.newHashMap();
 
     private Map<String, Bone> id2Bone = Maps.newHashMap();
     private List<Bone> bones = Lists.newArrayList();
@@ -206,7 +210,7 @@ public class CustomJsonModel {
     }
 
     public IExpression getVariable(String name) { return variables.get(name); }
-    public TickVariable getTickVar(String name) { return tickVars.get(name); }
+    public TickVariable getTickVar(String name) { return tickVarMap.get(name); }
 
     public Collection<PlayerBone> getHiddenBones() {
         return boneHideList;
@@ -364,8 +368,9 @@ public class CustomJsonModel {
         AbstractClientPlayerEntity entity = CustomModelClient.currentPlayer;
         PlayerEntityModel model = CustomModelClient.currentModel;
 
-        for (TickVariable variable : tickVars.values())
-            variable.tick();
+        for (Pair<String, TickVariable> pair : tickVars) {
+            pair.getRight().tick();
+        }
 
         if (entity.isInSneakingPose())
             baseMat.translate(0, 0.2f, 0);

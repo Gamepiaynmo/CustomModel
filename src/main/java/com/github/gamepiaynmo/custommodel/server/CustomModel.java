@@ -202,7 +202,7 @@ public class CustomModel implements ModInitializer {
                     try {
                         reloadModel(context.getPlayer(), packet.getPlayerUuid(), false);
                     } catch (LoadModelException e) {
-                        if (context.getPlayer().sendCommandFeedback())
+                        if (context.getPlayer().allowsPermissionLevel(ModConfig.getListModelsPermission()))
                             context.getPlayer().sendMessage(new TranslatableText("error.custommodel.loadmodelpack", e.getFileName(), e.getMessage()));
                     }
                 });

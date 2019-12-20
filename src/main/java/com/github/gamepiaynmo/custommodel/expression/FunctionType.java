@@ -32,8 +32,8 @@ public enum FunctionType {
    MAX(ExpressionType.FLOAT, "max", FunctionType::getMax, (new ParametersVariable()).first(ExpressionType.FLOAT).repeat(ExpressionType.FLOAT)),
    CLAMP(ExpressionType.FLOAT, "clamp", args -> MathHelper.clamp(evalFloat(args, 0), evalFloat(args, 1), evalFloat(args, 2)), ExpressionType.FLOAT, ExpressionType.FLOAT, ExpressionType.FLOAT),
    ABS(ExpressionType.FLOAT, "abs", args -> MathHelper.abs(evalFloat(args, 0)), ExpressionType.FLOAT),
-   FLOOR(ExpressionType.FLOAT, "floor", args -> MathHelper.floor(evalFloat(args, 0)), ExpressionType.FLOAT),
-   CEIL(ExpressionType.FLOAT, "ceil", args -> MathHelper.ceil(evalFloat(args, 0)), ExpressionType.FLOAT),
+   FLOOR(ExpressionType.FLOAT, "floor", args -> (float) MathHelper.floor(evalFloat(args, 0)), ExpressionType.FLOAT),
+   CEIL(ExpressionType.FLOAT, "ceil", args -> (float) MathHelper.ceil(evalFloat(args, 0)), ExpressionType.FLOAT),
    EXP(ExpressionType.FLOAT, "exp", args -> (float) Math.exp((double)evalFloat(args, 0)), ExpressionType.FLOAT),
    FRAC(ExpressionType.FLOAT, "frac", args -> MathHelper.fractionalPart((double)evalFloat(args, 0)), ExpressionType.FLOAT),
    LOG(ExpressionType.FLOAT, "log", args -> (float) Math.log((double)evalFloat(args, 0)), ExpressionType.FLOAT),
@@ -66,15 +66,15 @@ public enum FunctionType {
    NOT(12, ExpressionType.BOOL, "!", args -> !evalBool(args, 0), ExpressionType.BOOL),
    AND(3, ExpressionType.BOOL, "&&", args -> evalBool(args, 0) && evalBool(args, 1), ExpressionType.BOOL, ExpressionType.BOOL),
    OR(2, ExpressionType.BOOL, "||", args -> evalBool(args, 0) || evalBool(args, 1), ExpressionType.BOOL, ExpressionType.BOOL),
-   GREATER(8, ExpressionType.BOOL, ">", args -> evalFloat(args, 0) > evalFloat(args, 1), ExpressionType.FLOAT, ExpressionType.FLOAT),
-   GREATER_OR_EQUAL(8, ExpressionType.BOOL, ">=", args -> evalFloat(args, 0) >= evalFloat(args, 1), ExpressionType.FLOAT, ExpressionType.FLOAT),
-   SMALLER(8, ExpressionType.BOOL, "<", args -> evalFloat(args, 0) < evalFloat(args, 1), ExpressionType.FLOAT, ExpressionType.FLOAT),
-   SMALLER_OR_EQUAL(8, ExpressionType.BOOL, "<=", args -> evalFloat(args, 0) <= evalFloat(args, 1), ExpressionType.FLOAT, ExpressionType.FLOAT),
-   EQUAL(7, ExpressionType.BOOL, "==", args -> evalFloat(args, 0) == evalFloat(args, 1), ExpressionType.FLOAT, ExpressionType.FLOAT),
-   NOT_EQUAL(7, ExpressionType.BOOL, "!=", args -> evalFloat(args, 0) != evalFloat(args, 1), ExpressionType.FLOAT, ExpressionType.FLOAT),
+   GREATER(8, ExpressionType.BOOL, ">", args -> evalFloat(args, 0) > evalFloat(args, 1) + 1e-6f, ExpressionType.FLOAT, ExpressionType.FLOAT),
+   GREATER_OR_EQUAL(8, ExpressionType.BOOL, ">=", args -> evalFloat(args, 0) >= evalFloat(args, 1) - 1e-6f, ExpressionType.FLOAT, ExpressionType.FLOAT),
+   SMALLER(8, ExpressionType.BOOL, "<", args -> evalFloat(args, 0) < evalFloat(args, 1) - 1e-6f, ExpressionType.FLOAT, ExpressionType.FLOAT),
+   SMALLER_OR_EQUAL(8, ExpressionType.BOOL, "<=", args -> evalFloat(args, 0) <= evalFloat(args, 1) + 1e-6f, ExpressionType.FLOAT, ExpressionType.FLOAT),
+   EQUAL(7, ExpressionType.BOOL, "==", args -> Math.abs(evalFloat(args, 0) - evalFloat(args, 1)) < 1e-6f, ExpressionType.FLOAT, ExpressionType.FLOAT),
+   NOT_EQUAL(7, ExpressionType.BOOL, "!=", args -> Math.abs(evalFloat(args, 0) - evalFloat(args, 1)) >= 1e-6f, ExpressionType.FLOAT, ExpressionType.FLOAT),
    BETWEEN(7, ExpressionType.BOOL, "between", args -> {
       float val = evalFloat(args, 0);
-      return val >= evalFloat(args, 1) && val <= evalFloat(args, 2);
+      return val >= evalFloat(args, 1) - 1e-6f && val <= evalFloat(args, 2) + 1e-6f;
    }, ExpressionType.FLOAT, ExpressionType.FLOAT, ExpressionType.FLOAT),
    EQUALS(7, ExpressionType.BOOL, "equals", args -> {
       float diff = evalFloat(args, 0) - evalFloat(args, 1);
@@ -85,7 +85,7 @@ public enum FunctionType {
       float valIn = evalFloat(args, 0);
       for(int i = 1; i < args.length; ++i) {
          float valCheck = evalFloat(args, i);
-         if (valIn == valCheck)
+         if (Math.abs(valIn - valCheck) < 1e-6f)
             return true;
       }
       return false;

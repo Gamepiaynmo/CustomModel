@@ -26,7 +26,9 @@ public class TickVariable {
     }
 
     public void setExpression(IExpression expression) {
-        this.expression = expression;
+        if (type == ExpressionType.BOOL)
+            this.expression = (IExpressionBool) expression;
+        else this.expression = (IExpressionFloat) expression;
     }
 
     public void tick() {
