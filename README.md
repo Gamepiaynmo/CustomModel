@@ -1,40 +1,87 @@
-# CustomModel
+## CustomModel
+
 Customize your player model in Minecraft using JSON.
+
+![icon](https://github.com/Gamepiaynmo/CustomModel/wiki/assets/icon.png)
 
 #### Description
 
-This mod allows you to customize your player model using JSON files. You can modify the appearance of each part of the model, add new boxes / planes to enrich your model. In addition, you can add ribbons to simulate hairs or scarfs, and also a brand-new customizable particle system!
+This mod allows you to customize your player model using JSON files while maintaining compatibility with vanilla Minecraft features as well as other mods. The combination of expressions, physics and the new particle system enables unbelievable customizability!
 
-#### Usage
+#### Installing
 
-After installation, JSON models are stored in a folder named "custom-models" under ".minecraft" (for servers, it is under the same folder as server.jar). Each model entry can either be a subfolder or a zip archive file. The name of the subfolder or zip file can be either the player name or player UUID (for example, my minecraft name is "Gamepiaynmo", and my UUID is "a94b57f9-13b8-4907-bd1e-ff622fcc5c5b", then the mod will try to find my model in the following four positions: folder "Gamepiaynmo", folder "a94b57f9-13b8-4907-bd1e-ff622fcc5c5b", file "Gamepiaynmo.zip" and file "a94b57f9-13b8-4907-bd1e-ff622fcc5c5b.zip", not case sensitive).
+The fabric version needs fabric-api as dependency. Mod Menu is also recommended as it enables adjusting configurations using graphical interface.
 
-Each model entry must contain one main JSON file named "model.json". Supplement textures are all stored at the root of each folder or zip file, and must be stored in ".png" format. More information about the JSON schema, please refer to the [github wiki page](https://github.com/Gamepiaynmo/CustomModel/wiki/Schema) and some examples can be found at [here](https://github.com/Gamepiaynmo/CustomModel/tree/master/examples).
+After installation, put your JSON models in the folder named "custom-models" under ".minecraft" (for servers, it is under the same folder as server.jar). Each model entry can either be a subfolder or a zip archive file. When in game, use the command /custommodel select "model id" to choose a model for you, or you can assign a default model in the configuration.
 
-When rendering, the client will search for models both at client side and server side. The priority can be adjusted in configuration. Notice that model files at server side MUST be zip files. When the model file has changed, you can use command "/custommodel reload @p" to reload your model.
+#### Modeling
 
-#### Contact
+Each model entry is either a folder or a zip archive file. It must contain one main JSON file named "model.json". Supplement textures are all stored at the root, and must be stored in PNG format. More information about the JSON schema, please refer to the [github wiki page](https://github.com/Gamepiaynmo/CustomModel/wiki/Schema) and some examples can be found [here](https://github.com/Gamepiaynmo/CustomModel/tree/master/examples).
 
-If you want some new features or need to report bugs, please rise a new issue at [github issue tracker](https://github.com/Gamepiaynmo/CustomModel/issues).
+#### Command
 
-Welcome to the [CPM discord server](https://discord.gg/uVT39n5).
+/custommodel is the only command that the mod added to the game. It has 4 sub-commands:
+
+- reload: Reload the model from disk files. When you modify the models on the disk, you can use this command to reload them.
+- refresh: Force the mod to refresh to model list when you add new models to the folder.
+- select xxx: Select the model with id xxx for the player.
+- list: List all models that the mod loaded. Then you can click on the message returned by the command to get the model selecting command.
+
+#### FAQ
+
+**I want some new features / find some bugs!**
+
+You can rise new issues at [github issue tracker](https://github.com/Gamepiaynmo/CustomModel/issues). Or you can contact me at [Custom Player Model Discord](https://discord.gg/uVT39n5).
+
+**Is this mod client side or server side?**
+
+I would say both. You can have this only at client side so that only yourself can see custom models. Or you can have a modded server which enables every player with this mod to see the models.
+
+#### Acknowledgements
+
+- This mod is inspired by [Optifine](https://optifine.net/) and [More Player Models](https://www.curseforge.com/minecraft/mc-mods/more-player-models).
+- Some of the models come from [Touhou Little Maid](https://www.curseforge.com/minecraft/mc-mods/touhou-little-maid) mod.
+- Minecraft modeling software [Blockbench](https://www.blockbench.net/web/).
 
 
 
 #### 说明
 
-此模组允许您使用JSON文件自定义玩家模型。您可以修改模型的每个部分的外观，添加新的方块/平面以丰富您的模型。此外，您可以添加飘带来模拟头发或围巾，还可以添加全新的可定制粒子系统！
+这个mod允许您使用JSON文件自定义玩家模型，同时保持与原版Minecraft功能以及其他mod的兼容性。表达式，物理系统和粒子系统的结合可以达到难以置信的可定制程度！
 
-#### 用法
+#### 安装
 
-安装后，JSON模型存储在“.minecraft”文件夹下的名为“custom-models”的文件夹中（对于服务器，它与server.jar位于同一文件夹中）。每个模型条目可以是子文件夹或zip存档文件。子文件夹或zip文件的名称可以是玩家名称或玩家UUID（例如，我的名字是“Gamepiaynmo”，而我的UUID是“a94b57f9-13b8-4907-bd1e-ff622fcc5c5b”，那么该模组会尝试在以下四个位置找到我的模型：文件夹“Gamepiaynmo”，文件夹“a94b57f9-13b8-4907-bd1e-ff622fcc5c5b”，文件“Gamepiaynmo.zip”和文件“a94b57f9-13b8-4907-bd1e-ff622fcc5c5b.zip”，不区分大小写）。
+Fabric版本需要fabric-api模组作为依赖项。此外建议使用Mod Menu模组，因为它可以使用图形界面调整配置。
 
-每个模型条目必须包含一个名为“model.json”的主JSON文件。补充纹理都存储在每个文件夹或zip文件的根目录中，并且必须以“.png”格式存储。有关JSON模式的更多信息，请参阅[github wiki页面](https://github.com/Gamepiaynmo/CustomModel/wiki/Schema)，可以在[这里](https://github.com/Gamepiaynmo/CustomModel/tree/master/examples)找到一些示例。
+安装完成后，请将JSON模型放在“.minecraft”下名为“custom-models”的文件夹中（对于服务器，它与server.jar在同一文件夹下）。 每个模型包都可以是子文件夹或zip压缩文件。 在游戏中时，使用命令/custommodel select “model id”为您自己选择一个模型，或者您可以在配置中分配一个默认模型。
 
-渲染时，客户端将在客户端和服务器端搜索模型。可以在配置中调整优先级。请注意，服务器端的模型文件必须是zip文件。模型文件更改后，您可以使用命令“/custommodel reload @p”重新加载模型。
+#### 建模
 
-#### 联系
+每个模型包都是一个文件夹或一个zip存档文件，它必须包含一个名为“model.json”的主JSON文件。贴图文件均存储于模型包根目录，并且必须以PNG格式存储。 有关JSON模式的更多信息，请参考[github wiki页面](https://github.com/Gamepiaynmo/CustomModel/wiki/Schema)，并可以在[这里](https://github.com/Gamepiaynmo/CustomModel/tree/master/examples)找到一些示例。
 
-如果您需要一些新功能或需要报告错误，请在[github issue tracker](https://github.com/Gamepiaynmo/CustomModel/issues)上发布新问题。
+#### 指令
 
-欢迎加入[自定义玩家模型Discord服务器](https://discord.gg/uVT39n5).
+/custommodel是该mod添加到游戏的唯一指令。它具有4个子指令：
+
+- reload：从磁盘文件中重新加载模型。 当修改模型文件后，可以使用此命令重新加载它们。
+- refresh：将新模型添加到文件夹时，强制Mod刷新模型列表。
+- select xxx：为玩家选择ID为xxx的模型。
+- list：列出mod加载的所有模型。 然后，您可以单击命令返回的消息以获取模型选择命令。
+
+#### 常见问题
+
+**我想要一些新功能/报告一些bug！**
+
+您可以在[github](https://github.com/Gamepiaynmo/CustomModel/issues)提出新问题。 或者，您可以通过[Discord](https://discord.gg/uVT39n5)与我联系。
+
+**这是客户端mod还是服务器mod？**
+
+两者都是。 您可以只在客户端使用它，这样只有您自己才能看到自定义模型。 或者，您也可以在服务器使用，使每个安装过此Mod的每个玩家都能看到新模型。
+
+#### 致谢
+
+- 模组的灵感来源于[Optifine](https://optifine.net/)和[更多玩家模型](https://www.curseforge.com/minecraft/mc-mods/more-player-models)。
+
+- 部分模型来源于模组[车万女仆](https://www.curseforge.com/minecraft/mc-mods/touhou-little-maid)。
+
+- 方块风格建模软件[Blockbench](https://www.blockbench.net/web/)。
