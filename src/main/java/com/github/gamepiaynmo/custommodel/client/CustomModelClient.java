@@ -94,7 +94,7 @@ public class CustomModelClient implements ClientModInitializer {
         try {
             if (info == null)
                 throw new ModelNotFoundException(model);
-            File modelFile = new File(CustomModel.MODEL_DIR + "/" + model);
+            File modelFile = new File(CustomModel.MODEL_DIR + "/" + info.fileName);
 
             if (modelFile.isDirectory())
                 pack = ModelPack.fromDirectory(textureManager, modelFile, uuid);
