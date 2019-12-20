@@ -3,6 +3,7 @@ package com.github.gamepiaynmo.custommodel.expression;
 import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.client.ModelPack;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
+import com.github.gamepiaynmo.custommodel.render.TickVariable;
 import com.github.gamepiaynmo.custommodel.render.model.IBone;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.util.Identifier;
@@ -49,61 +50,72 @@ public class ModelResolver implements IExpressionResolver {
 
    public IExpression getModelVariable(String name) {
       String[] parts = tokenize(name, "\\.");
-      if (parts.length != 2) {
+      if (parts.length != 2)
          return null;
-      } else {
-         String first = parts[0];
-         String second = parts[1];
 
-         switch (first) {
-            case "tex": {
-               return pack.getTexture(second);
-            }
-            case "inv": {
-               PlayerInventory inventory = CustomModelClient.currentPlayer.inventory;
-               IExpressionFloat result = null;
-               switch (second) {
-                  case "mainhand": result = () ->
-                          Registry.ITEM.getRawId(inventory.getMainHandStack().getItem()); break;
-                  case "offhand": result = () ->
-                          Registry.ITEM.getRawId(inventory.offHand.get(0).getItem()); break;
-                  case "helmet": result = () ->
-                          Registry.ITEM.getRawId(inventory.getArmorStack(3).getItem()); break;
-                  case "chestplate": result = () ->
-                          Registry.ITEM.getRawId(inventory.getArmorStack(2).getItem()); break;
-                  case "leggings": result = () ->
-                          Registry.ITEM.getRawId(inventory.getArmorStack(1).getItem()); break;
-                  case "boots": result = () ->
-                          Registry.ITEM.getRawId(inventory.getArmorStack(0).getItem()); break;
-                  default:
-                     try {
-                        if (second.startsWith("main")) {
-                           int index = Integer.parseInt(second.substring(4));
-                           if (index >= 0 && index < inventory.main.size())
-                              result = () -> Registry.ITEM.getRawId(inventory.main.get(index).getItem());
-                        }
-                     } catch (NumberFormatException e) {
+      String first = parts[0];
+      String second = parts[1];
+
+      switch (first) {
+         case "tex": {
+            return pack.getTexture(second);
+         }
+         case "inv": {
+            PlayerInventory inventory = CustomModelClient.currentPlayer.inventory;
+            IExpressionFloat result = null;
+            switch (second) {
+               case "mainhand": result = () ->
+                       Registry.ITEM.getRawId(inventory.getMainHandStack().getItem()); break;
+               case "offhand": result = () ->
+                       Registry.ITEM.getRawId(inventory.offHand.get(0).getItem()); break;
+               case "helmet": result = () ->
+                       Registry.ITEM.getRawId(inventory.getArmorStack(3).getItem()); break;
+               case "chestplate": result = () ->
+                       Registry.ITEM.getRawId(inventory.getArmorStack(2).getItem()); break;
+               case "leggings": result = () ->
+                       Registry.ITEM.getRawId(inventory.getArmorStack(1).getItem()); break;
+               case "boots": result = () ->
+                       Registry.ITEM.getRawId(inventory.getArmorStack(0).getItem()); break;
+               default:
+                  try {
+                     if (second.startsWith("main")) {
+                        int index = Integer.parseInt(second.substring(4));
+                        if (index >= 0 && index < inventory.main.size())
+                           result = () -> Registry.ITEM.getRawId(inventory.main.get(index).getItem());
                      }
-               }
+                  } catch (NumberFormatException e) {
+                  }
+            }
 
-               return result;
-            }
-            case "item": {
-               int rawid = Registry.ITEM.getRawId(Registry.ITEM.get(new Identifier(second)));
-               if (rawid < 0) return null;
-               return new ConstantFloat(rawid);
-            }
-            case "var": {
-               return model.getVariable(second);
-            }
-            default: {
-               IBone mr = this.getModelRenderer(first);
-               if (mr == null) {
-                  return null;
-               } else {
-                  ModelVariableType varType = ModelVariableType.parse(second);
-                  return varType == null ? null : new ModelVariableFloat(name, mr, varType);
-               }
+            return result;
+         }
+         case "item": {
+            int rawid = Registry.ITEM.getRawId(Registry.ITEM.get(new Identifier(second)));
+            if (rawid < 0) return null;
+            return new ConstantFloat(rawid);
+         }
+         case "var": {
+            return model.getVariable(second);
+         }
+         case "tvl": {
+            TickVariable var = model.getTickVar(second);
+            return var == null ? null : var.getLastValue();
+         }
+         case "tvc": {
+            TickVariable var = model.getTickVar(second);
+            return var == null ? null : var.getCurValue();
+         }
+         case "tvp": {
+            TickVariable var = model.getTickVar(second);
+            return var == null ? null : var.getParValue();
+         }
+         default: {
+            IBone mr = this.getModelRenderer(first);
+            if (mr == null) {
+               return null;
+            } else {
+               ModelVariableType varType = ModelVariableType.parse(second);
+               return varType == null ? null : new ModelVariableFloat(name, mr, varType);
             }
          }
       }
