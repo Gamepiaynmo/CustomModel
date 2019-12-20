@@ -10,6 +10,7 @@ import com.github.gamepiaynmo.custommodel.util.*;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -34,6 +35,7 @@ public class CustomJsonModel {
 
     public static final String HIDE = "hide";
     public static final String VARIABLES = "variables";
+    public static final String TICK_VARS = "tickVars";
     public static final String SKELETON = "skeleton";
     public static final String EYE_HEIGHT = "eyeHeight";
     public static final String BOUNDING_BOX = "boundingBox";
@@ -98,6 +100,18 @@ public class CustomJsonModel {
                 for (PlayerBone bone : bones)
                     model.boneHideList.add(bone);
             }
+        });
+
+        Json.parseJsonObject(jsonObj.get(TICK_VARS), (name, element) -> {
+            String typeStr = element.getAsJsonArray().get(0).getAsString();
+            ExpressionType type = typeStr.equals("float") ? ExpressionType.FLOAT : ExpressionType.BOOL;
+            model.tickVars.put(name, new TickVariable(type));
+        });
+        Json.parseJsonObject(jsonObj.get(TICK_VARS), (name, element) -> {
+            TickVariable variable = model.tickVars.get(name);
+            JsonArray array = element.getAsJsonArray();
+            variable.setInitValue(array.get(1));
+            variable.setExpression(Json.getExpression(array.get(2), 0, model.getParser()));
         });
 
         Json.parseJsonObject(jsonObj.get(VARIABLES), (name, element) -> {
@@ -167,6 +181,7 @@ public class CustomJsonModel {
 
     private Supplier<Identifier> baseTexture;
     private Map<String, IExpression> variables = Maps.newHashMap();
+    private Map<String, TickVariable> tickVars = Maps.newHashMap();
 
     private Map<String, Bone> id2Bone = Maps.newHashMap();
     private List<Bone> bones = Lists.newArrayList();
@@ -191,6 +206,7 @@ public class CustomJsonModel {
     }
 
     public IExpression getVariable(String name) { return variables.get(name); }
+    public TickVariable getTickVar(String name) { return tickVars.get(name); }
 
     public Collection<PlayerBone> getHiddenBones() {
         return boneHideList;
@@ -347,6 +363,9 @@ public class CustomJsonModel {
     public void tick(Matrix4 baseMat) {
         AbstractClientPlayerEntity entity = CustomModelClient.currentPlayer;
         PlayerEntityModel model = CustomModelClient.currentModel;
+
+        for (TickVariable variable : tickVars.values())
+            variable.tick();
 
         if (entity.isInSneakingPose())
             baseMat.translate(0, 0.2f, 0);

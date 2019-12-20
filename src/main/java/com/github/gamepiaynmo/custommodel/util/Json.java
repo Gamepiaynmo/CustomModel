@@ -53,6 +53,14 @@ public class Json {
       return parser.parseBool(primitive.getAsString());
    }
 
+   public static IExpression getExpression(JsonElement elem, float def, ExpressionParser parser) throws ParseException {
+      if (elem == null) return new ConstantFloat(def);
+      JsonPrimitive primitive = elem.getAsJsonPrimitive();
+      if (primitive.isNumber()) return new ConstantFloat(primitive.getAsFloat());
+      if (primitive.isBoolean()) return getConstantBoolean(primitive.getAsBoolean());
+      return parser.parse(primitive.getAsString());
+   }
+
    public static String getString(JsonObject jsonObj, String field) {
       return getString(jsonObj, field, null);
    }
