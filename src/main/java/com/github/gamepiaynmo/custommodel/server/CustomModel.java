@@ -153,7 +153,7 @@ public class CustomModel implements ModInitializer {
 
                     Packet send = formPacket(PacketModel.ID, packetModel);
                     if (broadcast)
-                        playerEntity.getServerWorld().method_14178().sendToOtherNearbyPlayers(playerEntity, send);
+                        playerEntity.getServerWorld().getChunkManager().sendToOtherNearbyPlayers(playerEntity, send);
                     ServerSidePacketRegistry.INSTANCE.sendToPlayer(receiver, send);
                 }
             }
@@ -179,7 +179,7 @@ public class CustomModel implements ModInitializer {
                     modelSelector.setModelForPlayer(profile, model);
 
                     Packet send = formPacket(PacketModel.ID, packetModel);
-                    playerEntity.getServerWorld().method_14178().sendToNearbyPlayers(playerEntity, send);
+                    playerEntity.getServerWorld().getChunkManager().sendToNearbyPlayers(playerEntity, send);
                 }
             }
         } catch (Exception e) {

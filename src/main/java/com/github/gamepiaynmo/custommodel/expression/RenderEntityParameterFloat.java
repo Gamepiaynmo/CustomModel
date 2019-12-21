@@ -17,14 +17,14 @@ public enum RenderEntityParameterFloat implements IExpressionFloat {
    HEALTH("health", (entity, params) -> entity.getHealth()),
    FOOD_LEVEL("food_level", (entity, params) -> (float) entity.getHungerManager().getFoodLevel()),
    HURT_TIME("hurt_time", (entity, params) -> (float) entity.hurtTime - params.partial),
-   POS_X("pos_x", (entity, params) -> (float) MathHelper.lerp(params.partial, entity.prevX, entity.x)),
-   POS_Y("pos_y", (entity, params) -> (float) MathHelper.lerp(params.partial, entity.prevY, entity.y)),
-   POS_Z("pos_z", (entity, params) -> (float) MathHelper.lerp(params.partial, entity.prevZ, entity.z)),
+   POS_X("pos_x", (entity, params) -> (float) MathHelper.lerp(params.partial, entity.prevX, entity.getX())),
+   POS_Y("pos_y", (entity, params) -> (float) MathHelper.lerp(params.partial, entity.prevY, entity.getY())),
+   POS_Z("pos_z", (entity, params) -> (float) MathHelper.lerp(params.partial, entity.prevZ, entity.getZ())),
    SPEED_X("speed_x", (entity, params) -> (float) entity.getVelocity().x),
    SPEED_Y("speed_y", (entity, params) -> (float) entity.getVelocity().y),
    SPEED_Z("speed_z", (entity, params) -> (float) entity.getVelocity().z),
    YAW("yaw", (entity, params) -> MathHelper.lerp(params.partial, entity.prevYaw, entity.yaw)),
-   BODY_YAW("body_yaw", (entity, params) -> MathHelper.lerp(params.partial, entity.field_6220, entity.field_6283)),
+   BODY_YAW("body_yaw", (entity, params) -> MathHelper.lerp(params.partial, entity.prevBodyYaw, entity.bodyYaw)),
    PITCH("pitch", (entity, params) -> MathHelper.lerp(params.partial, entity.prevPitch, entity.pitch)),
    SWING_PROGRESS("swing_progress", (entity, params) -> entity.getHandSwingProgress(params.partial));
 

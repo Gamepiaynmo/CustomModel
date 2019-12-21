@@ -15,7 +15,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
+import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.util.Arm;
 import net.minecraft.util.Identifier;
@@ -26,6 +29,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class CustomJsonModel {
@@ -265,14 +269,14 @@ public class CustomJsonModel {
             if (bone != PlayerBone.NONE) {
                 IExpressionFloat[] vec = skeleton.get(bone);
                 if (vec != null) {
-                    bone.getCuboid(CustomModelClient.currentModel).setRotationPoint(
+                    bone.getCuboid(CustomModelClient.currentModel).setPivot(
                             (float) -vec[0].eval(), (float) -vec[1].eval(), (float) vec[2].eval());
                 }
             }
         }
     }
 
-    public void render(Matrix4 baseMat) {
+    public void render(Matrix4 baseMat, MatrixStack matrixStack, Function<Identifier, VertexConsumer> vertexConsumer, VertexConsumerProvider vertexConsumerProvider, int l, int o) {
         AbstractClientPlayerEntity entity = CustomModelClient.currentPlayer;
         RenderParameter params = CustomModelClient.currentParameter;
         PlayerEntityModel model = CustomModelClient.currentModel;
@@ -280,24 +284,24 @@ public class CustomJsonModel {
         update(baseMat);
 
         float partial = params.partial;
-        GlStateManager.pushMatrix();
+        matrixStack.push();
         GL11.glMultMatrixd(baseMat.cpy().inv().val);
 
         for (Bone bone : bones) {
             if (bone.isVisible()) {
                 CustomModelClient.textureManager.bindTexture(bone.getTexture().get());
-                GlStateManager.pushMatrix();
+                matrixStack.push();
                 Matrix4 transform = tmpBoneMats.get(bone.getId());
 
                 GL11.glMultMatrixd(transform.val);
-                bone.render();
-                GlStateManager.popMatrix();
+                bone.render(matrixStack, vertexConsumer, vertexConsumerProvider, l, o);
+                matrixStack.pop();
             }
         }
-        GlStateManager.popMatrix();
+        matrixStack.pop();
     }
 
-    public void renderArm(Matrix4 baseMat, Arm arm) {
+    public void renderArm(Matrix4 baseMat, Arm arm, MatrixStack matrixStack, Function<Identifier, VertexConsumer> vertexConsumer, VertexConsumerProvider vertexConsumerProvider, int l, int o) {
         AbstractClientPlayerEntity entity = CustomModelClient.currentPlayer;
         RenderParameter params = CustomModelClient.currentParameter;
         PlayerEntityModel model = CustomModelClient.currentModel;
@@ -305,21 +309,21 @@ public class CustomJsonModel {
         update(baseMat);
 
         float partial = params.partial;
-        GlStateManager.pushMatrix();
+        matrixStack.push();
         GL11.glMultMatrixd(baseMat.cpy().inv().val);
 
         for (Bone bone : firstPersonList.get(arm)) {
             if (bone.isVisible()) {
                 CustomModelClient.textureManager.bindTexture(bone.getTexture().get());
-                GlStateManager.pushMatrix();
+                matrixStack.push();
                 Matrix4 transform = tmpBoneMats.get(bone.getId());
 
                 GL11.glMultMatrixd(transform.val);
-                bone.render();
-                GlStateManager.popMatrix();
+                bone.render(matrixStack, vertexConsumer, vertexConsumerProvider, l, o);
+                matrixStack.pop();
             }
         }
-        GlStateManager.popMatrix();
+        matrixStack.pop();
     }
 
     public void update(Matrix4 baseMat) {
@@ -445,7 +449,7 @@ public class CustomJsonModel {
         poseMap.put("sleeping", EntityPose.SLEEPING);
         poseMap.put("swimming", EntityPose.SWIMMING);
         poseMap.put("spin_attack", EntityPose.SPIN_ATTACK);
-        poseMap.put("sneaking", EntityPose.SNEAKING);
+        poseMap.put("sneaking", EntityPose.CROUCHING);
         poseMap.put("dying", EntityPose.DYING);
     }
 

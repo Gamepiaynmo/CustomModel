@@ -13,21 +13,18 @@ import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.color.item.ItemColors;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormats;
-import net.minecraft.client.render.item.ItemDynamicRenderer;
+import net.minecraft.client.render.*;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.texture.TextureManager;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.SystemUtil;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.util.registry.Registry;
@@ -62,7 +59,7 @@ public class ItemPart {
             stack.addEnchantment(Enchantments.UNBREAKING, 0);
     }
 
-    public void render() {
+    public void render(int l, int o, MatrixStack matrixStack, VertexConsumerProvider vertexConsumer) {
         int curId = (int) itemId.eval();
         boolean curEnchant = enchanted.eval();
         if (curId != lastId || curEnchant != lastEnchant) {
@@ -71,7 +68,7 @@ public class ItemPart {
             update();
         }
 
-        MinecraftClient.getInstance().getItemRenderer().renderItem(stack, ModelTransformation.Type.FIXED);
+        MinecraftClient.getInstance().getItemRenderer().renderItem(stack, ModelTransformation.Type.FIXED, l, o, matrixStack, vertexConsumer);
     }
 
     public static ItemPart fromJson(Bone bone, JsonObject jsonObj) throws ParseException {

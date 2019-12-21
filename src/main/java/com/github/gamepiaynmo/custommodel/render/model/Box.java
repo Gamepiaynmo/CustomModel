@@ -6,8 +6,11 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.Vertex;
 import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.util.math.Matrix3f;
+import net.minecraft.client.util.math.Matrix4f;
+import net.minecraft.util.math.Direction;
 
 @Environment(EnvType.CLIENT)
 public class Box {
@@ -55,24 +58,19 @@ public class Box {
         this.vertices[5] = vertex_6;
         this.vertices[6] = vertex_7;
         this.vertices[7] = vertex_8;
-        this.polygons[0] = new Quad(new Vertex[]{vertex_6, vertex_2, vertex_3, vertex_7}, int_1 + int_5 + int_3, int_2 + int_5, int_1 + int_5 + int_3 + int_5, int_2 + int_5 + int_4, texWidth, texHeight);
-        this.polygons[1] = new Quad(new Vertex[]{vertex_1, vertex_5, vertex_8, vertex_4}, int_1, int_2 + int_5, int_1 + int_5, int_2 + int_5 + int_4, texWidth, texHeight);
-        this.polygons[2] = new Quad(new Vertex[]{vertex_6, vertex_5, vertex_1, vertex_2}, int_1 + int_5, int_2, int_1 + int_5 + int_3, int_2 + int_5, texWidth, texHeight);
-        this.polygons[3] = new Quad(new Vertex[]{vertex_3, vertex_4, vertex_8, vertex_7}, int_1 + int_5 + int_3, int_2 + int_5, int_1 + int_5 + int_3 + int_3, int_2, texWidth, texHeight);
-        this.polygons[4] = new Quad(new Vertex[]{vertex_2, vertex_1, vertex_4, vertex_3}, int_1 + int_5, int_2 + int_5, int_1 + int_5 + int_3, int_2 + int_5 + int_4, texWidth, texHeight);
-        this.polygons[5] = new Quad(new Vertex[]{vertex_5, vertex_6, vertex_7, vertex_8}, int_1 + int_5 + int_3 + int_5, int_2 + int_5, int_1 + int_5 + int_3 + int_5 + int_3, int_2 + int_5 + int_4, texWidth, texHeight);
+        this.polygons[0] = new Quad(new Vertex[]{vertex_6, vertex_2, vertex_3, vertex_7}, int_1 + int_5 + int_3, int_2 + int_5, int_1 + int_5 + int_3 + int_5, int_2 + int_5 + int_4, texWidth, texHeight, Direction.DOWN);
+        this.polygons[1] = new Quad(new Vertex[]{vertex_1, vertex_5, vertex_8, vertex_4}, int_1, int_2 + int_5, int_1 + int_5, int_2 + int_5 + int_4, texWidth, texHeight, Direction.UP);
+        this.polygons[2] = new Quad(new Vertex[]{vertex_6, vertex_5, vertex_1, vertex_2}, int_1 + int_5, int_2, int_1 + int_5 + int_3, int_2 + int_5, texWidth, texHeight, Direction.WEST);
+        this.polygons[3] = new Quad(new Vertex[]{vertex_3, vertex_4, vertex_8, vertex_7}, int_1 + int_5 + int_3, int_2 + int_5, int_1 + int_5 + int_3 + int_3, int_2, texWidth, texHeight, Direction.NORTH);
+        this.polygons[4] = new Quad(new Vertex[]{vertex_2, vertex_1, vertex_4, vertex_3}, int_1 + int_5, int_2 + int_5, int_1 + int_5 + int_3, int_2 + int_5 + int_4, texWidth, texHeight, Direction.EAST);
+        this.polygons[5] = new Quad(new Vertex[]{vertex_5, vertex_6, vertex_7, vertex_8}, int_1 + int_5 + int_3 + int_5, int_2 + int_5, int_1 + int_5 + int_3 + int_5 + int_3, int_2 + int_5 + int_4, texWidth, texHeight, Direction.SOUTH);
 
     }
 
-    public void render(BufferBuilder bufferBuilder_1, float float_1) {
-        Quad[] var3 = this.polygons;
-        int var4 = var3.length;
-
-        for(int var5 = 0; var5 < var4; ++var5) {
-            Quad quad_1 = var3[var5];
-            quad_1.render(bufferBuilder_1, float_1);
+    public void render(Matrix4f model, Matrix3f normal, VertexConsumer vertexConsumer, float r, float g, float b, float a, int o, int l) {
+        for (Quad quad : polygons) {
+            quad.render(model, normal, vertexConsumer, r, g, b, a, o, l);
         }
-
     }
 
     public static Box getBoxFromJson(Bone bone, JsonObject jsonObj) {

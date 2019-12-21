@@ -9,7 +9,7 @@ import com.github.gamepiaynmo.custommodel.util.Vector3;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import net.minecraft.client.model.Cuboid;
+import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.util.Identifier;
 
@@ -21,20 +21,20 @@ import java.util.function.Supplier;
 public enum PlayerBone {
     NONE("none", null),
     HEAD("head", () -> CustomModelClient.currentModel.head),
-    HEAD_OVERLAY("head_overlay", () -> CustomModelClient.currentModel.headwear),
-    BODY("body", () -> CustomModelClient.currentModel.body),
-    BODY_OVERLAY("body_overlay", () -> CustomModelClient.currentModel.bodyOverlay),
+    HEAD_OVERLAY("head_overlay", () -> CustomModelClient.currentModel.helmet),
+    BODY("body", () -> CustomModelClient.currentModel.torso),
+    BODY_OVERLAY("body_overlay", () -> CustomModelClient.currentModel.jacket),
     LEFT_ARM("left_arm", () -> CustomModelClient.currentModel.leftArm),
-    LEFT_ARM_OVERLAY("left_arm_overlay", () -> CustomModelClient.currentModel.leftArmOverlay),
+    LEFT_ARM_OVERLAY("left_arm_overlay", () -> CustomModelClient.currentModel.leftSleeve),
     RIGHT_ARM("right_arm", () -> CustomModelClient.currentModel.rightArm),
-    RIGHT_ARM_OVERLAY("right_arm_overlay", () -> CustomModelClient.currentModel.rightArmOverlay),
+    RIGHT_ARM_OVERLAY("right_arm_overlay", () -> CustomModelClient.currentModel.rightSleeve),
     LEFT_LEG("left_leg", () -> CustomModelClient.currentModel.leftLeg),
-    LEFT_LEG_OVERLAY("left_leg_overlay", () -> CustomModelClient.currentModel.leftLegOverlay),
+    LEFT_LEG_OVERLAY("left_leg_overlay", () -> CustomModelClient.currentModel.leftPantLeg),
     RIGHT_LEG("right_leg", () -> CustomModelClient.currentModel.rightLeg),
-    RIGHT_LEG_OVERLAY("right_leg_overlay", () -> CustomModelClient.currentModel.rightLegOverlay);
+    RIGHT_LEG_OVERLAY("right_leg_overlay", () -> CustomModelClient.currentModel.rightPantLeg);
 
     private final String id;
-    private final Supplier<Cuboid> cuboidGetter;
+    private final Supplier<ModelPart> cuboidGetter;
     private static final Map<String, PlayerBone> id2Bone = Maps.newHashMap();
     private static final Map<String, Collection<PlayerBone>> boneLists = Maps.newHashMap();
     private final IBone bone;
@@ -42,7 +42,7 @@ public enum PlayerBone {
     private static final Vector3 One = new Vector3(1, 1, 1);
     private static final Vec2d TexSize = new Vec2d(64, 64);
 
-    PlayerBone(String id, Supplier<Cuboid> cuboidGetter) {
+    PlayerBone(String id, Supplier<ModelPart> cuboidGetter) {
         this.id = id;
         this.cuboidGetter = cuboidGetter;
         bone = cuboidGetter == null ? new BlankBone() : new OriginalBone(this, cuboidGetter);
@@ -52,7 +52,7 @@ public enum PlayerBone {
         return id;
     }
 
-    public Cuboid getCuboid(PlayerEntityModel model) {
+    public ModelPart getCuboid(PlayerEntityModel model) {
         return cuboidGetter.get();
     }
 
@@ -70,10 +70,10 @@ public enum PlayerBone {
     }
 
     public static class OriginalBone implements IBone {
-        private Supplier<Cuboid> cuboidGetter;
+        private Supplier<ModelPart> cuboidGetter;
         private PlayerBone playerBone;
 
-        OriginalBone(PlayerBone playerBone, Supplier<Cuboid> cuboidGetter) {
+        OriginalBone(PlayerBone playerBone, Supplier<ModelPart> cuboidGetter) {
             this.playerBone = playerBone;
             this.cuboidGetter = cuboidGetter;
         }
@@ -85,13 +85,13 @@ public enum PlayerBone {
 
         @Override
         public Vector3 getPosition() {
-            Cuboid cuboid = cuboidGetter.get();
-            return new Vector3(cuboid.rotationPointX, cuboid.rotationPointY, cuboid.rotationPointZ);
+            ModelPart cuboid = cuboidGetter.get();
+            return new Vector3(cuboid.pivotX, cuboid.pivotY, cuboid.pivotZ);
         }
 
         @Override
         public Vector3 getRotation() {
-            Cuboid cuboid = cuboidGetter.get();
+            ModelPart cuboid = cuboidGetter.get();
             return new Vector3(cuboid.yaw, cuboid.pitch, cuboid.roll);
         }
 

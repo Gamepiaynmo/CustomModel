@@ -162,7 +162,7 @@ public class CustomModelClient implements ClientModInitializer {
             MinecraftClient client = MinecraftClient.getInstance();
             if (world == client.world) {
                 for (AbstractClientPlayerEntity player : client.world.getPlayers()) {
-                    PlayerEntityRenderer renderer = client.getEntityRenderManager().getRenderer(player);
+                    PlayerEntityRenderer renderer = (PlayerEntityRenderer) client.getEntityRenderManager().getRenderer(player);
                     ((ICustomPlayerRenderer) renderer).tick(player);
                 }
 

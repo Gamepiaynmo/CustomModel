@@ -24,8 +24,6 @@ import java.util.function.Predicate;
 @Mixin(EntitySelector.class)
 public abstract class MixinEntitySelector implements Command.IClientEntitySelector {
     @Shadow
-    private boolean checkPermissions;
-    @Shadow
     private String playerName;
     @Shadow
     private UUID uuid;
@@ -38,14 +36,7 @@ public abstract class MixinEntitySelector implements Command.IClientEntitySelect
     @Shadow
     abstract <T extends Entity> List<T> getEntities(Vec3d vec3d_1, List<T> list_1);
 
-    private void check(CommandSource commandSource) throws CommandSyntaxException {
-        if (this.checkPermissions && !commandSource.hasPermissionLevel(2)) {
-            throw EntityArgumentType.NOT_ALLOWED_EXCEPTION.create();
-        }
-    }
-
     public List<GameProfile> getPlayers(CommandSource commandSource) throws CommandSyntaxException {
-//        this.check(commandSource);
         if (this.playerName != null) {
             PlayerListEntry entry = MinecraftClient.getInstance().getNetworkHandler().getPlayerListEntry(this.playerName);
             return entry != null ? Lists.newArrayList(entry.getProfile()) : Collections.emptyList();

@@ -14,7 +14,8 @@
     "MixinClientCommandSource",
     "MixinNetworkHandler",
     "MixinClientPlayerEntity",
-    "MixinMinecraftClient"
+    "MixinMinecraftClient",
+    "MixinLivingEntityRenderer"
   ],
   "server": [
   ],

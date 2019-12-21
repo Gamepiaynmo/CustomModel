@@ -15,12 +15,18 @@ import com.google.gson.JsonObject;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.GlAllocationUtils;
+import net.minecraft.client.util.math.Matrix3f;
+import net.minecraft.client.util.math.Matrix4f;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import org.lwjgl.opengl.GL11;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class Bone implements IBone {
@@ -57,9 +63,6 @@ public class Bone implements IBone {
 
     private IExpressionFloat texture = null;
     private Vec2d textureSize;
-
-    private boolean compiled = false;
-    private int glList;
 
     public static Bone getBoneFromJson(ModelPack pack, CustomJsonModel model, JsonObject jsonObj) throws ParseException {
         Bone bone = new Bone(model);
@@ -192,30 +195,23 @@ public class Bone implements IBone {
     public double[] getPhysicsParams() { return physicsParams; }
     public double getLength() { return length; }
 
-    public void render() {
+    public void render(MatrixStack matrixStack, Function<Identifier, VertexConsumer> vertexConsumer, VertexConsumerProvider vertexConsumerProvider, int l, int o) {
         float scaleFactor = CustomModelClient.currentParameter.scale;
-        if (!compiled)
-            compile(scaleFactor);
-        GlStateManager.color4f(color[0], color[1], color[2], alpha);
-        GlStateManager.callList(glList);
-
-        for (ItemPart item : items)
-            item.render();
-        GlStateManager.enableRescaleNormal();
-    }
-
-    private void compile(float scaleFactor) {
-        glList = GlAllocationUtils.genLists(1);
-        GlStateManager.newList(glList, GL11.GL_COMPILE);
-        BufferBuilder bufferBuilder = Tessellator.getInstance().getBufferBuilder();
+        MatrixStack.Entry entry = matrixStack.peek();
+        Matrix4f matrix4f = entry.getModel();
+        Matrix3f matrix3f = entry.getNormal();
+        float r = color[0];
+        float g = color[1];
+        float b = color[2];
+        float a = alpha;
+        VertexConsumer consumer = vertexConsumer.apply(getTexture().get());
 
         for (Box box : boxes)
-            box.render(bufferBuilder, scaleFactor);
+            box.render(matrix4f, matrix3f, consumer, r, g, b, a, o, l);
         for (Quad quad : quads)
-            quad.render(bufferBuilder, scaleFactor);
-
-        GlStateManager.endList();
-        this.compiled = true;
+            quad.render(matrix4f, matrix3f, consumer, r, g, b, a, o, l);
+        for (ItemPart item : items)
+            item.render(l, o, matrixStack, vertexConsumerProvider);
     }
 
     private static double degToRad = Math.PI / 180;

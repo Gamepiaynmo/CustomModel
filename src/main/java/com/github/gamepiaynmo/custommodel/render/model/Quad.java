@@ -6,10 +6,16 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.Vertex;
+import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.util.math.Matrix3f;
+import net.minecraft.client.util.math.Matrix4f;
+import net.minecraft.client.util.math.Vector3f;
+import net.minecraft.client.util.math.Vector4f;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
 @Environment(EnvType.CLIENT)
@@ -20,13 +26,17 @@ public class Quad {
     public float z;
     public float xMax;
     public float yMax;
+    public final Vector3f direction;
 
-    protected Quad(Vertex[] vertexs_1, float int_1, float int_2, float int_3, float int_4, float float_1, float float_2) {
+    protected Quad(Vertex[] vertexs_1, float int_1, float int_2, float int_3, float int_4, float float_1, float float_2, Direction direction) {
         vertexs_1[0] = vertexs_1[0].remap(int_3 / float_1, int_2 / float_2);
         vertexs_1[1] = vertexs_1[1].remap(int_1 / float_1, int_2 / float_2);
         vertexs_1[2] = vertexs_1[2].remap(int_1 / float_1, int_4 / float_2);
         vertexs_1[3] = vertexs_1[3].remap(int_3 / float_1, int_4 / float_2);
         this.vertices = vertexs_1;
+
+        this.direction = direction.getUnitVector();
+        this.direction.piecewiseMultiply(-1.0F, 1.0F, 1.0F);
     }
 
     protected Quad(float xMin, float yMin, float zMin, float width, float height, float uMin, float vMin, float sizeAdd, float texWidth, float texHeight) {
@@ -40,24 +50,25 @@ public class Quad {
         this.z = zMin;
         this.xMax = xMin + sizeAdd;
         this.yMax = yMin + sizeAdd;
+        this.direction = Direction.UP.getUnitVector();
     }
 
-    public void render(BufferBuilder bufferBuilder_1, float float_1) {
-        Vec3d vec3d_1 = this.vertices[1].pos.reverseSubtract(this.vertices[0].pos);
-        Vec3d vec3d_2 = this.vertices[1].pos.reverseSubtract(this.vertices[2].pos);
-        Vec3d vec3d_3 = vec3d_2.crossProduct(vec3d_1).normalize();
-        float float_2 = (float)vec3d_3.x;
-        float float_3 = (float)vec3d_3.y;
-        float float_4 = (float)vec3d_3.z;
+    public void render(Matrix4f model, Matrix3f normal, VertexConsumer vertexConsumer, float r, float g, float b, float a, int o, int l) {
+        Vector3f vector3f = direction.copy();
+        vector3f.transform(normal);
+        float nx = vector3f.getX();
+        float ny = vector3f.getY();
+        float nz = vector3f.getZ();
 
-        bufferBuilder_1.begin(7, VertexFormats.POSITION_UV_NORMAL_2);
-
-        for(int int_1 = 0; int_1 < 4; ++int_1) {
-            Vertex vertex_1 = this.vertices[int_1];
-            bufferBuilder_1.vertex(vertex_1.pos.x * (double)float_1, vertex_1.pos.y * (double)float_1, vertex_1.pos.z * (double)float_1).texture(vertex_1.u, vertex_1.v).normal(float_2, float_3, float_4).next();
+        for(int i = 0; i < 4; ++i) {
+            Vertex vertex = vertices[i];
+            float x = (float) (vertex.pos.getX() / 16.0F);
+            float y = (float) (vertex.pos.getY() / 16.0F);
+            float z = (float) (vertex.pos.getZ() / 16.0F);
+            Vector4f vector4f = new Vector4f(x, y, z, 1.0F);
+            vector4f.transform(model);
+            vertexConsumer.vertex(vector4f.getX(), vector4f.getY(), vector4f.getZ(), r, g, b, a, vertex.u, vertex.v, o, l, nx, ny, nz);
         }
-
-        Tessellator.getInstance().draw();
     }
 
     public static Quad getQuadFromJson(Bone bone, JsonObject jsonObj) {

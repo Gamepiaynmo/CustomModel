@@ -58,7 +58,7 @@ public abstract class MixinClientPlayerEntity extends AbstractClientPlayerEntity
                     // Prevent sending the message
                     cancel = true;
             } catch (CommandException e) {
-                addChatMessage(e.getMessageText().formatted(Formatting.RED), false);
+                addChatMessage(e.getTextMessage().formatted(Formatting.RED), false);
                 cancel = true;
             } catch (CommandSyntaxException e) {
                 addChatMessage(new LiteralText(e.getMessage()).formatted(Formatting.RED), false);

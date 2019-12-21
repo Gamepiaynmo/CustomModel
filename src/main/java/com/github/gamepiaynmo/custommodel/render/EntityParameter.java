@@ -10,7 +10,7 @@ public class EntityParameter {
     float headYaw;
 
     public EntityParameter(LivingEntity entity) {
-        bodyYaw = entity.field_6283;
+        bodyYaw = entity.bodyYaw;
         yaw = entity.yaw;
         pitch = entity.pitch;
         prevHeadYaw = entity.prevHeadYaw;
@@ -18,7 +18,7 @@ public class EntityParameter {
     }
 
     public void apply(LivingEntity entity) {
-        entity.field_6283 = bodyYaw;
+        entity.bodyYaw = bodyYaw;
         entity.yaw = yaw;
         entity.pitch = pitch;
         entity.prevHeadYaw = prevHeadYaw;
