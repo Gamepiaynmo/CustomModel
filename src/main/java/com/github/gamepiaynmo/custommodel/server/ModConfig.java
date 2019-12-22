@@ -1,72 +1,64 @@
 package com.github.gamepiaynmo.custommodel.server;
 
-import me.sargunvohra.mcmods.autoconfig1.AutoConfig;
-import me.sargunvohra.mcmods.autoconfig1.ConfigData;
-import me.sargunvohra.mcmods.autoconfig1.annotation.Config;
-import me.sargunvohra.mcmods.autoconfig1.annotation.ConfigEntry;
+import net.minecraft.util.text.translation.I18n;
+import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.relauncher.Side;
 
-@Config(name = CustomModel.MODID)
-public class ModConfig implements ConfigData {
+public class ModConfig {
+    static Configuration CONFIG = new Configuration();
+    static ModConfig SETTINGS = new ModConfig();
 
-    @ConfigEntry.Category("client")
-    @ConfigEntry.Gui.TransitiveObject
     public ClientConfig client = new ClientConfig();
-
-    @ConfigEntry.Category("server")
-    @ConfigEntry.Gui.TransitiveObject
     public ServerConfig server = new ServerConfig();
-
-    @ConfigEntry.Category("permission")
-    @ConfigEntry.Gui.TransitiveObject
     public Permissions permission = new Permissions();
 
-    @Config(name = "client")
-    public static class ClientConfig implements ConfigData {
-        @ConfigEntry.Gui.Tooltip
+    public static class ClientConfig {
         public boolean hideNearParticles = true;
     }
 
-    @Config(name = "server")
-    public static class ServerConfig implements ConfigData {
-        @ConfigEntry.Gui.Tooltip
+    public static class ServerConfig {
         public boolean customEyeHeight = true;
-
-        @ConfigEntry.Gui.Tooltip
         public boolean customBoundingBox = true;
-
-        @ConfigEntry.Gui.Tooltip
         public String defaultModel = "default";
     }
 
-    @Config(name = "permission")
-    public static class Permissions implements ConfigData {
-        @ConfigEntry.Gui.Tooltip
+    public static class Permissions {
         public int reloadSelfPermission = 0;
-
-        @ConfigEntry.Gui.Tooltip
         public int reloadOthersPermission = 1;
-
-        @ConfigEntry.Gui.Tooltip
         public int selectSelfPermission = 1;
-
-        @ConfigEntry.Gui.Tooltip
         public int selectOthersPermission = 2;
-
-        @ConfigEntry.Gui.Tooltip
         public int listModelsPermission = 1;
     }
 
-    public static ModConfig getConfig() { return AutoConfig.getConfigHolder(ModConfig.class).getConfig(); }
+    public static ModConfig getSettings() { return SETTINGS; }
+    public static void updateConfig() {
+        SETTINGS.client.hideNearParticles = CONFIG.getBoolean("hideNearParticles", "client", true, getTranslated("text.autoconfig.custommodel.option.client.hideNearParticles.@Tooltip"), "text.autoconfig.custommodel.option.client.hideNearParticles");
 
-    public static boolean isHideNearParticles() { return getConfig().client.hideNearParticles; }
+        SETTINGS.server.customEyeHeight = CONFIG.getBoolean("customEyeHeight", "server", true, getTranslated("text.autoconfig.custommodel.option.server.customEyeHeight.@Tooltip"), "text.autoconfig.custommodel.option.server.customEyeHeight");
+        SETTINGS.server.customBoundingBox = CONFIG.getBoolean("customBoundingBox", "server", true, getTranslated("text.autoconfig.custommodel.option.server.customBoundingBox.@Tooltip"), "text.autoconfig.custommodel.option.server.customBoundingBox");
+        SETTINGS.server.defaultModel = CONFIG.getString("defaultModel", "server", "default", getTranslated("text.autoconfig.custommodel.option.server.defaultModel.@Tooltip"), "text.autoconfig.custommodel.option.server.defaultModel");
 
-    public static boolean isCustomEyeHeight() { return getConfig().server.customEyeHeight; }
-    public static boolean isCustomBoundingBox() { return getConfig().server.customBoundingBox; }
-    public static String getDefaultModel() { return getConfig().server.defaultModel; }
+        SETTINGS.permission.reloadSelfPermission = CONFIG.getInt("reloadSelfPermission", "permission", 0, 0, 4, getTranslated("text.autoconfig.custommodel.option.permission.reloadSelfPermission.@Tooltip"), "text.autoconfig.custommodel.option.permission.reloadSelfPermission");
+        SETTINGS.permission.reloadOthersPermission = CONFIG.getInt("reloadOthersPermission", "permission", 1, 0, 4, getTranslated("text.autoconfig.custommodel.option.permission.reloadOthersPermission.@Tooltip"), "text.autoconfig.custommodel.option.permission.reloadOthersPermission");
+        SETTINGS.permission.selectSelfPermission = CONFIG.getInt("selectSelfPermission", "permission", 1, 0, 4, getTranslated("text.autoconfig.custommodel.option.permission.selectSelfPermission.@Tooltip"), "text.autoconfig.custommodel.option.permission.selectSelfPermission");
+        SETTINGS.permission.selectOthersPermission = CONFIG.getInt("selectOthersPermission", "permission", 2, 0, 4, getTranslated("text.autoconfig.custommodel.option.permission.selectOthersPermission.@Tooltip"), "text.autoconfig.custommodel.option.permission.selectOthersPermission");
+        SETTINGS.permission.listModelsPermission = CONFIG.getInt("listModelsPermission", "permission", 1, 0, 4, getTranslated("text.autoconfig.custommodel.option.permission.listModelsPermission.@Tooltip"), "text.autoconfig.custommodel.option.permission.listModelsPermission");
+    }
 
-    public static int getReloadSelfPermission() { return getConfig().permission.reloadSelfPermission; }
-    public static int getReloadOthersPermission() { return getConfig().permission.reloadOthersPermission; }
-    public static int getSelectSelfPermission() { return getConfig().permission.selectSelfPermission; }
-    public static int getSelectOthersPermission() { return getConfig().permission.selectOthersPermission; }
-    public static int getListModelsPermission() { return getConfig().permission.listModelsPermission; }
+    private static String getTranslated(String key) {
+        return I18n.translateToLocal(key);
+    }
+
+    public static boolean isHideNearParticles() { return getSettings().client.hideNearParticles; }
+
+    public static boolean isCustomEyeHeight() { return getSettings().server.customEyeHeight; }
+    public static boolean isCustomBoundingBox() { return getSettings().server.customBoundingBox; }
+    public static String getDefaultModel() { return getSettings().server.defaultModel; }
+
+    public static int getReloadSelfPermission() { return getSettings().permission.reloadSelfPermission; }
+    public static int getReloadOthersPermission() { return getSettings().permission.reloadOthersPermission; }
+    public static int getSelectSelfPermission() { return getSettings().permission.selectSelfPermission; }
+    public static int getSelectOthersPermission() { return getSettings().permission.selectOthersPermission; }
+    public static int getListModelsPermission() { return getSettings().permission.listModelsPermission; }
 }

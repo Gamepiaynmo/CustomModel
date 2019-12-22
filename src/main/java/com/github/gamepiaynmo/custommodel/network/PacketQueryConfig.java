@@ -1,28 +1,29 @@
 package com.github.gamepiaynmo.custommodel.network;
 
 import com.github.gamepiaynmo.custommodel.server.CustomModel;
+import com.github.gamepiaynmo.custommodel.server.ModConfig;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.network.Packet;
-import net.minecraft.network.listener.ServerPlayPacketListener;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.PacketByteBuf;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 import java.io.IOException;
 
-public class PacketQueryConfig implements Packet<ServerPlayPacketListener> {
-    public static final Identifier ID = new Identifier(CustomModel.MODID, "packet_query_config");
+public class PacketQueryConfig implements IMessage, IMessageHandler<PacketQueryConfig, PacketReplyConfig> {
 
     @Override
-    public void read(PacketByteBuf var1) throws IOException {
+    public void fromBytes(ByteBuf buf) {
 
     }
 
     @Override
-    public void write(PacketByteBuf var1) throws IOException {
+    public void toBytes(ByteBuf buf) {
 
     }
 
     @Override
-    public void apply(ServerPlayPacketListener var1) {
-
+    public PacketReplyConfig onMessage(PacketQueryConfig message, MessageContext ctx) {
+        return new PacketReplyConfig(ModConfig.getSettings().server);
     }
 }

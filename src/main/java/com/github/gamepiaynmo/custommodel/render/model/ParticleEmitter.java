@@ -9,10 +9,9 @@ import com.github.gamepiaynmo.custommodel.util.Json;
 import com.github.gamepiaynmo.custommodel.util.Matrix4;
 import com.github.gamepiaynmo.custommodel.util.Vector3;
 import com.google.gson.JsonObject;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.particle.ParticleManager;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
 import java.util.Random;
@@ -88,10 +87,14 @@ public class ParticleEmitter {
             arr[i] = expr[i].eval();
     }
 
+    private double lerp(double s, double a, double b) {
+        return a + (b - a) * s;
+    }
+
     public void tick(Matrix4 transform) {
-        MinecraftClient client = MinecraftClient.getInstance();
-        ParticleManager manager = client.particleManager;
-        ClientWorld world = client.world;
+        Minecraft client = Minecraft.getMinecraft();
+        ParticleManager manager = client.effectRenderer;
+        WorldClient world = client.world;
 
         if (bone.isVisible()) {
             timer += 1;
@@ -126,29 +129,29 @@ public class ParticleEmitter {
                 while (timer > 0) {
                     timer -= 1 / density;
                     Vector3 pos = epos.cpy();
-                    pos.add(edir[0].cpy().scl(MathHelper.lerp(random.nextDouble(), -posRange.x, posRange.x)));
-                    pos.add(edir[1].cpy().scl(MathHelper.lerp(random.nextDouble(), -posRange.y, posRange.y)));
-                    pos.add(edir[2].cpy().scl(MathHelper.lerp(random.nextDouble(), -posRange.z, posRange.z)));
+                    pos.add(edir[0].cpy().scl(lerp(random.nextDouble(), -posRange.x, posRange.x)));
+                    pos.add(edir[1].cpy().scl(lerp(random.nextDouble(), -posRange.y, posRange.y)));
+                    pos.add(edir[2].cpy().scl(lerp(random.nextDouble(), -posRange.z, posRange.z)));
 
                     Vector3 dir = edir[2].cpy();
-                    dir.rotate(edir[0], MathHelper.lerp(random.nextDouble(), -dirRange, dirRange));
-                    dir.rotate(edir[1], MathHelper.lerp(random.nextDouble(), -dirRange, dirRange));
-                    dir.scl(MathHelper.lerp(random.nextDouble(), speed[0], speed[1]));
+                    dir.rotate(edir[0], lerp(random.nextDouble(), -dirRange, dirRange));
+                    dir.rotate(edir[1], lerp(random.nextDouble(), -dirRange, dirRange));
+                    dir.scl(lerp(random.nextDouble(), speed[0], speed[1]));
 
                     CustomParticle particle = new CustomParticle(world, this, pos, dir);
-                    particle.setAngle(D2R * MathHelper.lerp(random.nextFloat(), angle[0], angle[1]));
-                    particle.setRotSpeed(MathHelper.lerp(random.nextFloat(), rotSpeed[0], rotSpeed[1]));
-                    particle.setMaxAge((int) MathHelper.lerp(random.nextFloat(), lifeSpan[0], lifeSpan[1]));
-                    particle.setSize(MathHelper.lerp(random.nextFloat(), size[0], size[1]));
-                    particle.setColor(MathHelper.lerp(random.nextFloat(), color[0][0], color[0][1]),
-                            MathHelper.lerp(random.nextFloat(), color[1][0], color[1][1]),
-                            MathHelper.lerp(random.nextFloat(), color[2][0], color[2][1]));
-                    particle.setAlpha(MathHelper.lerp(random.nextFloat(), color[3][0], color[3][1]));
+                    particle.setAngle(D2R * (float) lerp(random.nextFloat(), angle[0], angle[1]));
+                    particle.setRotSpeed((float) lerp(random.nextFloat(), rotSpeed[0], rotSpeed[1]));
+                    particle.setMaxAge((int) lerp(random.nextFloat(), lifeSpan[0], lifeSpan[1]));
+                    particle.setSize((float) lerp(random.nextFloat(), size[0], size[1]));
+                    particle.setRBGColorF((float) lerp(random.nextFloat(), color[0][0], color[0][1]),
+                            (float) lerp(random.nextFloat(), color[1][0], color[1][1]),
+                            (float) lerp(random.nextFloat(), color[2][0], color[2][1]));
+                    particle.setAlpha((float) lerp(random.nextFloat(), color[3][0], color[3][1]));
                     particle.setGravity(gravity);
                     particle.setCollide(collide);
                     particle.setTexture(bone.getTexture().get());
 
-                    manager.addParticle(particle);
+                    manager.addEffect(particle);
                 }
             }
         }

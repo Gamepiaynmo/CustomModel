@@ -32,8 +32,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.*;
 
 public class CustomModel implements ModInitializer {
@@ -212,7 +210,7 @@ public class CustomModel implements ModInitializer {
         });
 
         ServerSidePacketRegistry.INSTANCE.register(PacketQueryConfig.ID, (context, buffer) -> {
-            sendPacket(context.getPlayer(), PacketReplyConfig.ID, new PacketReplyConfig(ModConfig.getConfig().server));
+            sendPacket(context.getPlayer(), PacketReplyConfig.ID, new PacketReplyConfig(ModConfig.getSettings().server));
         });
 
         ServerStartCallback.EVENT.register(minecraftServer -> server = minecraftServer);

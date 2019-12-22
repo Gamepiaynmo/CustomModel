@@ -1,18 +1,18 @@
 package com.github.gamepiaynmo.custommodel.network;
 
 import com.github.gamepiaynmo.custommodel.server.CustomModel;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.network.Packet;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.PacketByteBuf;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 import java.io.*;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-public class PacketModel implements Packet<ClientPlayPacketListener> {
-    public static final Identifier ID = new Identifier(CustomModel.MODID, "packet_model");
+public class PacketModel implements IMessage, IMessageHandler<PacketModel, IMessage> {
     private UUID uuid;
     private byte[] data;
     public boolean success;
@@ -56,31 +56,32 @@ public class PacketModel implements Packet<ClientPlayPacketListener> {
 
     public PacketModel() {}
 
-    @Override
-    public void read(PacketByteBuf buf) throws IOException {
-        uuid = buf.readUuid();
-        int len = buf.readInt();
-        data = new byte[len];
-        buf.readBytes(data);
-    }
-
-    @Override
-    public void write(PacketByteBuf buf) throws IOException {
-        buf.writeUuid(uuid);
-        buf.writeInt(data.length);
-        buf.writeBytes(data);
-    }
-
-    @Override
-    public void apply(ClientPlayPacketListener var1) {
-
-    }
-
     public UUID getUuid() {
         return uuid;
     }
 
     public byte[] getData() {
         return data;
+    }
+
+    @Override
+    public void fromBytes(ByteBuf buf) {
+        uuid = new UUID(buf.readLong(), buf.readLong());
+        int len = buf.readInt();
+        data = new byte[len];
+        buf.readBytes(data);
+    }
+
+    @Override
+    public void toBytes(ByteBuf buf) {
+        buf.writeLong(uuid.getMostSignificantBits());
+        buf.writeLong(uuid.getLeastSignificantBits());
+        buf.writeInt(data.length);
+        buf.writeBytes(data);
+    }
+
+    @Override
+    public IMessage onMessage(PacketModel message, MessageContext ctx) {
+        return null;
     }
 }

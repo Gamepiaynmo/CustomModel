@@ -12,11 +12,11 @@ import com.github.gamepiaynmo.custommodel.util.*;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.mojang.blaze3d.platform.GlStateManager;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.util.GlAllocationUtils;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.GLAllocation;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
 import java.util.Collection;
@@ -168,9 +168,9 @@ public class Bone implements IBone {
     }
 
     @Override
-    public Supplier<Identifier> getTexture() {
+    public Supplier<ResourceLocation> getTexture() {
         if (texture == null) {
-            Supplier<Identifier> res = parent.getTexture();
+            Supplier<ResourceLocation> res = parent.getTexture();
             if (parent instanceof Bone)
                 texture = ((Bone) parent).texture;
             return res;
@@ -196,7 +196,7 @@ public class Bone implements IBone {
         float scaleFactor = CustomModelClient.currentParameter.scale;
         if (!compiled)
             compile(scaleFactor);
-        GlStateManager.color4f(color[0], color[1], color[2], alpha);
+        GlStateManager.color(color[0], color[1], color[2], alpha);
         GlStateManager.callList(glList);
 
         for (ItemPart item : items)
@@ -205,16 +205,16 @@ public class Bone implements IBone {
     }
 
     private void compile(float scaleFactor) {
-        glList = GlAllocationUtils.genLists(1);
-        GlStateManager.newList(glList, GL11.GL_COMPILE);
-        BufferBuilder bufferBuilder = Tessellator.getInstance().getBufferBuilder();
+        glList = GLAllocation.generateDisplayLists(1);
+        GlStateManager.glNewList(glList, GL11.GL_COMPILE);
+        BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
 
         for (Box box : boxes)
             box.render(bufferBuilder, scaleFactor);
         for (Quad quad : quads)
             quad.render(bufferBuilder, scaleFactor);
 
-        GlStateManager.endList();
+        GlStateManager.glEndList();
         this.compiled = true;
     }
 

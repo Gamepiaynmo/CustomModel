@@ -12,15 +12,15 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.mojang.blaze3d.platform.TextureUtil;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.client.texture.NativeImage;
-import net.minecraft.client.texture.Texture;
-import net.minecraft.client.texture.TextureManager;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.AbstractClientPlayer;
+import net.minecraft.client.renderer.texture.AbstractTexture;
+import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.renderer.texture.TextureUtil;
+import net.minecraft.util.ResourceLocation;
 import org.apache.commons.io.IOUtils;
 
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.Collection;
 import java.util.List;
@@ -32,17 +32,17 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 public class ModelPack {
-    public static final Supplier<Identifier>[] defGetter = new Supplier[]{ () -> CustomModelClient.currentPlayer.getSkinTexture(),
-            () -> CustomModelClient.currentPlayer.getCapeTexture(),
-            () -> CustomModelClient.currentPlayer.getElytraTexture() };
+    public static final Supplier<ResourceLocation>[] defGetter = new Supplier[]{ () -> CustomModelClient.currentPlayer.getLocationSkin(),
+            () -> CustomModelClient.currentPlayer.getLocationCape(),
+            () -> CustomModelClient.currentPlayer.getLocationElytra() };
 
     private Map<String, Integer> textureIds = Maps.newHashMap();
-    private List<Identifier> textures = Lists.newArrayList();
+    private List<ResourceLocation> textures = Lists.newArrayList();
     private CustomJsonModel model;
     private boolean success = false;
     private String dirName;
-    private List<Texture> texList = Lists.newArrayList();
-    private Map<Identifier, Vec2d> textureSizes = Maps.newHashMap();
+    private List<AbstractTexture> texList = Lists.newArrayList();
+    private Map<ResourceLocation, Vec2d> textureSizes = Maps.newHashMap();
 
     private ModelPack() {}
 
@@ -173,17 +173,17 @@ public class ModelPack {
         JsonObject modelJson = new JsonParser().parse(new InputStreamReader(modelInputStream)).getAsJsonObject();
         IOUtils.closeQuietly(modelInputStream);
         for (IModelResource texture : textures) {
-            Identifier identifier = new Identifier(CustomModel.MODID, (pack.dirName + "/" + texture.getName()).toLowerCase());
+            ResourceLocation identifier = new ResourceLocation(CustomModel.MODID, (pack.dirName + "/" + texture.getName()).toLowerCase());
             pack.textureIds.put(getFileName(texture.getName()), pack.textures.size());
             pack.textures.add(identifier);
-            NativeImage image = NativeImage.read(texture.getInputStream());
+            BufferedImage image = TextureUtil.readBufferedImage(texture.getInputStream());
             pack.textureSizes.put(identifier, new Vec2d(image.getWidth(), image.getHeight()));
             CustomTexture tex = new CustomTexture(image);
             pack.texList.add(tex);
-            textureManager.registerTexture(identifier, tex);
+            textureManager.loadTexture(identifier, tex);
         }
 
-        CustomModelClient.currentPlayer = (AbstractClientPlayerEntity) MinecraftClient.getInstance().world.getPlayerByUuid(uuid);
+        CustomModelClient.currentPlayer = (AbstractClientPlayer) Minecraft.getMinecraft().world.getPlayerEntityByUUID(uuid);
         pack.model = CustomJsonModel.fromJson(pack, modelJson);
         pack.success = true;
         return pack;
@@ -196,16 +196,16 @@ public class ModelPack {
         return path.substring(idx1, idx2);
     }
 
-    public Supplier<Identifier> getBaseTexture() {
+    public Supplier<ResourceLocation> getBaseTexture() {
         return defGetter[0];
     }
 
-    public Supplier<Identifier> getTexture(int id) {
+    public Supplier<ResourceLocation> getTexture(int id) {
         if (id < defGetter.length)
             return defGetter[id];
         id -= defGetter.length;
         if (id < textures.size()) {
-            Identifier identifier = textures.get(id);
+            ResourceLocation identifier = textures.get(id);
             return () -> identifier;
         }
         return defGetter[0];
@@ -224,7 +224,7 @@ public class ModelPack {
         return null;
     }
 
-    public Vec2d getTextureSize(Identifier texture) {
+    public Vec2d getTextureSize(ResourceLocation texture) {
         Vec2d res = textureSizes.get(texture);
         return res == null ? new Vec2d(64, 64) : res;
     }
@@ -238,13 +238,13 @@ public class ModelPack {
     }
 
     public void release() {
-        for (Texture texture : texList)
-            TextureUtil.releaseTextureId(texture.getGlId());
+        for (AbstractTexture texture : texList)
+            TextureUtil.deleteTexture(texture.getGlTextureId());
         model.release();
     }
 
     public interface TextureGetter {
-        Identifier getTexture(AbstractClientPlayerEntity player);
+        ResourceLocation getTexture(AbstractClientPlayer player);
     }
 
     public interface IModelResource {

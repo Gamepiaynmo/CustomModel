@@ -14,34 +14,22 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
-import io.netty.buffer.Unpooled;
-import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.event.world.WorldTickCallback;
-import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.client.render.entity.PlayerEntityRenderer;
-import net.minecraft.client.render.entity.model.PlayerEntityModel;
-import net.minecraft.client.texture.TextureManager;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.MessageType;
-import net.minecraft.network.Packet;
-import net.minecraft.text.TranslatableText;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.PacketByteBuf;
+import net.minecraft.client.entity.AbstractClientPlayer;
+import net.minecraft.client.model.ModelPlayer;
+import net.minecraft.client.renderer.entity.RenderPlayer;
+import net.minecraft.client.renderer.texture.TextureManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.util.*;
 
-public class CustomModelClient implements ClientModInitializer {
+public class CustomModelClient {
     private static final Map<UUID, ModelPack> modelPacks = Maps.newHashMap();
     private static int clearCounter = 0;
 
     public static TextureManager textureManager;
-    public static Map<String, PlayerEntityRenderer> playerRenderers;
+    public static Map<String, RenderPlayer> playerRenderers;
 
     private static final Set<UUID> queried = Sets.newHashSet();
     public static ModConfig.ServerConfig serverConfig;
@@ -49,26 +37,16 @@ public class CustomModelClient implements ClientModInitializer {
 
     public static final Logger LOGGER = LogManager.getLogger();
 
-    public static AbstractClientPlayerEntity currentPlayer;
+    public static AbstractClientPlayer currentPlayer;
     public static RenderParameter currentParameter;
-    public static PlayerEntityRenderer currentRenderer;
-    public static PlayerEntityModel currentModel;
+    public static RenderPlayer currentRenderer;
+    public static ModelPlayer currentModel;
     public static CustomJsonModel currentJsonModel;
     public static Matrix4 currentInvTransform;
 
     public static boolean isRenderingInventory;
     public static EntityParameter inventoryEntityParameter;
     public static boolean isRenderingFirstPerson;
-
-    private static void sendPacket(Identifier id, Packet<?> packet) {
-        PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
-        try {
-            packet.write(buf);
-            ClientSidePacketRegistry.INSTANCE.sendToServer(id, buf);
-        } catch (Exception e) {
-            LOGGER.warn(e.getMessage(), e);
-        }
-    }
 
     public static void clearModels() {
         for (ModelPack pack : modelPacks.values())

@@ -1,24 +1,23 @@
 package com.github.gamepiaynmo.custommodel.render;
 
-import com.mojang.blaze3d.platform.TextureUtil;
-import net.minecraft.client.texture.AbstractTexture;
-import net.minecraft.client.texture.NativeImage;
-import net.minecraft.resource.ResourceManager;
+import net.minecraft.client.renderer.texture.AbstractTexture;
+import net.minecraft.client.renderer.texture.SimpleTexture;
+import net.minecraft.client.renderer.texture.TextureUtil;
+import net.minecraft.client.resources.IResourceManager;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 public class CustomTexture extends AbstractTexture {
 
-    private NativeImage image;
+    private BufferedImage image;
 
-    public CustomTexture(NativeImage image) {
+    public CustomTexture(BufferedImage image) {
         this.image = image;
     }
 
     @Override
-    public void load(ResourceManager var1) throws IOException {
-        bindTexture();
-        TextureUtil.prepareImage(getGlId(), image.getWidth(), image.getHeight());
-        image.upload(0, 0, 0, false);
+    public void loadTexture(IResourceManager var1) throws IOException {
+        TextureUtil.uploadTextureImageAllocate(getGlTextureId(), image, false, false);
     }
 }

@@ -6,13 +6,15 @@ import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
 import java.util.Map;
 
-@Mod(modid = CustomModel.MODID, useMetadata = true)
+@Mod(modid = CustomModel.MODID, useMetadata = true, guiFactory = "com.github.gamepiaynmo.custommodel.client.ModMenu")
 public class CustomModelMod implements IFMLLoadingPlugin {
     public static Logger LOGGER;
 
@@ -28,6 +30,11 @@ public class CustomModelMod implements IFMLLoadingPlugin {
 
     @Mod.EventHandler
     public void postInit(FMLPostInitializationEvent event) {
+
+    }
+
+    @Mod.EventHandler
+    public void serverStart(FMLServerStartedEvent event) {
 
     }
 

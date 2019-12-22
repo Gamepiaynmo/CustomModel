@@ -5,7 +5,7 @@ import com.github.gamepiaynmo.custommodel.util.Matrix4;
 import com.github.gamepiaynmo.custommodel.util.Quaternion;
 import com.github.gamepiaynmo.custommodel.util.Vec2d;
 import com.github.gamepiaynmo.custommodel.util.Vector3;
-import net.minecraft.util.Identifier;
+import net.minecraft.util.ResourceLocation;
 
 import java.util.function.Supplier;
 
@@ -14,7 +14,7 @@ public interface IBone {
     Vector3 getRotation();
     Vector3 getScale();
     Vec2d getTextureSize();
-    Supplier<Identifier> getTexture();
+    Supplier<ResourceLocation> getTexture();
     IBone getParent();
     PlayerBone getPlayerBone();
     String getId();

@@ -2,41 +2,41 @@ package com.github.gamepiaynmo.custommodel.network;
 
 import com.github.gamepiaynmo.custommodel.server.CustomModel;
 import com.mojang.authlib.GameProfile;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.Packet;
-import net.minecraft.network.listener.ServerPlayPacketListener;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.PacketByteBuf;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 import java.io.IOException;
 import java.util.UUID;
 
-public class PacketQuery implements Packet<ServerPlayPacketListener> {
-    public static final Identifier ID = new Identifier(CustomModel.MODID, "packet_query");
+public class PacketQuery implements IMessage, IMessageHandler<PacketQuery, PacketModel> {
     private UUID playerUuid;
 
     public PacketQuery(GameProfile profile) {
-        playerUuid = PlayerEntity.getUuidFromProfile(profile);
+        playerUuid = EntityPlayer.getUUID(profile);
     }
 
     public PacketQuery() {}
 
-    @Override
-    public void read(PacketByteBuf buf) throws IOException {
-        playerUuid = buf.readUuid();
-    }
-
-    @Override
-    public void write(PacketByteBuf buf) throws IOException {
-        buf.writeUuid(playerUuid);
-    }
-
-    @Override
-    public void apply(ServerPlayPacketListener var1) {
-
-    }
-
     public UUID getPlayerUuid() {
         return playerUuid;
+    }
+
+    @Override
+    public void fromBytes(ByteBuf buf) {
+        playerUuid = new UUID(buf.readLong(), buf.readLong());
+    }
+
+    @Override
+    public void toBytes(ByteBuf buf) {
+        buf.writeLong(playerUuid.getMostSignificantBits());
+        buf.writeLong(playerUuid.getLeastSignificantBits());
+    }
+
+    @Override
+    public PacketModel onMessage(PacketQuery message, MessageContext ctx) {
+        return null;
     }
 }

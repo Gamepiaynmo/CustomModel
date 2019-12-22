@@ -1,6 +1,6 @@
 package com.github.gamepiaynmo.custommodel.util;
 
-import net.minecraft.text.TranslatableText;
+import net.minecraft.util.text.TextComponentTranslation;
 
 public class TranslatableException extends RuntimeException {
 
@@ -9,11 +9,11 @@ public class TranslatableException extends RuntimeException {
     }
 
     public TranslatableException(String message, Object... args) {
-        super(new TranslatableText(message, args).asString());
+        super(new TextComponentTranslation(message, args).getUnformattedComponentText());
     }
 
     public TranslatableException(String message, Throwable cause, Object... args) {
-        super(new TranslatableText(message, args).asString(), cause);
+        super(new TextComponentTranslation(message, args).getUnformattedComponentText(), cause);
     }
 
     public TranslatableException(Throwable cause) {

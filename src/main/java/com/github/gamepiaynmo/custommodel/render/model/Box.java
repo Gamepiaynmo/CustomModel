@@ -4,14 +4,11 @@ import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
 import com.github.gamepiaynmo.custommodel.util.Json;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.client.model.Vertex;
-import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.model.PositionTextureVertex;
+import net.minecraft.client.renderer.BufferBuilder;
 
-@Environment(EnvType.CLIENT)
 public class Box {
-    private final Vertex[] vertices;
+    private final PositionTextureVertex[] vertices;
     private final Quad[] polygons;
     public final float xMin;
     public final float yMin;
@@ -27,7 +24,7 @@ public class Box {
         this.xMax = float_1 + float_4;
         this.yMax = float_2 + float_4;
         this.zMax = float_3 + float_4;
-        this.vertices = new Vertex[8];
+        this.vertices = new PositionTextureVertex[8];
         this.polygons = new Quad[6];
         float float_5 = float_1;
         float float_6 = float_2;
@@ -39,14 +36,14 @@ public class Box {
         float_6 += float_4;
         float_7 += float_4;
 
-        Vertex vertex_1 = new Vertex(float_1, float_2, float_3, 0.0F, 0.0F);
-        Vertex vertex_2 = new Vertex(float_5, float_2, float_3, 0.0F, 8.0F);
-        Vertex vertex_3 = new Vertex(float_5, float_6, float_3, 8.0F, 8.0F);
-        Vertex vertex_4 = new Vertex(float_1, float_6, float_3, 8.0F, 0.0F);
-        Vertex vertex_5 = new Vertex(float_1, float_2, float_7, 0.0F, 0.0F);
-        Vertex vertex_6 = new Vertex(float_5, float_2, float_7, 0.0F, 8.0F);
-        Vertex vertex_7 = new Vertex(float_5, float_6, float_7, 8.0F, 8.0F);
-        Vertex vertex_8 = new Vertex(float_1, float_6, float_7, 8.0F, 0.0F);
+        PositionTextureVertex vertex_1 = new PositionTextureVertex(float_1, float_2, float_3, 0.0F, 0.0F);
+        PositionTextureVertex vertex_2 = new PositionTextureVertex(float_5, float_2, float_3, 0.0F, 8.0F);
+        PositionTextureVertex vertex_3 = new PositionTextureVertex(float_5, float_6, float_3, 8.0F, 8.0F);
+        PositionTextureVertex vertex_4 = new PositionTextureVertex(float_1, float_6, float_3, 8.0F, 0.0F);
+        PositionTextureVertex vertex_5 = new PositionTextureVertex(float_1, float_2, float_7, 0.0F, 0.0F);
+        PositionTextureVertex vertex_6 = new PositionTextureVertex(float_5, float_2, float_7, 0.0F, 8.0F);
+        PositionTextureVertex vertex_7 = new PositionTextureVertex(float_5, float_6, float_7, 8.0F, 8.0F);
+        PositionTextureVertex vertex_8 = new PositionTextureVertex(float_1, float_6, float_7, 8.0F, 0.0F);
         this.vertices[0] = vertex_1;
         this.vertices[1] = vertex_2;
         this.vertices[2] = vertex_3;
@@ -55,12 +52,12 @@ public class Box {
         this.vertices[5] = vertex_6;
         this.vertices[6] = vertex_7;
         this.vertices[7] = vertex_8;
-        this.polygons[0] = new Quad(new Vertex[]{vertex_6, vertex_2, vertex_3, vertex_7}, int_1 + int_5 + int_3, int_2 + int_5, int_1 + int_5 + int_3 + int_5, int_2 + int_5 + int_4, texWidth, texHeight);
-        this.polygons[1] = new Quad(new Vertex[]{vertex_1, vertex_5, vertex_8, vertex_4}, int_1, int_2 + int_5, int_1 + int_5, int_2 + int_5 + int_4, texWidth, texHeight);
-        this.polygons[2] = new Quad(new Vertex[]{vertex_6, vertex_5, vertex_1, vertex_2}, int_1 + int_5, int_2, int_1 + int_5 + int_3, int_2 + int_5, texWidth, texHeight);
-        this.polygons[3] = new Quad(new Vertex[]{vertex_3, vertex_4, vertex_8, vertex_7}, int_1 + int_5 + int_3, int_2 + int_5, int_1 + int_5 + int_3 + int_3, int_2, texWidth, texHeight);
-        this.polygons[4] = new Quad(new Vertex[]{vertex_2, vertex_1, vertex_4, vertex_3}, int_1 + int_5, int_2 + int_5, int_1 + int_5 + int_3, int_2 + int_5 + int_4, texWidth, texHeight);
-        this.polygons[5] = new Quad(new Vertex[]{vertex_5, vertex_6, vertex_7, vertex_8}, int_1 + int_5 + int_3 + int_5, int_2 + int_5, int_1 + int_5 + int_3 + int_5 + int_3, int_2 + int_5 + int_4, texWidth, texHeight);
+        this.polygons[0] = new Quad(new PositionTextureVertex[]{vertex_6, vertex_2, vertex_3, vertex_7}, int_1 + int_5 + int_3, int_2 + int_5, int_1 + int_5 + int_3 + int_5, int_2 + int_5 + int_4, texWidth, texHeight);
+        this.polygons[1] = new Quad(new PositionTextureVertex[]{vertex_1, vertex_5, vertex_8, vertex_4}, int_1, int_2 + int_5, int_1 + int_5, int_2 + int_5 + int_4, texWidth, texHeight);
+        this.polygons[2] = new Quad(new PositionTextureVertex[]{vertex_6, vertex_5, vertex_1, vertex_2}, int_1 + int_5, int_2, int_1 + int_5 + int_3, int_2 + int_5, texWidth, texHeight);
+        this.polygons[3] = new Quad(new PositionTextureVertex[]{vertex_3, vertex_4, vertex_8, vertex_7}, int_1 + int_5 + int_3, int_2 + int_5, int_1 + int_5 + int_3 + int_3, int_2, texWidth, texHeight);
+        this.polygons[4] = new Quad(new PositionTextureVertex[]{vertex_2, vertex_1, vertex_4, vertex_3}, int_1 + int_5, int_2 + int_5, int_1 + int_5 + int_3, int_2 + int_5 + int_4, texWidth, texHeight);
+        this.polygons[5] = new Quad(new PositionTextureVertex[]{vertex_5, vertex_6, vertex_7, vertex_8}, int_1 + int_5 + int_3 + int_5, int_2 + int_5, int_1 + int_5 + int_3 + int_5 + int_3, int_2 + int_5 + int_4, texWidth, texHeight);
 
     }
 

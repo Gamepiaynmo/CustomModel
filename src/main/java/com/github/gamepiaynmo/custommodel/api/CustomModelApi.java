@@ -3,7 +3,7 @@ package com.github.gamepiaynmo.custommodel.api;
 import com.github.gamepiaynmo.custommodel.server.CustomModel;
 import com.github.gamepiaynmo.custommodel.server.ModelInfo;
 import com.mojang.authlib.GameProfile;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.entity.player.EntityPlayerMP;
 
 import java.util.Collection;
 
@@ -12,7 +12,7 @@ public interface CustomModelApi {
      * Reload the model for the specified player.
      * @param player Specified player.
      */
-    public static void reloadModelForPlayer(ServerPlayerEntity player) {
+    public static void reloadModelForPlayer(EntityPlayerMP player) {
         CustomModel.reloadModel(player, true);
     }
 
@@ -21,7 +21,7 @@ public interface CustomModelApi {
      * @param player Specified player.
      * @param modelId Model ID of the model pack.
      */
-    public static void selectModelForPlayer(ServerPlayerEntity player, String modelId) {
+    public static void selectModelForPlayer(EntityPlayerMP player, String modelId) {
         CustomModel.selectModel(player, modelId);
     }
 
@@ -31,7 +31,7 @@ public interface CustomModelApi {
      * @param modelId Model ID of the model pack.
      */
     public static void selectModelForOfflinePlayer(String playerName, String modelId) {
-        GameProfile profile = CustomModel.server.getUserCache().findByName(playerName);
+        GameProfile profile = CustomModel.server.getPlayerProfileCache().getGameProfileForUsername(playerName);
         CustomModel.getModelSelector().setModelForPlayer(profile, modelId);
     }
 
@@ -40,7 +40,7 @@ public interface CustomModelApi {
      * @param player Specified player.
      * @return Model ID of the model pack.
      */
-    public static String getCurrentModelOfPlayer(ServerPlayerEntity player) {
+    public static String getCurrentModelOfPlayer(EntityPlayerMP player) {
         return CustomModel.getModelSelector().getModelForPlayer(player.getGameProfile());
     }
 
@@ -50,7 +50,7 @@ public interface CustomModelApi {
      * @return Model ID of the model pack.
      */
     public static String getCurrentModelOfOfflinePlayer(String playerName) {
-        GameProfile profile = CustomModel.server.getUserCache().findByName(playerName);
+        GameProfile profile = CustomModel.server.getPlayerProfileCache().getGameProfileForUsername(playerName);
         return CustomModel.getModelSelector().getModelForPlayer(profile);
     }
 
