@@ -1,8 +1,14 @@
 package com.github.gamepiaynmo.custommodel.network;
 
+import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
+import com.github.gamepiaynmo.custommodel.client.ModelPack;
 import com.github.gamepiaynmo.custommodel.server.CustomModel;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.Packet;
+import net.minecraft.util.text.ChatType;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
@@ -82,6 +88,17 @@ public class PacketModel implements IMessage, IMessageHandler<PacketModel, IMess
 
     @Override
     public IMessage onMessage(PacketModel message, MessageContext ctx) {
+        ModelPack pack = null;
+        try {
+            pack = ModelPack.fromZipMemory(CustomModelClient.textureManager, message.getUuid(), message.getData());
+        } catch (Exception e) {
+            TextComponentTranslation text = new TextComponentTranslation("error.custommodel.loadmodelpack", "", e.getMessage());
+            text.getStyle().setColor(TextFormatting.RED);
+            Minecraft.getMinecraft().ingameGUI.addChatMessage(ChatType.CHAT, text);
+            CustomModelClient.LOGGER.warn(e.getMessage(), e);
+        }
+        if (pack != null && pack.successfulLoaded())
+            CustomModelClient.addModel(message.getUuid(), pack);
         return null;
     }
 }

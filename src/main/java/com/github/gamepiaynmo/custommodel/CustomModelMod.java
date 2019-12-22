@@ -1,12 +1,10 @@
 package com.github.gamepiaynmo.custommodel;
 
+import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.server.CustomModel;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
+import net.minecraftforge.fml.common.event.*;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 import org.apache.logging.log4j.Logger;
@@ -21,6 +19,8 @@ public class CustomModelMod implements IFMLLoadingPlugin {
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         LOGGER = event.getModLog();
+        CustomModel.onInitialize();
+        CustomModelClient.onInitializeClient();
     }
 
     @Mod.EventHandler
@@ -34,8 +34,13 @@ public class CustomModelMod implements IFMLLoadingPlugin {
     }
 
     @Mod.EventHandler
-    public void serverStart(FMLServerStartedEvent event) {
+    public void serverStart(FMLServerStartingEvent event) {
+        CustomModel.server = event.getServer();
+    }
 
+    @Mod.EventHandler
+    public void serverStop(FMLServerStoppingEvent event) {
+        CustomModel.server = null;
     }
 
     @Override

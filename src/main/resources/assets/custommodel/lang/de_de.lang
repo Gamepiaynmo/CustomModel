@@ -46,3 +46,4 @@ error.custommodel.parse.invalidfunc=Unbekannte Funktion: %s
 command.custommodel.listmodels=Es gibt %d Modellpakete.
 command.custommodel.reload=Reloaded Modelle für %d Spieler
 command.custommodel.select=Das Modell von %d Spielern wurde zu %s geändert
+command.custommodel.usage=/custommodel <refresh|list|reload|select> ...

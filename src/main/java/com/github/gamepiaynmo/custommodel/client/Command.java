@@ -2,86 +2,153 @@ package com.github.gamepiaynmo.custommodel.client;
 
 import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.server.CustomModel;
+import com.github.gamepiaynmo.custommodel.server.ModConfig;
+import com.github.gamepiaynmo.custommodel.util.LoadModelException;
 import com.github.gamepiaynmo.custommodel.util.ModelNotFoundException;
 import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
-import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.arguments.ArgumentType;
-import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.suggestion.Suggestions;
-import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.command.EntitySelector;
-import net.minecraft.command.arguments.EntityArgumentType;
-import net.minecraft.server.command.CommandSource;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.Text;
-import net.minecraft.text.Texts;
-import net.minecraft.text.TranslatableText;
-import net.minecraft.util.Formatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.network.NetworkPlayerInfo;
+import net.minecraft.command.*;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.client.IClientCommand;
 
-import java.io.File;
+import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
-public class Command implements ClientCommandPlugin {
+public class Command implements IClientCommand {
     @Override
-    public void registerCommands(CommandDispatcher<CottonClientCommandSource> dispatcher) {
-        dispatcher.register(ArgumentBuilders.literal(CustomModel.MODID
-        ).then(ArgumentBuilders.literal("reload").executes(context -> {
-            CustomModelClient.reloadModel(MinecraftClient.getInstance().player.getGameProfile());
-            context.getSource().sendFeedback(new TranslatableText("command.custommodel.reload", 1));
-            return 1;
-        }).then(ArgumentBuilders.argument("targets", EntityArgumentType.players()).executes(context -> {
-            List<GameProfile> players = ((IClientEntitySelector) (Object) context.getArgument("targets", EntitySelector.class)).getPlayers(context.getSource());
-            for (GameProfile player : players)
-                CustomModelClient.reloadModel(player);
-            context.getSource().sendFeedback(new TranslatableText("command.custommodel.reload", players.size()));
-            return players.size();
-        }))).then(ArgumentBuilders.literal("list").executes(context -> {
-            Collection<Text> info = CustomModel.getModelInfoList();
-            context.getSource().sendFeedback(new TranslatableText("command.custommodel.listmodels", info.size()));
-            for (Text str : info)
-                context.getSource().sendFeedback(str);
-            return info.size();
-        })).then(ArgumentBuilders.literal("select").then(ArgumentBuilders.argument("model", new ModelArgumentType()).executes(context -> {
-            String model = context.getArgument("model", String.class);
-            CustomModelClient.selectModel(MinecraftClient.getInstance().player.getGameProfile(), model);
-            context.getSource().sendFeedback(new TranslatableText("command.custommodel.select", 1, model));
-            return 1;
-        }).then(ArgumentBuilders.argument("targets", EntityArgumentType.players()).executes(context -> {
-            List<GameProfile> players = ((IClientEntitySelector) (Object) context.getArgument("targets", EntitySelector.class)).getPlayers(context.getSource());
-            String model = context.getArgument("model", String.class);
-            for (GameProfile player : players)
-                CustomModelClient.selectModel(player, model);
-            context.getSource().sendFeedback(new TranslatableText("command.custommodel.select", players.size(), model));
-            return players.size();
-        })))).then(ArgumentBuilders.literal("refresh").executes(context -> {
-            CustomModel.refreshModelList();
-            context.getSource().sendFeedback(new TranslatableText("command.custommodel.listmodels", CustomModel.models.size()));
-            return 1;
-        })));
+    public boolean allowUsageWithoutPrefix(ICommandSender sender, String message) {
+        return false;
     }
 
-    public static interface IClientEntitySelector {
-        List<GameProfile> getPlayers(CommandSource commandSource) throws CommandSyntaxException;
+    @Override
+    public String getName() {
+        return CustomModel.MODID;
     }
 
-    public static class ModelArgumentType implements ArgumentType<String> {
-        @Override
-        public String parse(StringReader reader) throws CommandSyntaxException {
-            return reader.readUnquotedString();
+    @Override
+    public String getUsage(ICommandSender sender) {
+        return "command.custommodel.usage";
+    }
+
+    @Override
+    public List<String> getAliases() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public boolean checkPermission(MinecraftServer server, ICommandSender sender) {
+        return true;
+    }
+
+    @Override
+    public boolean isUsernameIndex(String[] args, int index) {
+        if ("reload".equalsIgnoreCase(args[0]))
+            return index == 1;
+
+        if ("select".equalsIgnoreCase(args[0]))
+            return index == 2;
+
+        return false;
+    }
+
+    @Override
+    public int compareTo(ICommand o) {
+        return getName().compareTo(o.getName());
+    }
+
+    @Override
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+        try {
+            if (args.length < 1)
+                throw new WrongUsageException("command.custommodel.usage");
+
+            if (args[0].equals("refresh")) {
+                CustomModel.refreshModelList();
+                CommandBase.notifyCommandListener(sender, this, "command.custommodel.listmodels", CustomModel.models.size());
+                return;
+            }
+
+            if (args[0].equals("list")) {
+                CommandBase.notifyCommandListener(sender, this, "command.custommodel.listmodels", CustomModel.models.size());
+                for (ITextComponent text : CustomModel.getModelInfoList())
+                    sender.sendMessage(text);
+                return;
+            }
+
+            if (args[0].equals("reload")) {
+                if (args.length > 1) {
+                    Collection<GameProfile> players = getPlayers(args[1]);
+                    CommandBase.notifyCommandListener(sender, this, "command.custommodel.reload", players.size());
+                    for (GameProfile player : players)
+                        CustomModelClient.reloadModel(player);
+                } else {
+                    CommandBase.notifyCommandListener(sender, this, "command.custommodel.reload", 1);
+                    CustomModelClient.reloadModel(Minecraft.getMinecraft().player.getGameProfile());
+                }
+                return;
+            }
+
+            if (args.length < 2)
+                throw new WrongUsageException("command.custommodel.usage");
+
+            if (args[0].equals("select")) {
+                if (args.length > 2) {
+                    Collection<GameProfile> players = getPlayers(args[2]);
+                    CommandBase.notifyCommandListener(sender, this, "command.custommodel.select", players.size());
+                    for (GameProfile player : players)
+                        CustomModelClient.selectModel(player, args[1]);
+                } else {
+                    CommandBase.notifyCommandListener(sender, this, "command.custommodel.select", 1);
+                    CustomModelClient.selectModel(Minecraft.getMinecraft().player.getGameProfile(), args[1]);
+                }
+                return;
+            }
+        } catch (LoadModelException e) {
+            ITextComponent text = new TextComponentTranslation("error.custommodel.loadmodelpack", e.getFileName(), e.getMessage());
+            text.getStyle().setColor(TextFormatting.RED);
+            sender.sendMessage(text);
+            return;
         }
 
-        @Override
-        public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-            S source = context.getSource();
-            if (source instanceof CommandSource) {
-                return CommandSource.suggestMatching(CustomModel.getModelIdList(), builder);
-            } else return Suggestions.empty();
+        throw new WrongUsageException("command.custommodel.usage");
+    }
+
+    @Override
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
+        if (args.length == 1)
+            return CommandBase.getListOfStringsMatchingLastWord(args, "refresh", "list", "reload", "select");
+
+        switch (args[0]) {
+            case "reload": return args.length == 2 ? CommandBase.getListOfStringsMatchingLastWord(args, getPlayerNames()) : Collections.emptyList();
+            case "select": return args.length == 2 ? CommandBase.getListOfStringsMatchingLastWord(args, CustomModel.getModelIdList()) :
+                    args.length == 3 ? CommandBase.getListOfStringsMatchingLastWord(args, getPlayerNames()) : Collections.emptyList();
         }
+
+        return Collections.emptyList();
+    }
+
+    private List<String> getPlayerNames() {
+        List<String> res = Lists.newArrayList();
+        for (NetworkPlayerInfo info : Minecraft.getMinecraft().getConnection().getPlayerInfoMap())
+            res.add(info.getGameProfile().getName());
+        return res;
+    }
+
+    private List<GameProfile> getPlayers(String predict) {
+        List<GameProfile> res = Lists.newArrayList();
+        for (NetworkPlayerInfo info : Minecraft.getMinecraft().getConnection().getPlayerInfoMap()) {
+            if (info.getGameProfile().getName().startsWith(predict))
+                res.add(info.getGameProfile());
+        }
+        return res;
     }
 }

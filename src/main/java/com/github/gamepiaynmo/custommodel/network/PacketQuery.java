@@ -1,6 +1,8 @@
 package com.github.gamepiaynmo.custommodel.network;
 
 import com.github.gamepiaynmo.custommodel.server.CustomModel;
+import com.github.gamepiaynmo.custommodel.server.ModConfig;
+import com.github.gamepiaynmo.custommodel.util.LoadModelException;
 import com.mojang.authlib.GameProfile;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayer;
@@ -37,6 +39,10 @@ public class PacketQuery implements IMessage, IMessageHandler<PacketQuery, Packe
 
     @Override
     public PacketModel onMessage(PacketQuery message, MessageContext ctx) {
+        try {
+            CustomModel.reloadModel(ctx.getServerHandler().player, message.getPlayerUuid(), false);
+        } catch (LoadModelException e) {
+        }
         return null;
     }
 }

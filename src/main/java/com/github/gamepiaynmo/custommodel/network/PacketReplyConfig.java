@@ -1,5 +1,6 @@
 package com.github.gamepiaynmo.custommodel.network;
 
+import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.server.ModConfig;
 import com.github.gamepiaynmo.custommodel.server.CustomModel;
 import io.netty.buffer.ByteBuf;
@@ -39,6 +40,8 @@ public class PacketReplyConfig implements IMessage, IMessageHandler<PacketReplyC
 
     @Override
     public IMessage onMessage(PacketReplyConfig message, MessageContext ctx) {
+        CustomModelClient.serverConfig = message.getConfig();
+        CustomModelClient.isServerModded = true;
         return null;
     }
 }

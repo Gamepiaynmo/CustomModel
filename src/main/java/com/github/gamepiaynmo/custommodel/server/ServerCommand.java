@@ -1,102 +1,129 @@
 package com.github.gamepiaynmo.custommodel.server;
 
-import com.github.gamepiaynmo.custommodel.client.command.ArgumentBuilders;
 import com.github.gamepiaynmo.custommodel.util.LoadModelException;
-import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.arguments.ArgumentType;
-import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.suggestion.Suggestions;
-import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.fabricmc.fabric.api.registry.CommandRegistry;
-import net.minecraft.command.arguments.ArgumentTypes;
-import net.minecraft.command.arguments.EntityArgumentType;
-import net.minecraft.command.arguments.serialize.ConstantArgumentSerializer;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.CommandSource;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.Text;
-import net.minecraft.text.Texts;
-import net.minecraft.text.TranslatableText;
-import net.minecraft.util.Formatting;
+import com.google.common.collect.Lists;
+import net.minecraft.client.Minecraft;
+import net.minecraft.command.*;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public class ServerCommand {
-    public static void register() {
-        ArgumentTypes.register(CustomModel.MODID, ModelArgumentType.class, new ConstantArgumentSerializer(ModelArgumentType::new));
-        CommandRegistry.INSTANCE.register(false, (dispatcher) -> {
-            dispatcher.register(CommandManager.literal(CustomModel.MODID
-            ).then(CommandManager.literal("reload").requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(ModConfig.getReloadSelfPermission())).executes(context -> {
-                try {
-                    CustomModel.reloadModel(context.getSource().getPlayer(), true);
-                } catch (LoadModelException e) {
-                    context.getSource().sendFeedback(new TranslatableText("error.custommodel.loadmodelpack", e.getFileName(), e.getMessage()).formatted(Formatting.RED), false);
-                }
-                context.getSource().sendFeedback(new TranslatableText("command.custommodel.reload", 1), true);
-                return 1;
-            }).then(CommandManager.argument("targets", EntityArgumentType.players()).requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(ModConfig.getReloadOthersPermission())).executes(context -> {
-                Collection<ServerPlayerEntity> players = EntityArgumentType.getPlayers(context, "targets");
-                try {
-                    for (ServerPlayerEntity player : players)
-                        CustomModel.reloadModel(player, true);
-                } catch (LoadModelException e) {
-                    context.getSource().sendFeedback(new TranslatableText("error.custommodel.loadmodelpack", e.getFileName(), e.getMessage()).formatted(Formatting.RED), false);
-                }
-                context.getSource().sendFeedback(new TranslatableText("command.custommodel.reload", players.size()), true);
-                return players.size();
-            }))).then(CommandManager.literal("list").requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(ModConfig.getListModelsPermission())).executes(context -> {
-                Collection<Text> info = CustomModel.getModelInfoList();
-                context.getSource().sendFeedback(new TranslatableText("command.custommodel.listmodels", info.size()), false);
-                for (Text str : info)
-                    context.getSource().sendFeedback(str, false);
-                return info.size();
-            })).then(CommandManager.literal("select").then(CommandManager.argument("model", new ModelArgumentType()).requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(ModConfig.getSelectSelfPermission())).executes(context -> {
-                String model = context.getArgument("model", String.class);
-                try {
-                    CustomModel.selectModel(context.getSource().getPlayer(), model);
-                } catch (LoadModelException e) {
-                    context.getSource().sendFeedback(new TranslatableText("error.custommodel.loadmodelpack", e.getFileName(), e.getMessage()).formatted(Formatting.RED), false);
-                }
-                context.getSource().sendFeedback(new TranslatableText("command.custommodel.select", 1, model), true);
-                return 1;
-            }).then(CommandManager.argument("targets", EntityArgumentType.players()).requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(ModConfig.getSelectOthersPermission())).executes(context -> {
-                Collection<ServerPlayerEntity> players = EntityArgumentType.getPlayers(context, "targets");
-                String model = context.getArgument("model", String.class);
-                try {
-                    for (ServerPlayerEntity player : players)
-                        CustomModel.selectModel(player, model);
-                } catch (LoadModelException e) {
-                    context.getSource().sendFeedback(new TranslatableText("error.custommodel.loadmodelpack", e.getFileName(), e.getMessage()).formatted(Formatting.RED), false);
-                }
-                context.getSource().sendFeedback(new TranslatableText("command.custommodel.select", players.size(), model), true);
-                return players.size();
-            })))).then(CommandManager.literal("refresh").requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(ModConfig.getListModelsPermission())).executes(context -> {
-                CustomModel.refreshModelList();
-                context.getSource().sendFeedback(new TranslatableText("command.custommodel.listmodels", CustomModel.models.size()), false);
-                return 1;
-            })));
-        });
+public class ServerCommand extends CommandBase {
+    @Override
+    public String getName() {
+        return CustomModel.MODID;
     }
 
-    public static class ModelArgumentType implements ArgumentType<String> {
-        @Override
-        public String parse(StringReader reader) throws CommandSyntaxException {
-            return reader.readUnquotedString();
+    @Override
+    public int getRequiredPermissionLevel() {
+        return 0;
+    }
+
+    @Override
+    public String getUsage(ICommandSender sender) {
+        return "command.custommodel.usage";
+    }
+
+    private void checkPermission(ICommandSender sender, int level) throws CommandException {
+        if (!sender.canUseCommand(level, getName()))
+            throw new CommandException("commands.generic.permission");
+    }
+
+    @Override
+    public boolean isUsernameIndex(String[] args, int index) {
+        if ("reload".equalsIgnoreCase(args[0]))
+            return index == 1;
+
+        if ("select".equalsIgnoreCase(args[0]))
+            return index == 2;
+
+        return false;
+    }
+
+    @Override
+    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+        try {
+            if (args.length < 1)
+                throw new WrongUsageException("command.custommodel.usage");
+
+            if (args[0].equals("refresh")) {
+                checkPermission(sender, ModConfig.getListModelsPermission());
+                CustomModel.refreshModelList();
+                notifyCommandListener(sender, this, "command.custommodel.listmodels", CustomModel.models.size());
+                return;
+            }
+
+            if (args[0].equals("list")) {
+                checkPermission(sender, ModConfig.getListModelsPermission());
+                notifyCommandListener(sender, this, "command.custommodel.listmodels", CustomModel.models.size());
+                for (ITextComponent text : CustomModel.getModelInfoList())
+                    sender.sendMessage(text);
+                return;
+            }
+
+            if (args[0].equals("reload")) {
+                if (args.length > 1) {
+                    checkPermission(sender, ModConfig.getReloadOthersPermission());
+                    Collection<EntityPlayerMP> players = getPlayers(server, sender, args[1]);
+                    notifyCommandListener(sender, this, "command.custommodel.reload", players.size());
+                    for (EntityPlayerMP player : players)
+                        CustomModel.reloadModel(player, true);
+                } else {
+                    checkPermission(sender, ModConfig.getReloadSelfPermission());
+                    notifyCommandListener(sender, this, "command.custommodel.reload", 1);
+                    CustomModel.reloadModel(getCommandSenderAsPlayer(sender), true);
+                }
+                return;
+            }
+
+            if (args.length < 2)
+                throw new WrongUsageException("command.custommodel.usage");
+
+            if (args[0].equals("select")) {
+                if (args.length > 2) {
+                    checkPermission(sender, ModConfig.getSelectOthersPermission());
+                    Collection<EntityPlayerMP> players = getPlayers(server, sender, args[2]);
+                    notifyCommandListener(sender, this, "command.custommodel.select", players.size());
+                    for (EntityPlayerMP player : players)
+                        CustomModel.selectModel(player, args[1]);
+                } else {
+                    checkPermission(sender, ModConfig.getSelectSelfPermission());
+                    notifyCommandListener(sender, this, "command.custommodel.select", 1);
+                    CustomModel.selectModel(getCommandSenderAsPlayer(sender), args[1]);
+                }
+                return;
+            }
+        } catch (LoadModelException e) {
+            ITextComponent text = new TextComponentTranslation("error.custommodel.loadmodelpack", e.getFileName(), e.getMessage());
+            text.getStyle().setColor(TextFormatting.RED);
+            sender.sendMessage(text);
+            return;
         }
 
-        @Override
-        public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-            S source = context.getSource();
-            if (source instanceof ServerCommandSource) {
-                return CommandSource.suggestMatching(CustomModel.getModelIdList(), builder);
-            } else if (source instanceof CommandSource) {
-                return ((CommandSource) source).getCompletions((CommandContext<CommandSource>) context, builder);
-            } else return Suggestions.empty();
+        throw new WrongUsageException("command.custommodel.usage");
+    }
+
+    @Override
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
+        if (args.length == 1)
+            return getListOfStringsMatchingLastWord(args, "refresh", "list", "reload", "select");
+
+        switch (args[0]) {
+            case "reload": return args.length == 2 ? getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames()) : Collections.emptyList();
+            case "select": return args.length == 2 ? getListOfStringsMatchingLastWord(args, CustomModel.getModelIdList()) :
+                args.length == 3 ? getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames()) : Collections.emptyList();
         }
+
+        return Collections.emptyList();
     }
 }

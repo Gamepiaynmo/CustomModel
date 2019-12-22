@@ -1,9 +1,6 @@
 package com.github.gamepiaynmo.custommodel.client;
 
-import com.github.gamepiaynmo.custommodel.network.PacketModel;
-import com.github.gamepiaynmo.custommodel.network.PacketQuery;
-import com.github.gamepiaynmo.custommodel.network.PacketQueryConfig;
-import com.github.gamepiaynmo.custommodel.network.PacketReplyConfig;
+import com.github.gamepiaynmo.custommodel.network.*;
 import com.github.gamepiaynmo.custommodel.render.*;
 import com.github.gamepiaynmo.custommodel.server.CustomModel;
 import com.github.gamepiaynmo.custommodel.server.ModConfig;
@@ -17,13 +14,20 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.model.ModelPlayer;
+import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.CommandEvent;
+import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -35,11 +39,10 @@ public class CustomModelClient {
     private static int clearCounter = 0;
 
     public static TextureManager textureManager;
-    public static Map<String, RenderPlayer> playerRenderers;
 
     private static final Set<UUID> queried = Sets.newHashSet();
     public static ModConfig.ServerConfig serverConfig;
-    public static boolean configQueried = false;
+    public static boolean isServerModded = false;
 
     public static final Logger LOGGER = LogManager.getLogger();
 
@@ -54,17 +57,7 @@ public class CustomModelClient {
     public static EntityParameter inventoryEntityParameter;
     public static boolean isRenderingFirstPerson;
 
-    public static void clearModels() {
-        for (ModelPack pack : modelPacks.values())
-            pack.release();
-        modelPacks.clear();
-        queried.clear();
-
-        serverConfig = null;
-        configQueried = false;
-    }
-
-    private static void addModel(UUID name, ModelPack pack) {
+    public static void addModel(UUID name, ModelPack pack) {
         ModelPack old = modelPacks.get(name);
         if (old != null)
             old.release();
@@ -103,8 +96,8 @@ public class CustomModelClient {
         UUID uuid = EntityPlayer.getUUID(profile);
         queried.add(uuid);
 
-        if (ClientSidePacketRegistry.INSTANCE.canServerReceive(PacketQuery.ID))
-            sendPacket(PacketQuery.ID, new PacketQuery(profile));
+        if (isServerModded)
+            NetworkHandler.CHANNEL.sendToServer(new PacketQuery(profile));
         else reloadModel(profile);
     }
 
@@ -139,74 +132,55 @@ public class CustomModelClient {
         return Minecraft.getMinecraft().getRenderPartialTicks();
     }
 
-    public void onInitializeClient() {
+    public static void onInitializeClient() {
         new File(CustomModel.MODEL_DIR).mkdirs();
+        MinecraftForge.EVENT_BUS.register(CustomModelClient.class);
+        serverConfig = new ModConfig.ServerConfig();
+        serverConfig.customEyeHeight = ModConfig.isCustomEyeHeight();
+        serverConfig.customBoundingBox = false;
+    }
 
-        WorldTickCallback.EVENT.register(world -> {
-            MinecraftClient client = MinecraftClient.getInstance();
-            if (world == client.world) {
-                for (AbstractClientPlayerEntity player : client.world.getPlayers()) {
-                    PlayerEntityRenderer renderer = client.getEntityRenderManager().getRenderer(player);
-                    ((ICustomPlayerRenderer) renderer).tick(player);
-                }
+    @SubscribeEvent
+    public static void onWorldTick(TickEvent.WorldTickEvent event) {
+        Minecraft minecraft = Minecraft.getMinecraft();
+        if (minecraft.world == event.world) {
+            for (AbstractClientPlayer player : event.world.getPlayers(AbstractClientPlayer.class, player -> true)) {
+                Render<Entity> renderer = minecraft.getRenderManager().getEntityRenderObject(player);
+                ((ICustomPlayerRenderer) renderer).tick(player);
+            }
 
-                if (!configQueried && serverConfig == null) {
-                    if (ClientSidePacketRegistry.INSTANCE.canServerReceive(PacketQueryConfig.ID)) {
-                        sendPacket(PacketQueryConfig.ID, new PacketQueryConfig());
-                        configQueried = true;
-                    } else {
-                        serverConfig = new ModConfig.ServerConfig();
-                        serverConfig.customEyeHeight = ModConfig.isCustomEyeHeight();
-                        serverConfig.customBoundingBox = false;
-                    }
-                }
-
-                if (clearCounter++ > 200) {
-                    clearCounter = 0;
-                    Set<UUID> uuids = Sets.newHashSet();
-                    for (AbstractClientPlayerEntity playerEntity : client.world.getPlayers())
-                        uuids.add(PlayerEntity.getUuidFromProfile(playerEntity.getGameProfile()));
-                    for (Iterator<Map.Entry<UUID, ModelPack>> iter = modelPacks.entrySet().iterator(); iter.hasNext();) {
-                        Map.Entry<UUID, ModelPack> entry = iter.next();
-                        if (!uuids.contains(entry.getKey())) {
-                            entry.getValue().release();
-                            queried.remove(entry.getKey());
-                            iter.remove();
-                        }
+            if (clearCounter++ > 200) {
+                clearCounter = 0;
+                Set<UUID> uuids = Sets.newHashSet();
+                for (AbstractClientPlayer playerEntity : event.world.getPlayers(AbstractClientPlayer.class, player -> true))
+                    uuids.add(EntityPlayer.getUUID(playerEntity.getGameProfile()));
+                for (Iterator<Map.Entry<UUID, ModelPack>> iter = modelPacks.entrySet().iterator(); iter.hasNext();) {
+                    Map.Entry<UUID, ModelPack> entry = iter.next();
+                    if (!uuids.contains(entry.getKey())) {
+                        entry.getValue().release();
+                        queried.remove(entry.getKey());
+                        iter.remove();
                     }
                 }
             }
-        });
+        }
+    }
 
-        ClientSidePacketRegistry.INSTANCE.register(PacketModel.ID, (context, buffer) -> {
-            PacketModel packet = new PacketModel();
-            try {
-                packet.read(buffer);
-                context.getTaskQueue().execute(() -> {
-                    ModelPack pack = null;
-                    try {
-                        pack = ModelPack.fromZipMemory(textureManager, packet.getUuid(), packet.getData());
-                    } catch (Exception e) {
-                        MinecraftClient.getInstance().inGameHud.addChatMessage(MessageType.CHAT,
-                                new TranslatableText("error.custommodel.loadmodelpack", "", e.getMessage()).formatted(Formatting.RED));
-                        LOGGER.warn(e.getMessage(), e);
-                    }
-                    if (pack != null && pack.successfulLoaded())
-                        addModel(packet.getUuid(), pack);
-                });
-            } catch (Exception e) {
-                LOGGER.warn(e.getMessage(), e);
-            }
-        });
+    @SubscribeEvent
+    public static void onCommand(CommandEvent event) {
+        event.getCommand();
+    }
 
-        ClientSidePacketRegistry.INSTANCE.register(PacketReplyConfig.ID, (context, buffer) -> {
-            PacketReplyConfig packet = new PacketReplyConfig();
-            try {
-                packet.read(buffer);
-                serverConfig = packet.getConfig();
-            } catch (Exception e) {
-                LOGGER.warn(e.getMessage(), e);
-            }
-        });
+    @SubscribeEvent
+    public static void onWorldUnload(WorldEvent.Unload event) {
+        for (ModelPack pack : modelPacks.values())
+            pack.release();
+        modelPacks.clear();
+        queried.clear();
+
+        serverConfig = new ModConfig.ServerConfig();
+        serverConfig.customEyeHeight = ModConfig.isCustomEyeHeight();
+        serverConfig.customBoundingBox = false;
+        isServerModded = false;
     }
 }

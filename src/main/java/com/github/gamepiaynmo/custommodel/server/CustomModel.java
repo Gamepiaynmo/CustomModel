@@ -1,10 +1,7 @@
 package com.github.gamepiaynmo.custommodel.server;
 
 import com.github.gamepiaynmo.custommodel.api.IModelSelector;
-import com.github.gamepiaynmo.custommodel.network.PacketModel;
-import com.github.gamepiaynmo.custommodel.network.PacketQuery;
-import com.github.gamepiaynmo.custommodel.network.PacketQueryConfig;
-import com.github.gamepiaynmo.custommodel.network.PacketReplyConfig;
+import com.github.gamepiaynmo.custommodel.network.*;
 import com.github.gamepiaynmo.custommodel.util.LoadModelException;
 import com.github.gamepiaynmo.custommodel.util.ModelNotFoundException;
 import com.google.common.collect.Lists;
@@ -12,6 +9,8 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
 import io.netty.buffer.Unpooled;
+import net.minecraft.command.CommandHandler;
+import net.minecraft.command.ServerCommandManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
@@ -24,6 +23,10 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -43,29 +46,6 @@ public class CustomModel {
 
     private static final IModelSelector defaultSelector = new DefaultModelSelector();
     private static IModelSelector modelSelector = defaultSelector;
-
-    private static void sendPacket(EntityPlayer player, ResourceLocation id, Packet<?> packet) {
-        if (ServerSidePacketRegistry.INSTANCE.canPlayerReceive(player, id)) {
-            PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
-            try {
-                packet.write(buf);
-                ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, id, buf);
-            } catch (Exception e) {
-                LOGGER.warn(e.getMessage(), e);
-            }
-        }
-    }
-
-    private static Packet<?> formPacket(ResourceLocation id, Packet<?> packet) {
-        PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
-        try {
-            packet.write(buf);
-            return new CustomPayloadS2CPacket(id, buf);
-        } catch (Exception e) {
-            LOGGER.warn(e.getMessage(), e);
-            return packet;
-        }
-    }
 
     public static void setModelSelector(IModelSelector modelSelector) {
         CustomModel.modelSelector = modelSelector;
@@ -128,7 +108,7 @@ public class CustomModel {
         reloadModel(receiver, EntityPlayer.getUUID(receiver.getGameProfile()), broadcast);
     }
 
-    private static void reloadModel(EntityPlayer receiver, UUID uuid, boolean broadcast) throws LoadModelException {
+    public static void reloadModel(EntityPlayer receiver, UUID uuid, boolean broadcast) throws LoadModelException {
         EntityPlayerMP playerEntity = server.getPlayerList().getPlayerByUUID(uuid);
         GameProfile profile = playerEntity.getGameProfile();
         uuid = EntityPlayer.getUUID(profile);
@@ -147,10 +127,9 @@ public class CustomModel {
                     modelMap.put(uuid, ModelInfo.fromFile(modelFile));
                     modelSelector.setModelForPlayer(profile, entry);
 
-                    Packet send = formPacket(PacketModel.ID, packetModel);
                     if (broadcast)
-                        playerEntity.getServerWorld().method_14178().sendToOtherNearbyPlayers(playerEntity, send);
-                    ServerSidePacketRegistry.INSTANCE.sendToPlayer(receiver, send);
+                        NetworkHandler.CHANNEL.sendToAllTracking(packetModel, playerEntity);
+                    else NetworkHandler.CHANNEL.sendTo(packetModel, playerEntity);
                 }
             }
         } catch (Exception e) {
@@ -173,9 +152,7 @@ public class CustomModel {
                 if (packetModel.success) {
                     modelMap.put(uuid, ModelInfo.fromFile(modelFile));
                     modelSelector.setModelForPlayer(profile, model);
-
-                    Packet send = formPacket(PacketModel.ID, packetModel);
-                    playerEntity.getServerWorld().method_14178().sendToNearbyPlayers(playerEntity, send);
+                    NetworkHandler.CHANNEL.sendToAllTracking(packetModel, playerEntity);
                 }
             }
         } catch (Exception e) {
@@ -184,50 +161,31 @@ public class CustomModel {
         }
     }
 
-    @Override
-    public void onInitialize() {
+    public static void onInitialize() {
         new File(MODEL_DIR).mkdirs();
-
-        ServerCommand.register();
-
-        ServerSidePacketRegistry.INSTANCE.register(PacketQuery.ID, (context, buffer) -> {
-            PacketQuery packet = new PacketQuery();
-            try {
-                packet.read(buffer);
-                context.getTaskQueue().execute(() -> {
-                    try {
-                        reloadModel(context.getPlayer(), packet.getPlayerUuid(), false);
-                    } catch (LoadModelException e) {
-                        if (context.getPlayer().allowsPermissionLevel(ModConfig.getListModelsPermission()))
-                            context.getPlayer().sendMessage(new TranslatableText("error.custommodel.loadmodelpack", e.getFileName(), e.getMessage()));
-                    }
-                });
-            } catch (Exception e) {
-                LOGGER.warn(e.getMessage(), e);
-            }
-        });
-
-        ServerSidePacketRegistry.INSTANCE.register(PacketQueryConfig.ID, (context, buffer) -> {
-            sendPacket(context.getPlayer(), PacketReplyConfig.ID, new PacketReplyConfig(ModConfig.getSettings().server));
-        });
-
-        ServerStartCallback.EVENT.register(minecraftServer -> server = minecraftServer);
-        ServerStopCallback.EVENT.register(minecraftServer -> server = null);
-
-        ServerTickCallback.EVENT.register(minecraftServer -> {
-            if (clearCounter++ > 200) {
-                clearCounter = 0;
-                Set<UUID> uuids = Sets.newHashSet();
-                for (ServerPlayerEntity playerEntity : minecraftServer.getPlayerManager().getPlayerList())
-                    uuids.add(PlayerEntity.getUuidFromProfile(playerEntity.getGameProfile()));
-                for (Iterator<Map.Entry<UUID, ModelInfo>> iter = modelMap.entrySet().iterator(); iter.hasNext();) {
-                    if (!uuids.contains(iter.next().getKey()))
-                        iter.remove();
-                }
-            }
-        });
-
-        AutoConfig.register(ModConfig.class, GsonConfigSerializer::new);
+        NetworkHandler.init();
+        ModConfig.updateConfig();
         refreshModelList();
+
+        MinecraftForge.EVENT_BUS.register(CustomModel.class);
+    }
+
+    @SubscribeEvent
+    public static void onServerTick(TickEvent.ServerTickEvent event) {
+        if (clearCounter++ > 200) {
+            clearCounter = 0;
+            Set<UUID> uuids = Sets.newHashSet();
+            for (EntityPlayerMP playerEntity : server.getPlayerList().getPlayers())
+                uuids.add(EntityPlayer.getUUID(playerEntity.getGameProfile()));
+            for (Iterator<Map.Entry<UUID, ModelInfo>> iter = modelMap.entrySet().iterator(); iter.hasNext();) {
+                if (!uuids.contains(iter.next().getKey()))
+                    iter.remove();
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
+        NetworkHandler.CHANNEL.sendTo(new PacketReplyConfig(), (EntityPlayerMP) event.player);
     }
 }
