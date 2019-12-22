@@ -1,0 +1,12 @@
+[
+{
+  "modid": "custommodel",
+  "name": "Custom Player Model",
+  "description": "Customize your player model in Minecraft using JSON.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "https://www.curseforge.com/minecraft/mc-mods/custom-player-model-cpm",
+  "authorList": ["Gamepiaynmo"],
+  "logoFile": "assets/custommodel/textures/logo.png"
+}
+]
