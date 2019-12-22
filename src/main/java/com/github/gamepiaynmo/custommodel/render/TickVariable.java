@@ -58,7 +58,7 @@ public class TickVariable {
     }
 
     private IExpressionFloat getParFloat() {
-        return () -> MathHelper.lerp(CustomModelClient.currentParameter.partial, lastFloat, curFloat);
+        return () -> lastFloat + CustomModelClient.currentParameter.partial * (curFloat - lastFloat);
     }
 
     public IExpression getLastValue() {

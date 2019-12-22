@@ -21,7 +21,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.util.JsonHelper;
+
+import net.minecraft.util.JsonUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -160,7 +161,7 @@ public class ServerConfigList<K, V extends ServerConfigEntry<K>> {
 
             try {
                 bufferedReader_1 = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
-                Collection<ServerConfigEntry<K>> collection_1 = (Collection)JsonHelper.deserialize(this.GSON, (Reader)bufferedReader_1, (Type)field_14369);
+                Collection<ServerConfigEntry<K>> collection_1 = (Collection) JsonUtils.fromJson(this.GSON, (Reader)bufferedReader_1, (Type)field_14369);
                 if (collection_1 != null) {
                     this.map.clear();
                     Iterator var3 = collection_1.iterator();

@@ -13,13 +13,13 @@ import com.google.common.collect.Queues;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.mojang.blaze3d.platform.GlStateManager;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.client.render.entity.model.PlayerEntityModel;
-import net.minecraft.entity.EntityPose;
-import net.minecraft.util.Arm;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
+import com.mojang.realmsclient.util.Pair;
+import net.minecraft.client.entity.AbstractClientPlayer;
+import net.minecraft.client.model.ModelPlayer;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.EnumHandSide;
+import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
 import java.util.Collection;
@@ -107,7 +107,7 @@ public class CustomJsonModel {
             String typeStr = element.getAsJsonArray().get(0).getAsString();
             ExpressionType type = typeStr.equals("float") ? ExpressionType.FLOAT : ExpressionType.BOOL;
             TickVariable variable = new TickVariable(type);
-            model.tickVars.add(new Pair<>(name, variable));
+            model.tickVars.add(Pair.of(name, variable));
             model.tickVarMap.put(name, variable);
         });
         Json.parseJsonObject(jsonObj.get(TICK_VARS), (name, element) -> {
@@ -145,21 +145,21 @@ public class CustomJsonModel {
 
         JsonElement leftArray = jsonObj.get(FP_LEFT);
         if (leftArray != null) {
-            model.firstPersonList.put(Arm.LEFT, Lists.newArrayList());
+            model.firstPersonList.put(EnumHandSide.LEFT, Lists.newArrayList());
             for (JsonElement element : leftArray.getAsJsonArray()) {
                 Bone bone = model.id2Bone.get(element.getAsString());
                 if (bone != null)
-                    model.firstPersonList.get(Arm.LEFT).add(bone);
+                    model.firstPersonList.get(EnumHandSide.LEFT).add(bone);
             }
         }
 
         JsonElement rightArray = jsonObj.get(FP_RIGHT);
         if (rightArray != null) {
-            model.firstPersonList.put(Arm.RIGHT, Lists.newArrayList());
+            model.firstPersonList.put(EnumHandSide.RIGHT, Lists.newArrayList());
             for (JsonElement element : rightArray.getAsJsonArray()) {
                 Bone bone = model.id2Bone.get(element.getAsString());
                 if (bone != null)
-                    model.firstPersonList.get(Arm.RIGHT).add(bone);
+                    model.firstPersonList.get(EnumHandSide.RIGHT).add(bone);
             }
         }
 
@@ -180,9 +180,9 @@ public class CustomJsonModel {
     private List<PlayerFeature> featureHideList = Lists.newArrayList();
     private Map<PlayerBone, Boolean> visibleBones = Maps.newEnumMap(PlayerBone.class);
     private Map<PlayerBone, IExpressionFloat[]> skeleton = Maps.newEnumMap(PlayerBone.class);
-    private Map<Arm, List<Bone>> firstPersonList = Maps.newEnumMap(Arm.class);
+    private Map<EnumHandSide, List<Bone>> firstPersonList = Maps.newEnumMap(EnumHandSide.class);
 
-    private Supplier<Identifier> baseTexture;
+    private Supplier<ResourceLocation> baseTexture;
     private Map<String, IExpression> variables = Maps.newHashMap();
     private List<Pair<String, TickVariable>> tickVars = Lists.newArrayList();
     private Map<String, TickVariable> tickVarMap = Maps.newHashMap();
@@ -220,7 +220,7 @@ public class CustomJsonModel {
     public boolean isHidden(PlayerBone bone) { return boneHideList.contains(bone); }
     public boolean isHidden(PlayerFeature feature) { return featureHideList.contains(feature); }
 
-    public Collection<Bone> getFirstPersonList(Arm arm) {
+    public Collection<Bone> getFirstPersonList(EnumHandSide arm) {
         return firstPersonList.get(arm);
     }
 
@@ -273,15 +273,15 @@ public class CustomJsonModel {
     }
 
     public void render(Matrix4 baseMat) {
-        AbstractClientPlayerEntity entity = CustomModelClient.currentPlayer;
+        AbstractClientPlayer entity = CustomModelClient.currentPlayer;
         RenderParameter params = CustomModelClient.currentParameter;
-        PlayerEntityModel model = CustomModelClient.currentModel;
+        ModelPlayer model = CustomModelClient.currentModel;
 
         update(baseMat);
 
         float partial = params.partial;
         GlStateManager.pushMatrix();
-        GL11.glMultMatrixd(baseMat.cpy().inv().val);
+        GL11.glMultMatrix(baseMat.cpy().inv().toBuffer());
 
         for (Bone bone : bones) {
             if (bone.isVisible()) {
@@ -289,7 +289,7 @@ public class CustomJsonModel {
                 GlStateManager.pushMatrix();
                 Matrix4 transform = tmpBoneMats.get(bone.getId());
 
-                GL11.glMultMatrixd(transform.val);
+                GL11.glMultMatrix(transform.toBuffer());
                 bone.render();
                 GlStateManager.popMatrix();
             }
@@ -297,16 +297,16 @@ public class CustomJsonModel {
         GlStateManager.popMatrix();
     }
 
-    public void renderArm(Matrix4 baseMat, Arm arm) {
-        AbstractClientPlayerEntity entity = CustomModelClient.currentPlayer;
+    public void renderArm(Matrix4 baseMat, EnumHandSide arm) {
+        AbstractClientPlayer entity = CustomModelClient.currentPlayer;
         RenderParameter params = CustomModelClient.currentParameter;
-        PlayerEntityModel model = CustomModelClient.currentModel;
+        ModelPlayer model = CustomModelClient.currentModel;
 
         update(baseMat);
 
         float partial = params.partial;
         GlStateManager.pushMatrix();
-        GL11.glMultMatrixd(baseMat.cpy().inv().val);
+        GL11.glMultMatrix(baseMat.cpy().inv().toBuffer());
 
         for (Bone bone : firstPersonList.get(arm)) {
             if (bone.isVisible()) {
@@ -314,7 +314,7 @@ public class CustomJsonModel {
                 GlStateManager.pushMatrix();
                 Matrix4 transform = tmpBoneMats.get(bone.getId());
 
-                GL11.glMultMatrixd(transform.val);
+                GL11.glMultMatrix(transform.toBuffer());
                 bone.render();
                 GlStateManager.popMatrix();
             }
@@ -323,14 +323,14 @@ public class CustomJsonModel {
     }
 
     public void update(Matrix4 baseMat) {
-        AbstractClientPlayerEntity entity = CustomModelClient.currentPlayer;
-        PlayerEntityModel model = CustomModelClient.currentModel;
+        AbstractClientPlayer entity = CustomModelClient.currentPlayer;
+        ModelPlayer model = CustomModelClient.currentModel;
         float partial = CustomModelClient.currentParameter.partial;
 
         if (lastBoneMats.isEmpty())
             ((ICustomPlayerRenderer) CustomModelClient.currentRenderer).tick(CustomModelClient.currentPlayer);
 
-        if (entity.isInSneakingPose() && !CustomModelClient.isRenderingFirstPerson)
+        if (entity.isSneaking() && !CustomModelClient.isRenderingFirstPerson)
             baseMat = baseMat.cpy().translate(0, 0.2f, 0);
 
         Map<String, Matrix4> curBoneMats = Maps.newHashMap();
@@ -365,14 +365,14 @@ public class CustomJsonModel {
     }
 
     public void tick(Matrix4 baseMat) {
-        AbstractClientPlayerEntity entity = CustomModelClient.currentPlayer;
-        PlayerEntityModel model = CustomModelClient.currentModel;
+        AbstractClientPlayer entity = CustomModelClient.currentPlayer;
+        ModelPlayer model = CustomModelClient.currentModel;
 
         for (Pair<String, TickVariable> pair : tickVars) {
-            pair.getRight().tick();
+            pair.second().tick();
         }
 
-        if (entity.isInSneakingPose())
+        if (entity.isSneaking())
             baseMat.translate(0, 0.2f, 0);
 
         if (lastBoneMats.isEmpty()) {
@@ -415,7 +415,7 @@ public class CustomJsonModel {
                     curEnd.sub(curStart).nor().scl(bone.getLength()).add(curStart);
 
                     bone.velocity.add(targetEnd.cpy().sub(curEnd).scl(bone.getPhysicsParams()[0]));
-                    bone.velocity.add(new Vector3(entity.getVelocity()).scl(-1, -1, -1).scl(bone.getPhysicsParams()[3]));
+                    bone.velocity.add(new Vector3(entity.motionX, entity.motionY, entity.motionZ).scl(-1, -1, -1).scl(bone.getPhysicsParams()[3]));
                     bone.velocity.y -= bone.getPhysicsParams()[4];
                     bone.velocity.scl(bone.getPhysicsParams()[2]);
 

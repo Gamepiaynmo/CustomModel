@@ -5,9 +5,9 @@ import com.github.gamepiaynmo.custommodel.client.ModelPack;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
 import com.github.gamepiaynmo.custommodel.render.TickVariable;
 import com.github.gamepiaynmo.custommodel.render.model.IBone;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.item.Item;
+import net.minecraft.util.ResourceLocation;
 
 import java.util.Map;
 
@@ -61,27 +61,27 @@ public class ModelResolver implements IExpressionResolver {
             return pack.getTexture(second);
          }
          case "inv": {
-            PlayerInventory inventory = CustomModelClient.currentPlayer.inventory;
+            InventoryPlayer inventory = CustomModelClient.currentPlayer.inventory;
             IExpressionFloat result = null;
             switch (second) {
                case "mainhand": result = () ->
-                       Registry.ITEM.getRawId(inventory.getMainHandStack().getItem()); break;
+                       Item.REGISTRY.getIDForObject(inventory.getCurrentItem().getItem()); break;
                case "offhand": result = () ->
-                       Registry.ITEM.getRawId(inventory.offHand.get(0).getItem()); break;
+                       Item.REGISTRY.getIDForObject(inventory.offHandInventory.get(0).getItem()); break;
                case "helmet": result = () ->
-                       Registry.ITEM.getRawId(inventory.getArmorStack(3).getItem()); break;
+                       Item.REGISTRY.getIDForObject(inventory.armorItemInSlot(3).getItem()); break;
                case "chestplate": result = () ->
-                       Registry.ITEM.getRawId(inventory.getArmorStack(2).getItem()); break;
+                       Item.REGISTRY.getIDForObject(inventory.armorItemInSlot(2).getItem()); break;
                case "leggings": result = () ->
-                       Registry.ITEM.getRawId(inventory.getArmorStack(1).getItem()); break;
+                       Item.REGISTRY.getIDForObject(inventory.armorItemInSlot(1).getItem()); break;
                case "boots": result = () ->
-                       Registry.ITEM.getRawId(inventory.getArmorStack(0).getItem()); break;
+                       Item.REGISTRY.getIDForObject(inventory.armorItemInSlot(0).getItem()); break;
                default:
                   try {
                      if (second.startsWith("main")) {
                         int index = Integer.parseInt(second.substring(4));
-                        if (index >= 0 && index < inventory.main.size())
-                           result = () -> Registry.ITEM.getRawId(inventory.main.get(index).getItem());
+                        if (index >= 0 && index < inventory.mainInventory.size())
+                           result = () -> Item.REGISTRY.getIDForObject(inventory.mainInventory.get(index).getItem());
                      }
                   } catch (NumberFormatException e) {
                   }
@@ -90,7 +90,7 @@ public class ModelResolver implements IExpressionResolver {
             return result;
          }
          case "item": {
-            int rawid = Registry.ITEM.getRawId(Registry.ITEM.get(new Identifier(second)));
+            int rawid = Item.REGISTRY.getIDForObject(Item.REGISTRY.getObject(new ResourceLocation(second)));
             if (rawid < 0) return null;
             return new ConstantFloat(rawid);
          }

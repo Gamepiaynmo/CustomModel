@@ -3,14 +3,14 @@ package com.github.gamepiaynmo.custommodel.server;
 import com.github.gamepiaynmo.custommodel.api.ModelPackInfo;
 import com.github.gamepiaynmo.custommodel.expression.ParseException;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
+import com.github.gamepiaynmo.custommodel.render.EntityDimensions;
+import com.github.gamepiaynmo.custommodel.render.EntityPose;
 import com.github.gamepiaynmo.custommodel.util.Json;
 import com.github.gamepiaynmo.custommodel.util.TranslatableException;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import net.minecraft.entity.EntityDimensions;
-import net.minecraft.entity.EntityPose;
 import org.apache.commons.io.IOUtils;
 
 import java.io.*;
@@ -100,7 +100,7 @@ public class ModelInfo {
             if (pose == null)
                 throw new TranslatableException("error.custommodel.loadmodelpack.unknownpose", key);
             float[] dimension = Json.parseFloatArray(value, 2);
-            res.dimensionsMap.put(pose, new EntityDimensions(dimension[0], dimension[1], true));
+            res.dimensionsMap.put(pose, new EntityDimensions(dimension[0], dimension[1]));
         });
 
         return res;

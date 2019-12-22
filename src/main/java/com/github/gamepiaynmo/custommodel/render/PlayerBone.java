@@ -9,9 +9,9 @@ import com.github.gamepiaynmo.custommodel.util.Vector3;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import net.minecraft.client.model.Cuboid;
-import net.minecraft.client.render.entity.model.PlayerEntityModel;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.model.ModelPlayer;
+import net.minecraft.client.model.ModelRenderer;
+import net.minecraft.util.ResourceLocation;
 
 import java.util.Collection;
 import java.util.List;
@@ -20,21 +20,21 @@ import java.util.function.Supplier;
 
 public enum PlayerBone {
     NONE("none", null),
-    HEAD("head", () -> CustomModelClient.currentModel.head),
-    HEAD_OVERLAY("head_overlay", () -> CustomModelClient.currentModel.headwear),
-    BODY("body", () -> CustomModelClient.currentModel.body),
-    BODY_OVERLAY("body_overlay", () -> CustomModelClient.currentModel.bodyOverlay),
-    LEFT_ARM("left_arm", () -> CustomModelClient.currentModel.leftArm),
-    LEFT_ARM_OVERLAY("left_arm_overlay", () -> CustomModelClient.currentModel.leftArmOverlay),
-    RIGHT_ARM("right_arm", () -> CustomModelClient.currentModel.rightArm),
-    RIGHT_ARM_OVERLAY("right_arm_overlay", () -> CustomModelClient.currentModel.rightArmOverlay),
-    LEFT_LEG("left_leg", () -> CustomModelClient.currentModel.leftLeg),
-    LEFT_LEG_OVERLAY("left_leg_overlay", () -> CustomModelClient.currentModel.leftLegOverlay),
-    RIGHT_LEG("right_leg", () -> CustomModelClient.currentModel.rightLeg),
-    RIGHT_LEG_OVERLAY("right_leg_overlay", () -> CustomModelClient.currentModel.rightLegOverlay);
+    HEAD("head", () -> CustomModelClient.currentModel.bipedHead),
+    HEAD_OVERLAY("head_overlay", () -> CustomModelClient.currentModel.bipedHeadwear),
+    BODY("body", () -> CustomModelClient.currentModel.bipedBody),
+    BODY_OVERLAY("body_overlay", () -> CustomModelClient.currentModel.bipedBodyWear),
+    LEFT_ARM("left_arm", () -> CustomModelClient.currentModel.bipedLeftArm),
+    LEFT_ARM_OVERLAY("left_arm_overlay", () -> CustomModelClient.currentModel.bipedLeftArmwear),
+    RIGHT_ARM("right_arm", () -> CustomModelClient.currentModel.bipedRightArm),
+    RIGHT_ARM_OVERLAY("right_arm_overlay", () -> CustomModelClient.currentModel.bipedRightArmwear),
+    LEFT_LEG("left_leg", () -> CustomModelClient.currentModel.bipedLeftLeg),
+    LEFT_LEG_OVERLAY("left_leg_overlay", () -> CustomModelClient.currentModel.bipedLeftLegwear),
+    RIGHT_LEG("right_leg", () -> CustomModelClient.currentModel.bipedRightLeg),
+    RIGHT_LEG_OVERLAY("right_leg_overlay", () -> CustomModelClient.currentModel.bipedRightLegwear);
 
     private final String id;
-    private final Supplier<Cuboid> cuboidGetter;
+    private final Supplier<ModelRenderer> cuboidGetter;
     private static final Map<String, PlayerBone> id2Bone = Maps.newHashMap();
     private static final Map<String, Collection<PlayerBone>> boneLists = Maps.newHashMap();
     private final IBone bone;
@@ -42,7 +42,7 @@ public enum PlayerBone {
     private static final Vector3 One = new Vector3(1, 1, 1);
     private static final Vec2d TexSize = new Vec2d(64, 64);
 
-    PlayerBone(String id, Supplier<Cuboid> cuboidGetter) {
+    PlayerBone(String id, Supplier<ModelRenderer> cuboidGetter) {
         this.id = id;
         this.cuboidGetter = cuboidGetter;
         bone = cuboidGetter == null ? new BlankBone() : new OriginalBone(this, cuboidGetter);
@@ -52,7 +52,7 @@ public enum PlayerBone {
         return id;
     }
 
-    public Cuboid getCuboid(PlayerEntityModel model) {
+    public ModelRenderer getCuboid(ModelPlayer model) {
         return cuboidGetter.get();
     }
 
@@ -70,10 +70,10 @@ public enum PlayerBone {
     }
 
     public static class OriginalBone implements IBone {
-        private Supplier<Cuboid> cuboidGetter;
+        private Supplier<ModelRenderer> cuboidGetter;
         private PlayerBone playerBone;
 
-        OriginalBone(PlayerBone playerBone, Supplier<Cuboid> cuboidGetter) {
+        OriginalBone(PlayerBone playerBone, Supplier<ModelRenderer> cuboidGetter) {
             this.playerBone = playerBone;
             this.cuboidGetter = cuboidGetter;
         }
@@ -85,14 +85,14 @@ public enum PlayerBone {
 
         @Override
         public Vector3 getPosition() {
-            Cuboid cuboid = cuboidGetter.get();
+            ModelRenderer cuboid = cuboidGetter.get();
             return new Vector3(cuboid.rotationPointX, cuboid.rotationPointY, cuboid.rotationPointZ);
         }
 
         @Override
         public Vector3 getRotation() {
-            Cuboid cuboid = cuboidGetter.get();
-            return new Vector3(cuboid.yaw, cuboid.pitch, cuboid.roll);
+            ModelRenderer cuboid = cuboidGetter.get();
+            return new Vector3(cuboid.rotateAngleX, cuboid.rotateAngleY, cuboid.rotateAngleZ);
         }
 
         @Override
@@ -114,7 +114,7 @@ public enum PlayerBone {
         }
 
         @Override
-        public Supplier<Identifier> getTexture() { return ModelPack.defGetter[0]; }
+        public Supplier<ResourceLocation> getTexture() { return ModelPack.defGetter[0]; }
 
         @Override
         public IBone getParent() { return null; }
@@ -146,7 +146,7 @@ public enum PlayerBone {
         }
 
         @Override
-        public Supplier<Identifier> getTexture() {
+        public Supplier<ResourceLocation> getTexture() {
             return ModelPack.defGetter[0];
         }
 

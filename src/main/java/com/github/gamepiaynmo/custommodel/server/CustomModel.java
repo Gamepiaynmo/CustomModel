@@ -12,29 +12,25 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
 import io.netty.buffer.Unpooled;
-import me.sargunvohra.mcmods.autoconfig1.AutoConfig;
-import me.sargunvohra.mcmods.autoconfig1.serializer.GsonConfigSerializer;
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.event.server.ServerStartCallback;
-import net.fabricmc.fabric.api.event.server.ServerStopCallback;
-import net.fabricmc.fabric.api.event.server.ServerTickCallback;
-import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
-import net.minecraft.client.network.packet.CustomPayloadS2CPacket;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
 import com.github.gamepiaynmo.custommodel.server.selector.DefaultModelSelector;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.*;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.PacketByteBuf;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.event.ClickEvent;
+import net.minecraft.util.text.event.HoverEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.util.*;
 
-public class CustomModel implements ModInitializer {
+public class CustomModel {
     public static final String MODID = "custommodel";
     public static final String MODEL_DIR = "custom-models";
 
@@ -48,7 +44,7 @@ public class CustomModel implements ModInitializer {
     private static final IModelSelector defaultSelector = new DefaultModelSelector();
     private static IModelSelector modelSelector = defaultSelector;
 
-    private static void sendPacket(PlayerEntity player, Identifier id, Packet<?> packet) {
+    private static void sendPacket(EntityPlayer player, ResourceLocation id, Packet<?> packet) {
         if (ServerSidePacketRegistry.INSTANCE.canPlayerReceive(player, id)) {
             PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
             try {
@@ -60,7 +56,7 @@ public class CustomModel implements ModInitializer {
         }
     }
 
-    private static Packet<?> formPacket(Identifier id, Packet<?> packet) {
+    private static Packet<?> formPacket(ResourceLocation id, Packet<?> packet) {
         PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
         try {
             packet.write(buf);
@@ -81,8 +77,8 @@ public class CustomModel implements ModInitializer {
         return CustomModel.modelSelector;
     }
 
-    public static ModelInfo getBoundingBoxForPlayer(PlayerEntity playerEntity) {
-        return modelMap.get(PlayerEntity.getUuidFromProfile(playerEntity.getGameProfile()));
+    public static ModelInfo getBoundingBoxForPlayer(EntityPlayer playerEntity) {
+        return modelMap.get(EntityPlayer.getUUID(playerEntity.getGameProfile()));
     }
 
     public static void refreshModelList() {
@@ -99,22 +95,24 @@ public class CustomModel implements ModInitializer {
         }
     }
 
-    public static Collection<Text> getModelInfoList() {
-        List<Text> res = Lists.newArrayList();
+    public static Collection<ITextComponent> getModelInfoList() {
+        List<ITextComponent> res = Lists.newArrayList();
         for (Map.Entry<String, ModelInfo> entry : models.entrySet()) {
             ModelInfo info = entry.getValue();
-            res.add(new LiteralText(info.modelName).styled(style -> {
-                Text hoverText = new TranslatableText("text.custommodel.modelinfo.name", info.modelName);
-                hoverText.append("\n").append(new TranslatableText("text.custommodel.modelinfo.id", info.modelId));
-                if (info.version.length() > 0)
-                    hoverText.append("\n").append(new TranslatableText("text.custommodel.modelinfo.version", info.version));
-                if (info.author.length() > 0)
-                    hoverText.append("\n").append(new TranslatableText("text.custommodel.modelinfo.author", info.author));
+            ITextComponent text = new TextComponentString(info.modelName);
+            Style style = text.getStyle();
 
-                style.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverText));
-                style.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND,
-                        "/" + CustomModel.MODID + " select " + info.modelId));
-            }));
+            TextComponentTranslation hoverText = new TextComponentTranslation("text.custommodel.modelinfo.name", info.modelName);
+            hoverText.appendText("\n").appendSibling(new TextComponentTranslation("text.custommodel.modelinfo.id", info.modelId));
+            if (info.version.length() > 0)
+                hoverText.appendText("\n").appendSibling(new TextComponentTranslation("text.custommodel.modelinfo.version", info.version));
+            if (info.author.length() > 0)
+                hoverText.appendText("\n").appendSibling(new TextComponentTranslation("text.custommodel.modelinfo.author", info.author));
+
+            style.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverText));
+            style.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND,
+                    "/" + CustomModel.MODID + " select " + info.modelId));
+            res.add(text);
         }
         return res;
     }
@@ -126,14 +124,14 @@ public class CustomModel implements ModInitializer {
         return res;
     }
 
-    public static void reloadModel(PlayerEntity receiver, boolean broadcast) throws LoadModelException {
-        reloadModel(receiver, PlayerEntity.getUuidFromProfile(receiver.getGameProfile()), broadcast);
+    public static void reloadModel(EntityPlayer receiver, boolean broadcast) throws LoadModelException {
+        reloadModel(receiver, EntityPlayer.getUUID(receiver.getGameProfile()), broadcast);
     }
 
-    private static void reloadModel(PlayerEntity receiver, UUID uuid, boolean broadcast) throws LoadModelException {
-        ServerPlayerEntity playerEntity = server.getPlayerManager().getPlayer(uuid);
+    private static void reloadModel(EntityPlayer receiver, UUID uuid, boolean broadcast) throws LoadModelException {
+        EntityPlayerMP playerEntity = server.getPlayerList().getPlayerByUUID(uuid);
         GameProfile profile = playerEntity.getGameProfile();
-        uuid = PlayerEntity.getUuidFromProfile(profile);
+        uuid = EntityPlayer.getUUID(profile);
 
         String entry = modelSelector.getModelForPlayer(profile);
         ModelInfo info = models.get(entry);
@@ -161,9 +159,9 @@ public class CustomModel implements ModInitializer {
         }
     }
 
-    public static void selectModel(ServerPlayerEntity playerEntity, String model) throws LoadModelException {
+    public static void selectModel(EntityPlayerMP playerEntity, String model) throws LoadModelException {
         GameProfile profile = playerEntity.getGameProfile();
-        UUID uuid = PlayerEntity.getUuidFromProfile(profile);
+        UUID uuid = EntityPlayer.getUUID(profile);
         ModelInfo info = models.get(model);
         if (info == null)
             throw new ModelNotFoundException(model);

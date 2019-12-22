@@ -1,11 +1,7 @@
 package com.github.gamepiaynmo.custommodel.server;
 
-import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.client.command.ArgumentBuilders;
-import com.github.gamepiaynmo.custommodel.client.command.Command;
 import com.github.gamepiaynmo.custommodel.util.LoadModelException;
-import com.google.common.collect.Lists;
-import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
@@ -14,11 +10,9 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.fabricmc.fabric.api.registry.CommandRegistry;
-import net.minecraft.command.EntitySelector;
 import net.minecraft.command.arguments.ArgumentTypes;
 import net.minecraft.command.arguments.EntityArgumentType;
 import net.minecraft.command.arguments.serialize.ConstantArgumentSerializer;
-import net.minecraft.entity.Entity;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
@@ -29,10 +23,7 @@ import net.minecraft.text.Texts;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class ServerCommand {

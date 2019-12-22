@@ -1,4 +1,4 @@
-package com.github.gamepiaynmo.custommodel.client.command;
+package com.github.gamepiaynmo.custommodel.client;
 
 import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.server.CustomModel;

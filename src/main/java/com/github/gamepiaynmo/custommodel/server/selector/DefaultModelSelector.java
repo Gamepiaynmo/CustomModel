@@ -5,9 +5,6 @@ import com.github.gamepiaynmo.custommodel.server.CustomModel;
 import com.github.gamepiaynmo.custommodel.server.ModConfig;
 import com.google.common.collect.ImmutableList;
 import com.mojang.authlib.GameProfile;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.io.File;
 import java.io.FileNotFoundException;

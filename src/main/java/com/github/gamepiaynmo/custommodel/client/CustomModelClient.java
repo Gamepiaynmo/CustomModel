@@ -14,10 +14,16 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.text.ChatType;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -79,8 +85,9 @@ public class CustomModelClient {
             if (modelFile.isFile())
                 pack = ModelPack.fromZipFile(textureManager, modelFile, uuid);
         } catch (Exception e) {
-            MinecraftClient.getInstance().inGameHud.addChatMessage(MessageType.CHAT,
-                    new TranslatableText("error.custommodel.loadmodelpack", model, e.getMessage()).formatted(Formatting.RED));
+            ITextComponent text = new TextComponentTranslation("error.custommodel.loadmodelpack", model, e.getMessage());
+            text.getStyle().setColor(TextFormatting.RED);
+            Minecraft.getMinecraft().ingameGUI.addChatMessage(ChatType.CHAT, text);
             LOGGER.warn(e.getMessage(), e);
         }
 
@@ -93,7 +100,7 @@ public class CustomModelClient {
     }
 
     public static void queryModel(GameProfile profile) {
-        UUID uuid = PlayerEntity.getUuidFromProfile(profile);
+        UUID uuid = EntityPlayer.getUUID(profile);
         queried.add(uuid);
 
         if (ClientSidePacketRegistry.INSTANCE.canServerReceive(PacketQuery.ID))
@@ -102,21 +109,21 @@ public class CustomModelClient {
     }
 
     public static void selectModel(GameProfile profile, String model) {
-        UUID uuid = PlayerEntity.getUuidFromProfile(profile);
+        UUID uuid = EntityPlayer.getUUID(profile);
         loadModel(uuid, model);
     }
 
     public static void reloadModel(GameProfile profile) {
-        UUID uuid = PlayerEntity.getUuidFromProfile(profile);
+        UUID uuid = EntityPlayer.getUUID(profile);
         if (modelPacks.containsKey(uuid))
             loadModel(uuid, modelPacks.get(uuid).getModel().getModelInfo().modelId);
         else loadModel(uuid, ModConfig.getDefaultModel());
     }
 
-    public static ModelPack getModelForPlayer(AbstractClientPlayerEntity player) {
+    public static ModelPack getModelForPlayer(AbstractClientPlayer player) {
         GameProfile profile = player.getGameProfile();
         if (profile != null) {
-            UUID uuid = PlayerEntity.getUuidFromProfile(profile);
+            UUID uuid = EntityPlayer.getUUID(profile);
 
             ModelPack pack = modelPacks.get(uuid);
             if (pack != null)
@@ -129,10 +136,9 @@ public class CustomModelClient {
     }
 
     public static float getPartial() {
-        return ((IPartial) (Object) MinecraftClient.getInstance()).getPartial();
+        return Minecraft.getMinecraft().getRenderPartialTicks();
     }
 
-    @Override
     public void onInitializeClient() {
         new File(CustomModel.MODEL_DIR).mkdirs();
 

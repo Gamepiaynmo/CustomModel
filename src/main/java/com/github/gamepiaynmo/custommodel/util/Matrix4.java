@@ -1,5 +1,7 @@
 package com.github.gamepiaynmo.custommodel.util;
 
+import java.nio.DoubleBuffer;
+
 public class Matrix4 {
     /** XX: Typically the unrotated X component for scaling, also the cosine of the angle when rotated on the Y and/or Z axis. On
      * Vector3 multiplication this value is multiplied with the source X component and added to the target X component. */
@@ -80,6 +82,10 @@ public class Matrix4 {
      * @param scale The scale */
     public Matrix4 (Vector3 position, Quaternion rotation, Vector3 scale) {
         set(position, rotation, scale);
+    }
+
+    public DoubleBuffer toBuffer() {
+        return DoubleBuffer.wrap(val);
     }
 
     /** Sets the matrix to the given matrix.
