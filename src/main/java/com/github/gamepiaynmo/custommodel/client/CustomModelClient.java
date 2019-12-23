@@ -130,9 +130,7 @@ public class CustomModelClient implements ClientModInitializer {
 
     public static void reloadModel(GameProfile profile) {
         UUID uuid = PlayerEntity.getUuidFromProfile(profile);
-        if (modelPacks.containsKey(uuid))
-            loadModel(uuid, modelPacks.get(uuid).getModel().getModelInfo().modelId);
-        else loadModel(uuid, ModConfig.getDefaultModel());
+        loadModel(uuid, CustomModel.getModelSelector().getModelForPlayer(profile));
     }
 
     public static ModelPack getModelForPlayer(AbstractClientPlayerEntity player) {
