@@ -108,9 +108,7 @@ public class CustomModelClient {
 
     public static void reloadModel(GameProfile profile) {
         UUID uuid = EntityPlayer.getUUID(profile);
-        if (modelPacks.containsKey(uuid))
-            loadModel(uuid, modelPacks.get(uuid).getModel().getModelInfo().modelId);
-        else loadModel(uuid, ModConfig.getDefaultModel());
+        loadModel(uuid, CustomModel.getModelSelector().getModelForPlayer(profile));
     }
 
     public static ModelPack getModelForPlayer(AbstractClientPlayer player) {

@@ -1,5 +1,6 @@
 package com.github.gamepiaynmo.custommodel.server.selector;
 
+import com.github.gamepiaynmo.custommodel.api.CustomModelApi;
 import com.github.gamepiaynmo.custommodel.api.IModelSelector;
 import com.github.gamepiaynmo.custommodel.server.CustomModel;
 import com.github.gamepiaynmo.custommodel.server.ModConfig;
@@ -38,8 +39,11 @@ public class DefaultModelSelector implements IModelSelector {
 
     @Override
     public String getModelForPlayer(GameProfile profile) {
-        if (models.contains(profile))
-            return models.get(profile).getModelPack();
+        if (models.contains(profile)) {
+            String modelId = models.get(profile).getModelPack();
+            if (CustomModelApi.getModelPackInfo(modelId) != null)
+                return modelId;
+        }
 
         return ModConfig.getDefaultModel();
     }
