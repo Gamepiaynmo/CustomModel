@@ -46,13 +46,6 @@ public class CustomModelClient {
 
     public static final Logger LOGGER = LogManager.getLogger();
 
-    public static AbstractClientPlayer currentPlayer;
-    public static RenderParameter currentParameter;
-    public static RenderPlayer currentRenderer;
-    public static ModelPlayer currentModel;
-    public static CustomJsonModel currentJsonModel;
-    public static Matrix4 currentInvTransform;
-
     public static boolean isRenderingInventory;
     public static EntityParameter inventoryEntityParameter;
     public static boolean isRenderingFirstPerson;
@@ -144,7 +137,8 @@ public class CustomModelClient {
         if (minecraft.world == event.world) {
             for (AbstractClientPlayer player : event.world.getPlayers(AbstractClientPlayer.class, player -> true)) {
                 Render<Entity> renderer = minecraft.getRenderManager().getEntityRenderObject(player);
-                ((ICustomPlayerRenderer) renderer).tick(player);
+                if (renderer instanceof ICustomPlayerRenderer)
+                    ((ICustomPlayerRenderer) renderer).tick(player);
             }
 
             if (clearCounter++ > 200) {
