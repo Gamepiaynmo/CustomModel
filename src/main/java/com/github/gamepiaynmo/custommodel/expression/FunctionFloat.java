@@ -1,5 +1,7 @@
 package com.github.gamepiaynmo.custommodel.expression;
 
+import com.github.gamepiaynmo.custommodel.render.RenderContext;
+
 public class FunctionFloat implements IExpressionFloat {
    private FunctionType type;
    private IExpression[] arguments;
@@ -15,7 +17,7 @@ public class FunctionFloat implements IExpressionFloat {
    }
 
    @Override
-   public float eval() {
-      return this.type.evalFloat(this.arguments);
+   public float eval(RenderContext context) {
+      return this.type.evalFloat(this.arguments, context);
    }
 }

@@ -3,10 +3,10 @@ package com.github.gamepiaynmo.custommodel.mixin;
 import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.client.ModelPack;
 import com.github.gamepiaynmo.custommodel.render.*;
-import com.github.gamepiaynmo.custommodel.render.feature.*;
 import com.github.gamepiaynmo.custommodel.util.Matrix4;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
+import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.client.renderer.GlStateManager;
@@ -43,6 +43,16 @@ public abstract class RenderPlayerHandler {
 
     private static RenderContext context;
 
+    private static ModelPlayer getModel(EntityLivingBase entityLivingBase) {
+        Render render = Minecraft.getMinecraft().getRenderManager().getEntityRenderObject(entityLivingBase);
+        if (render instanceof RenderLivingBase) {
+            ModelBase model = ((RenderLivingBase) render).getMainModel();
+            if (model instanceof ModelPlayer)
+                return (ModelPlayer) model;
+        }
+        return null;
+    }
+
     public static void render(EntityLivingBase playerEntity) {
         boolean boolean_1 = !playerEntity.isInvisible() || (boolean) ObfuscationReflectionHelper.getPrivateValue(Render.class,
                 Minecraft.getMinecraft().getRenderManager().getEntityRenderObject(playerEntity), 4);
@@ -62,15 +72,15 @@ public abstract class RenderPlayerHandler {
                     EntityParameter currentParameter = new EntityParameter(playerEntity);
                     CustomModelClient.inventoryEntityParameter.apply(playerEntity);
                     context.currentParameter = calculateTransform(playerEntity);
-                    context.currentJsonModel.update(transform);
+                    context.currentJsonModel.update(transform, context);
                     currentParameter.apply(playerEntity);
                 }
 
                 context.currentParameter = calculateTransform(playerEntity);
                 context.currentInvTransform = transform.cpy().inv();
 
-                model.getModel().updateSkeleton();
-                context.currentJsonModel.render(transform);
+                model.getModel().updateSkeleton(context);
+                context.currentJsonModel.render(transform, context);
                 resetSkeleton();
             }
 
@@ -83,101 +93,95 @@ public abstract class RenderPlayerHandler {
             setModelPose_c(context.getPlayer());
     }
 
-    @SubscribeEvent
-    public static void renderRightArm(RenderHandEvent) {
+    public static void renderRightArm(AbstractClientPlayer abstractClientPlayerEntity) {
         ModelPack pack = CustomModelClient.getModelForPlayer(abstractClientPlayerEntity);
-        if (pack != null && pack.getModel().getFirstPersonList(Arm.RIGHT) != null) {
+        if (pack != null && pack.getModel().getFirstPersonList(EnumHandSide.RIGHT) != null) {
             CustomModelClient.isRenderingFirstPerson = true;
             CustomJsonModel model = pack.getModel();
             partial = CustomModelClient.getPartial();
-            CustomModelClient.currentJsonModel = model;
-            CustomModelClient.currentModel = getModel();
-            CustomModelClient.currentParameter = calculateTransform(abstractClientPlayerEntity);
-            CustomModelClient.currentPlayer = abstractClientPlayerEntity;
-            CustomModelClient.currentRenderer = (PlayerEntityRenderer) (Object) this;
+            context.currentJsonModel = model;
+            context.currentModel = getModel(abstractClientPlayerEntity);
+            context.currentParameter = calculateTransform(abstractClientPlayerEntity);
+            context.setPlayer(abstractClientPlayerEntity);
 
-            GlStateManager.color3f(1.0F, 1.0F, 1.0F);
-            PlayerEntityModel<AbstractClientPlayerEntity> playerEntityModel = getModel();
+            GlStateManager.color(1.0F, 1.0F, 1.0F);
+            ModelPlayer playerModel = getModel(abstractClientPlayerEntity);
             GlStateManager.enableBlend();
 
-            playerEntityModel.isSneaking = false;
-            playerEntityModel.handSwingProgress = 0.0F;
-            playerEntityModel.field_3396 = 0.0F;
-            playerEntityModel.method_17087(abstractClientPlayerEntity, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F);
-            playerEntityModel.rightArm.pitch = 0;
-            playerEntityModel.rightArmOverlay.pitch = 0;
+            playerModel.isSneak = false;
+            playerModel.swingProgress = 0.0F;
+            playerModel.setRotationAngles(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F, abstractClientPlayerEntity);
+            playerModel.bipedRightArm.rotateAngleX = 0;
+            playerModel.bipedRightArmwear.rotateAngleX = 0;
 
             model.clearTransform();
-            model.update(this.transform);
+            model.update(transform, context);
 
             if (!model.isHidden(PlayerBone.RIGHT_ARM))
-                playerEntityModel.rightArm.render(0.0625F);
+                playerModel.bipedRightArm.render(0.0625F);
             if (!model.isHidden(PlayerBone.RIGHT_ARM_OVERLAY))
-                playerEntityModel.rightArmOverlay.render(0.0625F);
-            model.renderArm(model.getTransform(PlayerBone.RIGHT_ARM.getBone()), Arm.RIGHT);
+                playerModel.bipedRightArmwear.render(0.0625F);
+            model.renderArm(model.getTransform(PlayerBone.RIGHT_ARM.getBone()), EnumHandSide.RIGHT, context);
 
             GlStateManager.disableBlend();
             CustomModelClient.isRenderingFirstPerson = false;
-            info.cancel();
         }
     }
 
-    public static void renderLeftArm(AbstractClientPlayerEntity abstractClientPlayerEntity, CallbackInfo info) {
+    public static void renderLeftArm(AbstractClientPlayer abstractClientPlayerEntity) {
         ModelPack pack = CustomModelClient.getModelForPlayer(abstractClientPlayerEntity);
-        if (pack != null && pack.getModel().getFirstPersonList(Arm.LEFT) != null) {
+        if (pack != null && pack.getModel().getFirstPersonList(EnumHandSide.LEFT) != null) {
             CustomModelClient.isRenderingFirstPerson = true;
             CustomJsonModel model = pack.getModel();
             partial = CustomModelClient.getPartial();
-            CustomModelClient.currentJsonModel = model;
-            CustomModelClient.currentModel = getModel();
-            CustomModelClient.currentParameter = calculateTransform(abstractClientPlayerEntity);
-            CustomModelClient.currentPlayer = abstractClientPlayerEntity;
-            CustomModelClient.currentRenderer = (PlayerEntityRenderer) (Object) this;
+            context.currentJsonModel = model;
+            context.currentModel = getModel(abstractClientPlayerEntity);
+            context.currentParameter = calculateTransform(abstractClientPlayerEntity);
+            context.setPlayer(abstractClientPlayerEntity);
 
-            GlStateManager.color3f(1.0F, 1.0F, 1.0F);
-            PlayerEntityModel<AbstractClientPlayerEntity> playerEntityModel = getModel();
+            GlStateManager.color(1.0F, 1.0F, 1.0F);
+            ModelPlayer playerModel = getModel(abstractClientPlayerEntity);
             GlStateManager.enableBlend();
 
-            playerEntityModel.isSneaking = false;
-            playerEntityModel.handSwingProgress = 0.0F;
-            playerEntityModel.field_3396 = 0.0F;
-            playerEntityModel.method_17087(abstractClientPlayerEntity, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F);
-            playerEntityModel.leftArm.pitch = 0.0F;
-            playerEntityModel.leftArmOverlay.pitch = 0.0F;
+            playerModel.isSneak = false;
+            playerModel.swingProgress = 0.0F;
+            playerModel.setRotationAngles(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F, abstractClientPlayerEntity);
+            playerModel.bipedLeftArm.rotateAngleX = 0.0F;
+            playerModel.bipedLeftArmwear.rotateAngleX = 0.0F;
 
             model.clearTransform();
-            model.update(this.transform);
+            model.update(transform, context);
 
             if (!model.isHidden(PlayerBone.LEFT_ARM))
-                playerEntityModel.leftArm.render(0.0625F);
+                playerModel.bipedLeftArm.render(0.0625F);
             if (!model.isHidden(PlayerBone.LEFT_ARM_OVERLAY))
-                playerEntityModel.leftArmOverlay.render(0.0625F);
-            model.renderArm(model.getTransform(PlayerBone.LEFT_ARM.getBone()), Arm.LEFT);
+                playerModel.bipedLeftArmwear.render(0.0625F);
+            model.renderArm(model.getTransform(PlayerBone.LEFT_ARM.getBone()), EnumHandSide.LEFT, context);
 
             GlStateManager.disableBlend();
             CustomModelClient.isRenderingFirstPerson = false;
-            info.cancel();
         }
     }
 
-    public static void tick(AbstractClientPlayerEntity playerEntity) {
-        ModelPack model = CustomModelClient.getModelForPlayer(playerEntity);
+    public static void tick(EntityLivingBase playerEntity) {
+        ModelPack model = null;
+        context.setEntity(playerEntity);
+        if (context.isPlayer())
+            model = CustomModelClient.getModelForPlayer(context.getPlayer());
+        ModelPlayer playerModel = getModel(playerEntity);
         if (model != null) {
-            this.model.handSwingProgress = this.getHandSwingProgress(playerEntity, 1);
-            this.model.isRiding = playerEntity.hasVehicle();
-            this.model.isChild = playerEntity.isBaby();
+            playerModel.swingProgress = playerEntity.getSwingProgress(1);
+            playerModel.isRiding = playerEntity.isRiding();
+            playerModel.isChild = playerEntity.isChild();
 
-            this.partial = 1;
-            CustomModelClient.currentModel = getModel();
-            CustomModelClient.currentParameter = calculateTransform(playerEntity);
+            partial = 1;
+            context.currentModel = playerModel;
+            context.currentParameter = calculateTransform(playerEntity);
+            context.currentJsonModel = model.getModel();
+            context.currentInvTransform = transform.cpy().inv();
 
-            CustomModelClient.currentPlayer = playerEntity;
-            CustomModelClient.currentRenderer = (PlayerEntityRenderer) (Object) this;
-            CustomModelClient.currentJsonModel = model.getModel();
-            CustomModelClient.currentInvTransform = transform.cpy().inv();
-
-            model.getModel().updateSkeleton();
-            model.getModel().tick(transform);
+            model.getModel().updateSkeleton(context);
+            model.getModel().tick(transform, context);
             resetSkeleton();
         }
     }
@@ -185,7 +189,7 @@ public abstract class RenderPlayerHandler {
     @SubscribeEvent
     public static void render(RenderPlayerEvent.Pre event) {
         context.setPlayer((AbstractClientPlayer) event.getEntityPlayer());
-        context.currentModel = getModel();
+        context.currentModel = getModel(event.getEntityPlayer());
         ModelPack model = CustomModelClient.getModelForPlayer(context.getPlayer());
 
         setModelPose(context.getPlayer(), model.getModel());
@@ -416,7 +420,7 @@ public abstract class RenderPlayerHandler {
 
     }
 
-    private void setModelPose(AbstractClientPlayer abstractClientPlayerEntity_1, CustomJsonModel model) {
+    private static void setModelPose(AbstractClientPlayer abstractClientPlayerEntity_1, CustomJsonModel model) {
         ModelPlayer playerEntityModel_1 = context.currentModel;
         if (abstractClientPlayerEntity_1.isSpectator()) {
             playerEntityModel_1.setVisible(false);

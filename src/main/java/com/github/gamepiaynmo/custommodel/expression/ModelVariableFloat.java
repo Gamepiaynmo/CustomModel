@@ -1,5 +1,6 @@
 package com.github.gamepiaynmo.custommodel.expression;
 
+import com.github.gamepiaynmo.custommodel.render.RenderContext;
 import com.github.gamepiaynmo.custommodel.render.model.IBone;
 
 public class ModelVariableFloat implements IExpressionFloat {
@@ -13,12 +14,12 @@ public class ModelVariableFloat implements IExpressionFloat {
       this.enumModelVariable = enumModelVariable;
    }
 
-   public float eval() {
-      return this.getValue();
+   public float eval(RenderContext context) {
+      return this.getValue(context);
    }
 
-   public float getValue() {
-      return this.enumModelVariable.getFloat(this.modelRenderer);
+   public float getValue(RenderContext context) {
+      return this.enumModelVariable.getFloat(this.modelRenderer, context);
    }
 
    public String toString() {

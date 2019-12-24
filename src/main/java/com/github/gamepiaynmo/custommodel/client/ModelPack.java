@@ -5,6 +5,7 @@ import com.github.gamepiaynmo.custommodel.expression.IExpressionFloat;
 import com.github.gamepiaynmo.custommodel.expression.ParseException;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
 import com.github.gamepiaynmo.custommodel.render.CustomTexture;
+import com.github.gamepiaynmo.custommodel.render.RenderContext;
 import com.github.gamepiaynmo.custommodel.server.CustomModel;
 import com.github.gamepiaynmo.custommodel.util.TranslatableException;
 import com.github.gamepiaynmo.custommodel.util.Vec2d;
@@ -26,15 +27,14 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 public class ModelPack {
-    public static final Supplier<ResourceLocation>[] defGetter = new Supplier[]{ () -> CustomModelClient.currentPlayer.getLocationSkin(),
-            () -> CustomModelClient.currentPlayer.getLocationCape(),
-            () -> CustomModelClient.currentPlayer.getLocationElytra() };
+    public static final Function<RenderContext, ResourceLocation>[] defGetter = new Function[3];
 
     private Map<String, Integer> textureIds = Maps.newHashMap();
     private List<ResourceLocation> textures = Lists.newArrayList();
@@ -183,7 +183,6 @@ public class ModelPack {
             textureManager.loadTexture(identifier, tex);
         }
 
-        CustomModelClient.currentPlayer = (AbstractClientPlayer) Minecraft.getMinecraft().world.getPlayerEntityByUUID(uuid);
         pack.model = CustomJsonModel.fromJson(pack, modelJson);
         pack.success = true;
         return pack;
@@ -196,17 +195,18 @@ public class ModelPack {
         return path.substring(idx1, idx2);
     }
 
-    public Supplier<ResourceLocation> getBaseTexture() {
+    public Function<RenderContext, ResourceLocation> getBaseTexture() {
         return defGetter[0];
     }
 
-    public Supplier<ResourceLocation> getTexture(int id) {
+    public Function<RenderContext, ResourceLocation> getTexture(int id, RenderContext context) {
         if (id < defGetter.length)
             return defGetter[id];
         id -= defGetter.length;
         if (id < textures.size()) {
             ResourceLocation identifier = textures.get(id);
-            return () -> identifier;
+            if (context.isPlayer())
+                return (player) -> identifier;
         }
         return defGetter[0];
     }
@@ -260,8 +260,14 @@ public class ModelPack {
         }
 
         @Override
-        public float eval() {
-            return defGetter[getter].get() != null ? getter : -1;
+        public float eval(RenderContext context) {
+            return context.isPlayer() ? defGetter[getter].apply(context) != null ? getter : -1 : -1;
         }
+    }
+
+    static {
+        defGetter[0] = (context) -> context.isPlayer() ? context.getPlayer().getLocationSkin() : null;
+        defGetter[1] = (context) -> context.isPlayer() ? context.getPlayer().getLocationCape() : null;
+        defGetter[2] = (context) -> context.isPlayer() ? context.getPlayer().getLocationElytra() : null;
     }
 }

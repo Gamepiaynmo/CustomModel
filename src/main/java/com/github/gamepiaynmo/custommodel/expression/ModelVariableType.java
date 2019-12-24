@@ -1,26 +1,28 @@
 package com.github.gamepiaynmo.custommodel.expression;
 
+import com.github.gamepiaynmo.custommodel.render.RenderContext;
 import com.github.gamepiaynmo.custommodel.render.model.IBone;
 
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public enum ModelVariableType {
-   POS_X("tx", (bone) -> (float) bone.getPosition().x),
-   POS_Y("ty", (bone) -> (float) bone.getPosition().y),
-   POS_Z("tz", (bone) -> (float) bone.getPosition().z),
-   ANGLE_X("rx", (bone) -> (float) bone.getRotation().x),
-   ANGLE_Y("ry", (bone) -> (float) bone.getRotation().y),
-   ANGLE_Z("rz", (bone) -> (float) bone.getRotation().z),
-   SCALE_X("sx", (bone) -> (float) bone.getScale().x),
-   SCALE_Y("sy", (bone) -> (float) bone.getScale().y),
-   SCALE_Z("sz", (bone) -> (float) bone.getScale().z);
+   POS_X("tx", (bone, context) -> (float) bone.getPosition(context).x),
+   POS_Y("ty", (bone, context) -> (float) bone.getPosition(context).y),
+   POS_Z("tz", (bone, context) -> (float) bone.getPosition(context).z),
+   ANGLE_X("rx", (bone, context) -> (float) bone.getRotation(context).x),
+   ANGLE_Y("ry", (bone, context) -> (float) bone.getRotation(context).y),
+   ANGLE_Z("rz", (bone, context) -> (float) bone.getRotation(context).z),
+   SCALE_X("sx", (bone, context) -> (float) bone.getScale(context).x),
+   SCALE_Y("sy", (bone, context) -> (float) bone.getScale(context).y),
+   SCALE_Z("sz", (bone, context) -> (float) bone.getScale(context).z);
 
    private String name;
    public static ModelVariableType[] VALUES = values();
 
-   private final Function<IBone, Float> valueGetter;
+   private final BiFunction<IBone, RenderContext, Float> valueGetter;
 
-   ModelVariableType(String name, Function<IBone, Float> getter) {
+   ModelVariableType(String name, BiFunction<IBone, RenderContext, Float> getter) {
       this.name = name;
       valueGetter = getter;
    }
@@ -29,8 +31,8 @@ public enum ModelVariableType {
       return this.name;
    }
 
-   public float getFloat(IBone bone) {
-      return valueGetter.apply(bone);
+   public float getFloat(IBone bone, RenderContext context) {
+      return valueGetter.apply(bone, context);
    }
 
    public static ModelVariableType parse(String str) {

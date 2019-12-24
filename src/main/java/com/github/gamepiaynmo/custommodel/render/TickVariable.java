@@ -31,34 +31,34 @@ public class TickVariable {
         else this.expression = (IExpressionFloat) expression;
     }
 
-    public void tick() {
+    public void tick(RenderContext context) {
         if (type == ExpressionType.BOOL) {
             lastBool = curBool;
-            curBool = ((IExpressionBool) expression).eval();
+            curBool = ((IExpressionBool) expression).eval(context);
         } else {
             lastFloat = curFloat;
-            curFloat = ((IExpressionFloat) expression).eval();
+            curFloat = ((IExpressionFloat) expression).eval(context);
         }
     }
 
     private IExpressionBool getLastBool() {
-        return () -> lastBool;
+        return (c) -> lastBool;
     }
 
     private IExpressionBool getCurBool() {
-        return () -> curBool;
+        return (c) -> curBool;
     }
 
     private IExpressionFloat getLastFloat() {
-        return () -> lastFloat;
+        return (c) -> lastFloat;
     }
 
     private IExpressionFloat getCurFloat() {
-        return () -> curFloat;
+        return (c) -> curFloat;
     }
 
     private IExpressionFloat getParFloat() {
-        return () -> lastFloat + CustomModelClient.currentParameter.partial * (curFloat - lastFloat);
+        return (c) -> lastFloat + c.currentParameter.partial * (curFloat - lastFloat);
     }
 
     public IExpression getLastValue() {

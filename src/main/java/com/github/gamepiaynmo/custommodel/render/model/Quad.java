@@ -1,6 +1,7 @@
 package com.github.gamepiaynmo.custommodel.render.model;
 
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
+import com.github.gamepiaynmo.custommodel.render.RenderContext;
 import com.github.gamepiaynmo.custommodel.util.Json;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -57,7 +58,7 @@ public class Quad {
         Tessellator.getInstance().draw();
     }
 
-    public static Quad getQuadFromJson(Bone bone, JsonObject jsonObj) {
+    public static Quad getQuadFromJson(Bone bone, JsonObject jsonObj, RenderContext context) {
         int uMin = 0, vMin = 0;
         float xMin = 0, yMin = 0, zMin = 0, width = 0, height = 0, size = 0;
 
@@ -82,6 +83,6 @@ public class Quad {
         if (sizeVal != null)
             size = sizeVal.getAsFloat();
 
-        return new Quad(xMin, yMin, zMin, width, height, uMin, vMin, size, (float) bone.getTextureSize().x, (float) bone.getTextureSize().y);
+        return new Quad(xMin, yMin, zMin, width, height, uMin, vMin, size, (float) bone.getTextureSize(context).x, (float) bone.getTextureSize(context).y);
     }
 }

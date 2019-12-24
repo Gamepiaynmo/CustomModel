@@ -1,7 +1,9 @@
 package com.github.gamepiaynmo.custommodel.expression;
 
 import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
+import com.github.gamepiaynmo.custommodel.render.RenderContext;
 import com.github.gamepiaynmo.custommodel.render.RenderParameter;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.MathHelper;
 
@@ -15,7 +17,7 @@ public enum RenderEntityParameterFloat implements IExpressionFloat {
    HEAD_PITCH("head_pitch", (entity, params) -> params.headPitch),
    SCALE("scale", (entity, params) -> params.scale),
    HEALTH("health", (entity, params) -> entity.getHealth()),
-   FOOD_LEVEL("food_level", (entity, params) -> (float) entity.getFoodStats().getFoodLevel()),
+   FOOD_LEVEL("food_level", (entity, params) -> (float) (entity instanceof EntityPlayer ? ((EntityPlayer) entity).getFoodStats().getFoodLevel() : 0)),
    HURT_TIME("hurt_time", (entity, params) -> (float) entity.hurtTime - params.partial),
    POS_X("pos_x", (entity, params) -> (float) MathHelper.clampedLerp(entity.prevPosX, entity.posX, params.partial)),
    POS_Y("pos_y", (entity, params) -> (float) MathHelper.clampedLerp(entity.prevPosY, entity.posY, params.partial)),
@@ -30,9 +32,9 @@ public enum RenderEntityParameterFloat implements IExpressionFloat {
 
    private String name;
    private static final RenderEntityParameterFloat[] VALUES = values();
-   private final BiFunction<EntityPlayer, RenderParameter, Float> valueGetter;
+   private final BiFunction<EntityLivingBase, RenderParameter, Float> valueGetter;
 
-   RenderEntityParameterFloat(String name, BiFunction<EntityPlayer, RenderParameter, Float> getter) {
+   RenderEntityParameterFloat(String name, BiFunction<EntityLivingBase, RenderParameter, Float> getter) {
       this.name = name;
       valueGetter = getter;
    }
@@ -41,8 +43,9 @@ public enum RenderEntityParameterFloat implements IExpressionFloat {
       return this.name;
    }
 
-   public float eval() {
-      return valueGetter.apply(CustomModelClient.currentPlayer, CustomModelClient.currentParameter);
+   @Override
+   public float eval(RenderContext context) {
+      return valueGetter.apply(context.currentEntity, context.currentParameter);
    }
 
    public static RenderEntityParameterFloat parse(String str) {

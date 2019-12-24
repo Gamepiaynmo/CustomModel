@@ -61,27 +61,33 @@ public class ModelResolver implements IExpressionResolver {
             return pack.getTexture(second);
          }
          case "inv": {
-            InventoryPlayer inventory = CustomModelClient.currentPlayer.inventory;
             IExpressionFloat result = null;
             switch (second) {
-               case "mainhand": result = () ->
-                       Item.REGISTRY.getIDForObject(inventory.getCurrentItem().getItem()); break;
-               case "offhand": result = () ->
-                       Item.REGISTRY.getIDForObject(inventory.offHandInventory.get(0).getItem()); break;
-               case "helmet": result = () ->
-                       Item.REGISTRY.getIDForObject(inventory.armorItemInSlot(3).getItem()); break;
-               case "chestplate": result = () ->
-                       Item.REGISTRY.getIDForObject(inventory.armorItemInSlot(2).getItem()); break;
-               case "leggings": result = () ->
-                       Item.REGISTRY.getIDForObject(inventory.armorItemInSlot(1).getItem()); break;
-               case "boots": result = () ->
-                       Item.REGISTRY.getIDForObject(inventory.armorItemInSlot(0).getItem()); break;
+               case "mainhand": result = (context) ->
+                       !context.isPlayer() ? 0:
+                       Item.REGISTRY.getIDForObject(context.getPlayer().inventory.getCurrentItem().getItem()); break;
+               case "offhand": result = (context) ->
+                       !context.isPlayer() ? 0:
+                       Item.REGISTRY.getIDForObject(context.getPlayer().inventory.offHandInventory.get(0).getItem()); break;
+               case "helmet": result = (context) ->
+                       !context.isPlayer() ? 0:
+                       Item.REGISTRY.getIDForObject(context.getPlayer().inventory.armorItemInSlot(3).getItem()); break;
+               case "chestplate": result = (context) ->
+                       !context.isPlayer() ? 0:
+                       Item.REGISTRY.getIDForObject(context.getPlayer().inventory.armorItemInSlot(2).getItem()); break;
+               case "leggings": result = (context) ->
+                       !context.isPlayer() ? 0:
+                       Item.REGISTRY.getIDForObject(context.getPlayer().inventory.armorItemInSlot(1).getItem()); break;
+               case "boots": result = (context) ->
+                       !context.isPlayer() ? 0:
+                       Item.REGISTRY.getIDForObject(context.getPlayer().inventory.armorItemInSlot(0).getItem()); break;
                default:
                   try {
                      if (second.startsWith("main")) {
                         int index = Integer.parseInt(second.substring(4));
-                        if (index >= 0 && index < inventory.mainInventory.size())
-                           result = () -> Item.REGISTRY.getIDForObject(inventory.mainInventory.get(index).getItem());
+                        if (index >= 0 && index < 36)
+                           result = (context) -> !context.isPlayer() ? 0 :
+                                   Item.REGISTRY.getIDForObject(context.getPlayer().inventory.mainInventory.get(index).getItem());
                      }
                   } catch (NumberFormatException e) {
                   }

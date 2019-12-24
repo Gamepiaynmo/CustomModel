@@ -11,7 +11,6 @@ public class NetworkHandler {
     public static void init() {
         CHANNEL.registerMessage(PacketQuery.class, PacketQuery.class, 0, Side.SERVER);
         CHANNEL.registerMessage(PacketModel.class, PacketModel.class, 1, Side.CLIENT);
-        CHANNEL.registerMessage(PacketQueryConfig.class, PacketQueryConfig.class, 2, Side.SERVER);
-        CHANNEL.registerMessage(PacketReplyConfig.class, PacketReplyConfig.class, 3, Side.CLIENT);
+        CHANNEL.registerMessage(PacketReplyConfig.class, PacketReplyConfig.class, 2, Side.CLIENT);
     }
 }

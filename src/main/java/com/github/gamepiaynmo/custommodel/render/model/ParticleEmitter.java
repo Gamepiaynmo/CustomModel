@@ -5,6 +5,7 @@ import com.github.gamepiaynmo.custommodel.expression.IExpressionBool;
 import com.github.gamepiaynmo.custommodel.expression.IExpressionFloat;
 import com.github.gamepiaynmo.custommodel.expression.ParseException;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
+import com.github.gamepiaynmo.custommodel.render.RenderContext;
 import com.github.gamepiaynmo.custommodel.util.Json;
 import com.github.gamepiaynmo.custommodel.util.Matrix4;
 import com.github.gamepiaynmo.custommodel.util.Vector3;
@@ -82,36 +83,36 @@ public class ParticleEmitter {
         return emitter;
     }
 
-    private void evalFloatArray(float[] arr, IExpressionFloat[] expr) {
+    private void evalFloatArray(float[] arr, IExpressionFloat[] expr, RenderContext context) {
         for (int i = 0; i < arr.length; i++)
-            arr[i] = expr[i].eval();
+            arr[i] = expr[i].eval(context);
     }
 
     private double lerp(double s, double a, double b) {
         return a + (b - a) * s;
     }
 
-    public void tick(Matrix4 transform) {
+    public void tick(Matrix4 transform, RenderContext context) {
         Minecraft client = Minecraft.getMinecraft();
         ParticleManager manager = client.effectRenderer;
         WorldClient world = client.world;
 
-        if (bone.isVisible()) {
+        if (bone.isVisible(context)) {
             timer += 1;
-            density = densityExpr.eval();
+            density = densityExpr.eval(context);
             if (density > EPS && timer > 0) {
-                posRange = Vector3.Zero.set(posRangeExpr[0].eval(), posRangeExpr[1].eval(), posRangeExpr[2].eval());
-                dirRange = dirRangeExpr.eval();
-                evalFloatArray(angle, angleExpr);
-                evalFloatArray(speed, speedExpr);
-                evalFloatArray(rotSpeed, rotSpeedExpr);
-                evalFloatArray(lifeSpan, lifeSpanExpr);
-                density = densityExpr.eval();
+                posRange = Vector3.Zero.set(posRangeExpr[0].eval(context), posRangeExpr[1].eval(context), posRangeExpr[2].eval(context));
+                dirRange = dirRangeExpr.eval(context);
+                evalFloatArray(angle, angleExpr, context);
+                evalFloatArray(speed, speedExpr, context);
+                evalFloatArray(rotSpeed, rotSpeedExpr, context);
+                evalFloatArray(lifeSpan, lifeSpanExpr, context);
+                density = densityExpr.eval(context);
                 for (int i = 0; i < 4; i++)
-                    evalFloatArray(color[i], colorExpr[i]);
-                evalFloatArray(size, sizeExpr);
-                gravity = gravityExpr.eval();
-                collide = collideExpr.eval();
+                    evalFloatArray(color[i], colorExpr[i], context);
+                evalFloatArray(size, sizeExpr, context);
+                gravity = gravityExpr.eval(context);
+                collide = collideExpr.eval(context);
 
                 Vector3 epos = new Vector3();
                 epos.x = transform.val[12];
@@ -149,7 +150,7 @@ public class ParticleEmitter {
                     particle.setAlpha((float) lerp(random.nextFloat(), color[3][0], color[3][1]));
                     particle.setGravity(gravity);
                     particle.setCollide(collide);
-                    particle.setTexture(bone.getTexture().get());
+                    particle.setTexture(bone.getTexture(context).apply(context));
 
                     manager.addEffect(particle);
                 }

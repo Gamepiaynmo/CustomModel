@@ -6,6 +6,7 @@ import com.github.gamepiaynmo.custommodel.expression.IExpressionBool;
 import com.github.gamepiaynmo.custommodel.expression.IExpressionFloat;
 import com.github.gamepiaynmo.custommodel.expression.ParseException;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
+import com.github.gamepiaynmo.custommodel.render.RenderContext;
 import com.github.gamepiaynmo.custommodel.util.Json;
 import com.google.gson.JsonObject;
 import net.minecraft.client.Minecraft;
@@ -47,16 +48,16 @@ public class ItemPart {
             stack.addEnchantment(Enchantments.UNBREAKING, 0);
     }
 
-    public void render() {
-        int curId = (int) itemId.eval();
-        boolean curEnchant = enchanted.eval();
+    public void render(RenderContext context) {
+        int curId = (int) itemId.eval(context);
+        boolean curEnchant = enchanted.eval(context);
         if (curId != lastId || curEnchant != lastEnchant) {
             lastId = curId;
             lastEnchant = curEnchant;
             update();
         }
 
-        Minecraft.getMinecraft().getItemRenderer().renderItem(CustomModelClient.currentPlayer, stack, ItemCameraTransforms.TransformType.FIXED);
+        Minecraft.getMinecraft().getItemRenderer().renderItem(context.currentEntity, stack, ItemCameraTransforms.TransformType.FIXED);
     }
 
     public static ItemPart fromJson(Bone bone, JsonObject jsonObj) throws ParseException {
