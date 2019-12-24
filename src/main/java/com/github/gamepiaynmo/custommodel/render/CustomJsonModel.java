@@ -16,6 +16,7 @@ import com.google.gson.JsonObject;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
+import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.LivingEntity;
@@ -328,8 +329,11 @@ public class CustomJsonModel {
         PlayerEntityModel model = context.currentModel;
         float partial = context.currentParameter.partial;
 
-        if (lastBoneMats.isEmpty())
-            MinecraftClient.getInstance().getEntityRenderManager().getRenderer(entity);
+        if (lastBoneMats.isEmpty()) {
+            EntityRenderer renderer = MinecraftClient.getInstance().getEntityRenderManager().getRenderer(entity);
+            if (renderer instanceof ICustomPlayerRenderer)
+                ((ICustomPlayerRenderer) renderer).tick(entity);
+        }
 
         if (entity.isInSneakingPose() && !CustomModelClient.isRenderingFirstPerson)
             baseMat = baseMat.cpy().translate(0, 0.2f, 0);

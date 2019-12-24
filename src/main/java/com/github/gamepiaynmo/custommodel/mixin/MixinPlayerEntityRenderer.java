@@ -197,7 +197,7 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
         ModelPack model = null;
         context.setEntity(livingEntity);
         if (context.isPlayer()) {
-            CustomModelClient.getModelForPlayer(context.getPlayer());
+            model = CustomModelClient.getModelForPlayer(context.getPlayer());
             AbstractClientPlayerEntity playerEntity = context.getPlayer();
 
             if (model != null) {
