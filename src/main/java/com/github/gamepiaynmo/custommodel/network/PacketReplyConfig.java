@@ -4,6 +4,7 @@ import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.server.ModConfig;
 import com.github.gamepiaynmo.custommodel.server.CustomModel;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.Packet;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -40,8 +41,10 @@ public class PacketReplyConfig implements IMessage, IMessageHandler<PacketReplyC
 
     @Override
     public IMessage onMessage(PacketReplyConfig message, MessageContext ctx) {
-        CustomModelClient.serverConfig = message.getConfig();
-        CustomModelClient.isServerModded = true;
+        Minecraft.getMinecraft().addScheduledTask(() -> {
+            CustomModelClient.serverConfig = message.getConfig();
+            CustomModelClient.isServerModded = true;
+        });
         return null;
     }
 }

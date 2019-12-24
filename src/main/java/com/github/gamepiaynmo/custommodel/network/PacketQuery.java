@@ -39,10 +39,12 @@ public class PacketQuery implements IMessage, IMessageHandler<PacketQuery, Packe
 
     @Override
     public PacketModel onMessage(PacketQuery message, MessageContext ctx) {
-        try {
-            CustomModel.reloadModel(ctx.getServerHandler().player, message.getPlayerUuid(), false);
-        } catch (LoadModelException e) {
-        }
+        ctx.getServerHandler().player.getServerWorld().addScheduledTask(() -> {
+            try {
+                CustomModel.reloadModel(ctx.getServerHandler().player, message.getPlayerUuid(), false);
+            } catch (LoadModelException e) {
+            }
+        });
         return null;
     }
 }

@@ -33,6 +33,13 @@ minecraft {
     // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
 }
 
+jar {
+    manifest {
+        attributes 'FMLCorePlugin': 'com.github.gamepiaynmo.custommodel.CustomModelMod'
+        attributes 'FMLCorePluginContainsFMLMod': 'true'
+    }
+}
+
 dependencies {
     // you may put jars on which you depend on in ./libs
     // or you may define them like so..

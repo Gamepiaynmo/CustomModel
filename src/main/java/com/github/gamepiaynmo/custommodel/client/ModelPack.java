@@ -19,6 +19,7 @@ import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.common.MinecraftForge;
 import org.apache.commons.io.IOUtils;
 
 import java.awt.image.BufferedImage;
@@ -183,7 +184,9 @@ public class ModelPack {
             textureManager.loadTexture(identifier, tex);
         }
 
-        pack.model = CustomJsonModel.fromJson(pack, modelJson);
+        RenderContext context = new RenderContext();
+        context.setPlayer((AbstractClientPlayer) Minecraft.getMinecraft().world.getPlayerEntityByUUID(uuid));
+        pack.model = CustomJsonModel.fromJson(pack, modelJson, context);
         pack.success = true;
         return pack;
     }
@@ -261,7 +264,7 @@ public class ModelPack {
 
         @Override
         public float eval(RenderContext context) {
-            return context.isPlayer() ? defGetter[getter].apply(context) != null ? getter : -1 : -1;
+            return defGetter[getter].apply(context) != null ? getter : -1;
         }
     }
 

@@ -1,5 +1,6 @@
 package com.github.gamepiaynmo.custommodel.client;
 
+import com.github.gamepiaynmo.custommodel.mixin.RenderPlayerHandler;
 import com.github.gamepiaynmo.custommodel.network.*;
 import com.github.gamepiaynmo.custommodel.render.*;
 import com.github.gamepiaynmo.custommodel.server.CustomModel;
@@ -23,6 +24,7 @@ import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.world.WorldEvent;
@@ -37,8 +39,6 @@ import java.util.*;
 public class CustomModelClient {
     private static final Map<UUID, ModelPack> modelPacks = Maps.newHashMap();
     private static int clearCounter = 0;
-
-    public static TextureManager textureManager;
 
     private static final Set<UUID> queried = Sets.newHashSet();
     public static ModConfig.ServerConfig serverConfig;
@@ -65,6 +65,7 @@ public class CustomModelClient {
             if (info == null)
                 throw new ModelNotFoundException(model);
             File modelFile = new File(CustomModel.MODEL_DIR + "/" + info.fileName);
+            TextureManager textureManager = Minecraft.getMinecraft().renderEngine;
 
             if (modelFile.isDirectory())
                 pack = ModelPack.fromDirectory(textureManager, modelFile, uuid);
@@ -125,10 +126,12 @@ public class CustomModelClient {
 
     public static void onInitializeClient() {
         new File(CustomModel.MODEL_DIR).mkdirs();
-        MinecraftForge.EVENT_BUS.register(CustomModelClient.class);
         serverConfig = new ModConfig.ServerConfig();
         serverConfig.customEyeHeight = ModConfig.isCustomEyeHeight();
-        serverConfig.customBoundingBox = false;
+
+        MinecraftForge.EVENT_BUS.register(CustomModelClient.class);
+        MinecraftForge.EVENT_BUS.register(RenderPlayerHandler.class);
+        ClientCommandHandler.instance.registerCommand(new Command());
     }
 
     @SubscribeEvent
@@ -160,7 +163,8 @@ public class CustomModelClient {
 
     @SubscribeEvent
     public static void onCommand(CommandEvent event) {
-        event.getCommand();
+        if (event.getCommand() instanceof Command && isServerModded)
+            event.setCanceled(true);
     }
 
     @SubscribeEvent

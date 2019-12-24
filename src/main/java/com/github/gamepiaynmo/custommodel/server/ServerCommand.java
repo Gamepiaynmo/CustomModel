@@ -93,12 +93,12 @@ public class ServerCommand extends CommandBase {
                 if (args.length > 2) {
                     checkPermission(sender, ModConfig.getSelectOthersPermission());
                     Collection<EntityPlayerMP> players = getPlayers(server, sender, args[2]);
-                    notifyCommandListener(sender, this, "command.custommodel.select", players.size());
+                    notifyCommandListener(sender, this, "command.custommodel.select", players.size(), args[2]);
                     for (EntityPlayerMP player : players)
                         CustomModel.selectModel(player, args[1]);
                 } else {
                     checkPermission(sender, ModConfig.getSelectSelfPermission());
-                    notifyCommandListener(sender, this, "command.custommodel.select", 1);
+                    notifyCommandListener(sender, this, "command.custommodel.select", 1, args[1]);
                     CustomModel.selectModel(getCommandSenderAsPlayer(sender), args[1]);
                 }
                 return;

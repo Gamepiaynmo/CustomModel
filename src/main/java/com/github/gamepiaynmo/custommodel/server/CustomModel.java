@@ -1,6 +1,7 @@
 package com.github.gamepiaynmo.custommodel.server;
 
 import com.github.gamepiaynmo.custommodel.api.IModelSelector;
+import com.github.gamepiaynmo.custommodel.mixin.PlayerStatureHandler;
 import com.github.gamepiaynmo.custommodel.network.*;
 import com.github.gamepiaynmo.custommodel.util.LoadModelException;
 import com.github.gamepiaynmo.custommodel.util.ModelNotFoundException;
@@ -9,6 +10,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
 import io.netty.buffer.Unpooled;
+import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandHandler;
 import net.minecraft.command.ServerCommandManager;
 import net.minecraft.entity.player.EntityPlayer;
@@ -163,11 +165,11 @@ public class CustomModel {
 
     public static void onInitialize() {
         new File(MODEL_DIR).mkdirs();
-        NetworkHandler.init();
         ModConfig.updateConfig();
         refreshModelList();
 
         MinecraftForge.EVENT_BUS.register(CustomModel.class);
+        MinecraftForge.EVENT_BUS.register(PlayerStatureHandler.class);
     }
 
     @SubscribeEvent

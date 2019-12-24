@@ -1,5 +1,6 @@
 package com.github.gamepiaynmo.custommodel.util;
 
+import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;
 
 public class Matrix4 {
@@ -84,8 +85,12 @@ public class Matrix4 {
         set(position, rotation, scale);
     }
 
+    static DoubleBuffer buffer = ByteBuffer.allocateDirect(8 * 16).asDoubleBuffer();
     public DoubleBuffer toBuffer() {
-        return DoubleBuffer.wrap(val);
+        buffer.rewind();
+        buffer.put(val);
+        buffer.rewind();
+        return buffer;
     }
 
     /** Sets the matrix to the given matrix.

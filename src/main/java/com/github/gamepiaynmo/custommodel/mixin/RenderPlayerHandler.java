@@ -41,7 +41,7 @@ public abstract class RenderPlayerHandler {
         }
     }
 
-    private static RenderContext context;
+    private static RenderContext context = new RenderContext();
 
     private static ModelPlayer getModel(EntityLivingBase entityLivingBase) {
         Render render = Minecraft.getMinecraft().getRenderManager().getEntityRenderObject(entityLivingBase);
@@ -53,7 +53,7 @@ public abstract class RenderPlayerHandler {
         return null;
     }
 
-    public static void render(EntityLivingBase playerEntity) {
+    public static boolean renderModel(EntityLivingBase playerEntity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
         boolean boolean_1 = !playerEntity.isInvisible() || (boolean) ObfuscationReflectionHelper.getPrivateValue(Render.class,
                 Minecraft.getMinecraft().getRenderManager().getEntityRenderObject(playerEntity), 4);
         boolean boolean_2 = !boolean_1 && !playerEntity.isInvisibleToPlayer(Minecraft.getMinecraft().player);
@@ -65,6 +65,11 @@ public abstract class RenderPlayerHandler {
             ModelPack model = null;
             if (context.isPlayer())
                 model = CustomModelClient.getModelForPlayer(context.getPlayer());
+            if (model != null)
+                setModelPose(context.getPlayer(), model.getModel());
+
+            getModel(playerEntity).render(playerEntity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale);
+
             if (model != null) {
                 context.currentJsonModel = model.getModel();
                 context.currentJsonModel.clearTransform();
@@ -91,9 +96,10 @@ public abstract class RenderPlayerHandler {
 
         if (context.isPlayer())
             setModelPose_c(context.getPlayer());
+        return false;
     }
 
-    public static void renderRightArm(AbstractClientPlayer abstractClientPlayerEntity) {
+    public static boolean renderRightArm(AbstractClientPlayer abstractClientPlayerEntity) {
         ModelPack pack = CustomModelClient.getModelForPlayer(abstractClientPlayerEntity);
         if (pack != null && pack.getModel().getFirstPersonList(EnumHandSide.RIGHT) != null) {
             CustomModelClient.isRenderingFirstPerson = true;
@@ -125,10 +131,12 @@ public abstract class RenderPlayerHandler {
 
             GlStateManager.disableBlend();
             CustomModelClient.isRenderingFirstPerson = false;
+            return true;
         }
+        return false;
     }
 
-    public static void renderLeftArm(AbstractClientPlayer abstractClientPlayerEntity) {
+    public static boolean renderLeftArm(AbstractClientPlayer abstractClientPlayerEntity) {
         ModelPack pack = CustomModelClient.getModelForPlayer(abstractClientPlayerEntity);
         if (pack != null && pack.getModel().getFirstPersonList(EnumHandSide.LEFT) != null) {
             CustomModelClient.isRenderingFirstPerson = true;
@@ -160,7 +168,9 @@ public abstract class RenderPlayerHandler {
 
             GlStateManager.disableBlend();
             CustomModelClient.isRenderingFirstPerson = false;
+            return true;
         }
+        return false;
     }
 
     public static void tick(EntityLivingBase playerEntity) {
@@ -191,8 +201,6 @@ public abstract class RenderPlayerHandler {
         context.setPlayer((AbstractClientPlayer) event.getEntityPlayer());
         context.currentModel = getModel(event.getEntityPlayer());
         ModelPack model = CustomModelClient.getModelForPlayer(context.getPlayer());
-
-        setModelPose(context.getPlayer(), model.getModel());
         partial = partial;
     }
 

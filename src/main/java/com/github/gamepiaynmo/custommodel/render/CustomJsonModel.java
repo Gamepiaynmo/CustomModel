@@ -15,9 +15,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.realmsclient.util.Pair;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumHandSide;
@@ -86,7 +88,7 @@ public class CustomJsonModel {
 
     public static final Map<String, EntityPose> poseMap = Maps.newHashMap();
 
-    public static CustomJsonModel fromJson(ModelPack pack, JsonObject jsonObj) throws ParseException {
+    public static CustomJsonModel fromJson(ModelPack pack, JsonObject jsonObj, RenderContext context) throws ParseException {
         CustomJsonModel model = new CustomJsonModel(pack);
         model.baseTexture = pack.getBaseTexture();
         model.modelInfo = ModelInfo.fromJson(jsonObj);
@@ -136,7 +138,6 @@ public class CustomJsonModel {
         for (PlayerBone bone : PlayerBone.values())
             model.children.put(bone.getId(), Lists.newArrayList());
 
-        RenderContext context = new RenderContext();
         context.currentJsonModel = model;
         Json.parseJsonArray(jsonObj.get(BONES), element -> {
             JsonObject boneObj = element.getAsJsonObject();
@@ -286,10 +287,11 @@ public class CustomJsonModel {
         float partial = params.partial;
         GlStateManager.pushMatrix();
         GL11.glMultMatrix(baseMat.cpy().inv().toBuffer());
+        TextureManager textureManager = Minecraft.getMinecraft().renderEngine;
 
         for (Bone bone : bones) {
             if (bone.isVisible(context)) {
-                CustomModelClient.textureManager.bindTexture(bone.getTexture(context).apply(context));
+                textureManager.bindTexture(bone.getTexture(context).apply(context));
                 GlStateManager.pushMatrix();
                 Matrix4 transform = tmpBoneMats.get(bone.getId());
 
@@ -310,10 +312,11 @@ public class CustomJsonModel {
         float partial = params.partial;
         GlStateManager.pushMatrix();
         GL11.glMultMatrix(baseMat.cpy().inv().toBuffer());
+        TextureManager textureManager = Minecraft.getMinecraft().renderEngine;
 
         for (Bone bone : firstPersonList.get(arm)) {
             if (bone.isVisible(context)) {
-                CustomModelClient.textureManager.bindTexture(bone.getTexture(context).apply(context));
+                textureManager.bindTexture(bone.getTexture(context).apply(context));
                 GlStateManager.pushMatrix();
                 Matrix4 transform = tmpBoneMats.get(bone.getId());
 

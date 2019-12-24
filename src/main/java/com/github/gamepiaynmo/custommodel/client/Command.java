@@ -124,13 +124,17 @@ public class Command implements IClientCommand {
 
     @Override
     public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
-        if (args.length == 1)
-            return CommandBase.getListOfStringsMatchingLastWord(args, "refresh", "list", "reload", "select");
+        if (!CustomModelClient.isServerModded) {
+            if (args.length == 1)
+                return CommandBase.getListOfStringsMatchingLastWord(args, "refresh", "list", "reload", "select");
 
-        switch (args[0]) {
-            case "reload": return args.length == 2 ? CommandBase.getListOfStringsMatchingLastWord(args, getPlayerNames()) : Collections.emptyList();
-            case "select": return args.length == 2 ? CommandBase.getListOfStringsMatchingLastWord(args, CustomModel.getModelIdList()) :
-                    args.length == 3 ? CommandBase.getListOfStringsMatchingLastWord(args, getPlayerNames()) : Collections.emptyList();
+            switch (args[0]) {
+                case "reload":
+                    return args.length == 2 ? CommandBase.getListOfStringsMatchingLastWord(args, getPlayerNames()) : Collections.emptyList();
+                case "select":
+                    return args.length == 2 ? CommandBase.getListOfStringsMatchingLastWord(args, CustomModel.getModelIdList()) :
+                            args.length == 3 ? CommandBase.getListOfStringsMatchingLastWord(args, getPlayerNames()) : Collections.emptyList();
+            }
         }
 
         return Collections.emptyList();
