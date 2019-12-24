@@ -4,6 +4,7 @@ import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.client.ModelPack;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
 import com.github.gamepiaynmo.custommodel.render.PlayerFeature;
+import com.github.gamepiaynmo.custommodel.render.RenderContext;
 import com.github.gamepiaynmo.custommodel.render.model.IBone;
 import com.github.gamepiaynmo.custommodel.server.CustomModel;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -20,9 +21,11 @@ import org.lwjgl.opengl.GL11;
 
 public class CustomShoulderParrot<T extends AbstractClientPlayerEntity> extends ShoulderParrotFeatureRenderer<T> {
     private final ParrotEntityModel model = new ParrotEntityModel();
+    private final RenderContext context;
 
-    public CustomShoulderParrot(FeatureRendererContext<T, PlayerEntityModel<T>> featureRendererContext_1) {
+    public CustomShoulderParrot(FeatureRendererContext<T, PlayerEntityModel<T>> featureRendererContext_1, RenderContext context) {
         super(featureRendererContext_1);
+        this.context = context;
     }
 
     @Override
@@ -50,13 +53,13 @@ public class CustomShoulderParrot<T extends AbstractClientPlayerEntity> extends 
             CustomJsonModel model = pack == null ? null : pack.getModel();
 
             for (IBone bone : model.getFeatureAttached(boolean_1 ? PlayerFeature.SHOULDER_PARROT_LEFT : PlayerFeature.SHOULDER_PARROT_RIGHT)) {
-                if (!bone.isVisible()) continue;
+                if (!bone.isVisible(context)) continue;
 
                 GlStateManager.pushMatrix();
                 if (bone.getPlayerBone() != null) {
                     GlStateManager.translatef(boolean_1 ? 0.4F : -0.4F, playerEntity_1.isInSneakingPose() ? -1.3F : -1.5F, 0.0F);
                 } else {
-                    GL11.glMultMatrixd(CustomModelClient.currentInvTransform.val);
+                    GL11.glMultMatrixd(context.currentInvTransform.val);
                     GL11.glMultMatrixd(model.getTransform(bone).val);
                     GlStateManager.translatef(0, -1.5F, 0);
                 }

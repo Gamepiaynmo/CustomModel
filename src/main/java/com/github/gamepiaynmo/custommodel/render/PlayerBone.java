@@ -16,25 +16,26 @@ import net.minecraft.util.Identifier;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public enum PlayerBone {
     NONE("none", null),
-    HEAD("head", () -> CustomModelClient.currentModel.head),
-    HEAD_OVERLAY("head_overlay", () -> CustomModelClient.currentModel.headwear),
-    BODY("body", () -> CustomModelClient.currentModel.body),
-    BODY_OVERLAY("body_overlay", () -> CustomModelClient.currentModel.bodyOverlay),
-    LEFT_ARM("left_arm", () -> CustomModelClient.currentModel.leftArm),
-    LEFT_ARM_OVERLAY("left_arm_overlay", () -> CustomModelClient.currentModel.leftArmOverlay),
-    RIGHT_ARM("right_arm", () -> CustomModelClient.currentModel.rightArm),
-    RIGHT_ARM_OVERLAY("right_arm_overlay", () -> CustomModelClient.currentModel.rightArmOverlay),
-    LEFT_LEG("left_leg", () -> CustomModelClient.currentModel.leftLeg),
-    LEFT_LEG_OVERLAY("left_leg_overlay", () -> CustomModelClient.currentModel.leftLegOverlay),
-    RIGHT_LEG("right_leg", () -> CustomModelClient.currentModel.rightLeg),
-    RIGHT_LEG_OVERLAY("right_leg_overlay", () -> CustomModelClient.currentModel.rightLegOverlay);
+    HEAD("head", (model) -> model.head),
+    HEAD_OVERLAY("head_overlay", (model) -> model.headwear),
+    BODY("body", (model) -> model.body),
+    BODY_OVERLAY("body_overlay", (model) -> model.bodyOverlay),
+    LEFT_ARM("left_arm", (model) -> model.leftArm),
+    LEFT_ARM_OVERLAY("left_arm_overlay", (model) -> model.leftArmOverlay),
+    RIGHT_ARM("right_arm", (model) -> model.rightArm),
+    RIGHT_ARM_OVERLAY("right_arm_overlay", (model) -> model.rightArmOverlay),
+    LEFT_LEG("left_leg", (model) -> model.leftLeg),
+    LEFT_LEG_OVERLAY("left_leg_overlay", (model) -> model.leftLegOverlay),
+    RIGHT_LEG("right_leg", (model) -> model.rightLeg),
+    RIGHT_LEG_OVERLAY("right_leg_overlay", (model) -> model.rightLegOverlay);
 
     private final String id;
-    private final Supplier<Cuboid> cuboidGetter;
+    private final Function<PlayerEntityModel, Cuboid> cuboidGetter;
     private static final Map<String, PlayerBone> id2Bone = Maps.newHashMap();
     private static final Map<String, Collection<PlayerBone>> boneLists = Maps.newHashMap();
     private final IBone bone;
@@ -42,7 +43,7 @@ public enum PlayerBone {
     private static final Vector3 One = new Vector3(1, 1, 1);
     private static final Vec2d TexSize = new Vec2d(64, 64);
 
-    PlayerBone(String id, Supplier<Cuboid> cuboidGetter) {
+    PlayerBone(String id, Function<PlayerEntityModel, Cuboid> cuboidGetter) {
         this.id = id;
         this.cuboidGetter = cuboidGetter;
         bone = cuboidGetter == null ? new BlankBone() : new OriginalBone(this, cuboidGetter);
@@ -53,7 +54,7 @@ public enum PlayerBone {
     }
 
     public Cuboid getCuboid(PlayerEntityModel model) {
-        return cuboidGetter.get();
+        return cuboidGetter.apply(model);
     }
 
     public IBone getBone() { return bone; }
@@ -70,10 +71,10 @@ public enum PlayerBone {
     }
 
     public static class OriginalBone implements IBone {
-        private Supplier<Cuboid> cuboidGetter;
+        private Function<PlayerEntityModel, Cuboid> cuboidGetter;
         private PlayerBone playerBone;
 
-        OriginalBone(PlayerBone playerBone, Supplier<Cuboid> cuboidGetter) {
+        OriginalBone(PlayerBone playerBone, Function<PlayerEntityModel, Cuboid> cuboidGetter) {
             this.playerBone = playerBone;
             this.cuboidGetter = cuboidGetter;
         }
@@ -84,37 +85,37 @@ public enum PlayerBone {
         }
 
         @Override
-        public Vector3 getPosition() {
-            Cuboid cuboid = cuboidGetter.get();
+        public Vector3 getPosition(RenderContext context) {
+            Cuboid cuboid = cuboidGetter.apply(context.currentModel);
             return new Vector3(cuboid.rotationPointX, cuboid.rotationPointY, cuboid.rotationPointZ);
         }
 
         @Override
-        public Vector3 getRotation() {
-            Cuboid cuboid = cuboidGetter.get();
+        public Vector3 getRotation(RenderContext context) {
+            Cuboid cuboid = cuboidGetter.apply(context.currentModel);
             return new Vector3(cuboid.yaw, cuboid.pitch, cuboid.roll);
         }
 
         @Override
-        public Matrix4 getTransform() {
-            return new Matrix4().translate(getPosition().scl(0.0625)).rotate(getQuaternion());
+        public Matrix4 getTransform(RenderContext context) {
+            return new Matrix4().translate(getPosition(context).scl(0.0625)).rotate(getQuaternion(context));
         }
 
         @Override
-        public boolean isVisible() { return CustomModelClient.currentJsonModel.isVisible(playerBone); }
+        public boolean isVisible(RenderContext context) { return context.currentJsonModel.isVisible(playerBone); }
 
         @Override
-        public Vector3 getScale() {
+        public Vector3 getScale(RenderContext context) {
             return One.cpy();
         }
 
         @Override
-        public Vec2d getTextureSize() {
+        public Vec2d getTextureSize(RenderContext context) {
             return TexSize;
         }
 
         @Override
-        public Supplier<Identifier> getTexture() { return ModelPack.defGetter[0]; }
+        public Function<RenderContext, Identifier> getTexture(RenderContext context) { return ModelPack.defGetter[0]; }
 
         @Override
         public IBone getParent() { return null; }
@@ -126,27 +127,27 @@ public enum PlayerBone {
     public static class BlankBone implements IBone {
 
         @Override
-        public Vector3 getPosition() {
+        public Vector3 getPosition(RenderContext context) {
             return Vector3.Zero.cpy();
         }
 
         @Override
-        public Vector3 getRotation() {
+        public Vector3 getRotation(RenderContext context) {
             return Vector3.Zero.cpy();
         }
 
         @Override
-        public Vector3 getScale() {
+        public Vector3 getScale(RenderContext context) {
             return One.cpy();
         }
 
         @Override
-        public Vec2d getTextureSize() {
+        public Vec2d getTextureSize(RenderContext context) {
             return TexSize;
         }
 
         @Override
-        public Supplier<Identifier> getTexture() {
+        public Function<RenderContext, Identifier> getTexture(RenderContext context) {
             return ModelPack.defGetter[0];
         }
 
@@ -166,7 +167,7 @@ public enum PlayerBone {
         }
 
         @Override
-        public boolean isVisible() {
+        public boolean isVisible(RenderContext context) {
             return true;
         }
     }

@@ -4,6 +4,7 @@ import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.client.ModelPack;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
 import com.github.gamepiaynmo.custommodel.render.PlayerFeature;
+import com.github.gamepiaynmo.custommodel.render.RenderContext;
 import com.github.gamepiaynmo.custommodel.render.model.IBone;
 import com.github.gamepiaynmo.custommodel.util.Matrix4;
 import com.google.common.collect.Maps;
@@ -24,9 +25,11 @@ import java.util.Map;
 
 public class CustomArmorBiped<T extends AbstractClientPlayerEntity, M extends BipedEntityModel<T>, A extends BipedEntityModel<T>> extends ArmorBipedFeatureRenderer<T, M, A> {
     private static final Map<String, Identifier> ARMOR_TEXTURE_CACHE = Maps.newHashMap();
+    private final RenderContext context;
 
-    public CustomArmorBiped(FeatureRendererContext<T, M> featureRendererContext_1, A bipedEntityModel_1, A bipedEntityModel_2) {
+    public CustomArmorBiped(FeatureRendererContext<T, M> featureRendererContext_1, A bipedEntityModel_1, A bipedEntityModel_2, RenderContext context) {
         super(featureRendererContext_1, bipedEntityModel_1, bipedEntityModel_2);
+        this.context = context;
     }
 
     @Override
@@ -90,7 +93,7 @@ public class CustomArmorBiped<T extends AbstractClientPlayerEntity, M extends Bi
     private void renderCuboid(CustomJsonModel model, PlayerFeature feature, Cuboid cuboid, float scale) {
         for (IBone bone : model.getFeatureAttached(feature)) {
             boolean visible = cuboid.visible;
-            cuboid.visible = bone.isVisible();
+            cuboid.visible = bone.isVisible(context);
             if (cuboid.visible) {
                 float x = cuboid.rotationPointX;
                 float y = cuboid.rotationPointY;
@@ -106,7 +109,7 @@ public class CustomArmorBiped<T extends AbstractClientPlayerEntity, M extends Bi
                 cuboid.roll = 0;
 
                 GlStateManager.pushMatrix();
-                GL11.glMultMatrixd(CustomModelClient.currentInvTransform.val);
+                GL11.glMultMatrixd(context.currentInvTransform.val);
                 GL11.glMultMatrixd(model.getTransform(bone).val);
                 cuboid.render(scale);
                 GlStateManager.popMatrix();

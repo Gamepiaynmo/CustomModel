@@ -4,6 +4,7 @@ import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.client.ModelPack;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
 import com.github.gamepiaynmo.custommodel.render.PlayerFeature;
+import com.github.gamepiaynmo.custommodel.render.RenderContext;
 import com.github.gamepiaynmo.custommodel.render.model.IBone;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
@@ -21,8 +22,10 @@ import org.lwjgl.opengl.GL11;
 import java.util.function.Supplier;
 
 public class CustomCape extends CapeFeatureRenderer {
-    public CustomCape(FeatureRendererContext<AbstractClientPlayerEntity, PlayerEntityModel<AbstractClientPlayerEntity>> featureRendererContext_1) {
+    private final RenderContext context;
+    public CustomCape(FeatureRendererContext<AbstractClientPlayerEntity, PlayerEntityModel<AbstractClientPlayerEntity>> featureRendererContext_1, RenderContext context) {
         super(featureRendererContext_1);
+        this.context = context;
     }
 
     @Override
@@ -39,9 +42,9 @@ public class CustomCape extends CapeFeatureRenderer {
             if (itemStack_1.getItem() != Items.ELYTRA) {
                 GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
                 for (IBone bone : model.getFeatureAttached(PlayerFeature.CAPE)) {
-                    if (!bone.isVisible()) continue;
-                    Identifier customCapeTex = bone.getTexture().get();
-                    boolean customCape = !customCapeTex.equals(pack.getBaseTexture().get());
+                    if (!bone.isVisible(context)) continue;
+                    Identifier customCapeTex = bone.getTexture(context).apply(context);
+                    boolean customCape = !customCapeTex.equals(pack.getBaseTexture().apply(context));
 
                     if ((abstractClientPlayerEntity_1.getCapeTexture() != null && abstractClientPlayerEntity_1.canRenderCapeTexture()) || customCape) {
                         GlStateManager.pushMatrix();
@@ -68,7 +71,7 @@ public class CustomCape extends CapeFeatureRenderer {
                             float_9 += 25.0F;
                         }
 
-                        GL11.glMultMatrixd(CustomModelClient.currentInvTransform.val);
+                        GL11.glMultMatrixd(context.currentInvTransform.val);
                         GL11.glMultMatrixd(model.getTransform(bone).val);
                         this.bindTexture(customCape ? customCapeTex : abstractClientPlayerEntity_1.getCapeTexture());
 

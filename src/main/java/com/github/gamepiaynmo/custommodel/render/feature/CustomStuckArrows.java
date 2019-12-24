@@ -4,6 +4,7 @@ import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.client.ModelPack;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
 import com.github.gamepiaynmo.custommodel.render.PlayerBone;
+import com.github.gamepiaynmo.custommodel.render.RenderContext;
 import com.github.gamepiaynmo.custommodel.render.model.Bone;
 import com.github.gamepiaynmo.custommodel.render.model.Quad;
 import com.google.common.collect.Lists;
@@ -26,10 +27,12 @@ import java.util.Random;
 
 public class CustomStuckArrows<T extends AbstractClientPlayerEntity, M extends PlayerEntityModel<T>> extends StuckArrowsFeatureRenderer<T, M> {
     private final EntityRenderDispatcher field_17153;
+    private final RenderContext context;
 
-    public CustomStuckArrows(LivingEntityRenderer<T, M> livingEntityRenderer_1) {
+    public CustomStuckArrows(LivingEntityRenderer<T, M> livingEntityRenderer_1, RenderContext context) {
         super(livingEntityRenderer_1);
         this.field_17153 = livingEntityRenderer_1.getRenderManager();
+        this.context = context;
     }
 
     @Override
@@ -49,7 +52,7 @@ public class CustomStuckArrows<T extends AbstractClientPlayerEntity, M extends P
 
             List<Bone> bones = Lists.newArrayList();
             for (Bone bone : model.getBones()) {
-                if (bone.isVisible() && (bone.getBoxes().size() > 0 || bone.getQuads().size() > 0))
+                if (bone.isVisible(context) && (bone.getBoxes().size() > 0 || bone.getQuads().size() > 0))
                     bones.add(bone);
             }
 
@@ -70,7 +73,7 @@ public class CustomStuckArrows<T extends AbstractClientPlayerEntity, M extends P
 
                 int index = random_1.nextInt(bones.size() + playerBones.size());
                 if (index < playerBones.size()) {
-                    Cuboid cuboid_1 = playerBones.get(index).getCuboid(CustomModelClient.currentModel);
+                    Cuboid cuboid_1 = playerBones.get(index).getCuboid(context.currentModel);
                     Box box_1 = (Box) cuboid_1.boxes.get(random_1.nextInt(cuboid_1.boxes.size()));
                     cuboid_1.applyTransform(0.0625F);
                     float_11 = MathHelper.lerp(float_8, box_1.xMin, box_1.xMax) / 16.0F;
@@ -79,7 +82,7 @@ public class CustomStuckArrows<T extends AbstractClientPlayerEntity, M extends P
                 } else {
                     Bone bone = bones.get(index - playerBones.size());
                     index = random_1.nextInt(bone.getBoxes().size() + bone.getQuads().size());
-                    GL11.glMultMatrixd(CustomModelClient.currentInvTransform.val);
+                    GL11.glMultMatrixd(context.currentInvTransform.val);
                     GL11.glMultMatrixd(model.getTransform(bone).val);
                     if (index < bone.getBoxes().size()) {
                         com.github.gamepiaynmo.custommodel.render.model.Box box_1 = bone.getBoxes().get(index);

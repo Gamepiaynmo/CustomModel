@@ -4,6 +4,7 @@ import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.client.ModelPack;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
 import com.github.gamepiaynmo.custommodel.render.PlayerFeature;
+import com.github.gamepiaynmo.custommodel.render.RenderContext;
 import com.github.gamepiaynmo.custommodel.render.model.IBone;
 import com.github.gamepiaynmo.custommodel.server.CustomModel;
 import com.github.gamepiaynmo.custommodel.util.Matrix4;
@@ -24,8 +25,10 @@ import org.lwjgl.opengl.GL11;
 import java.util.Collection;
 
 public class CustomHeldItem<T extends AbstractClientPlayerEntity, M extends PlayerEntityModel<T>> extends HeldItemFeatureRenderer<T, M> {
-    public CustomHeldItem(FeatureRendererContext featureRendererContext_1) {
+    private final RenderContext context;
+    public CustomHeldItem(FeatureRendererContext featureRendererContext_1, RenderContext context) {
         super(featureRendererContext_1);
+        this.context = context;
     }
 
     private AbstractClientPlayerEntity playerEntity;
@@ -51,13 +54,13 @@ public class CustomHeldItem<T extends AbstractClientPlayerEntity, M extends Play
                 CustomJsonModel model = pack.getModel();
                 PlayerFeature feature = boolean_1 ? PlayerFeature.HELD_ITEM_LEFT : PlayerFeature.HELD_ITEM_RIGHT;
                 for (IBone bone : model.getFeatureAttached(feature)) {
-                    if (bone.isVisible()) {
+                    if (bone.isVisible(context)) {
                         GlStateManager.pushMatrix();
                         if (bone.getPlayerBone() != null) {
                             this.method_4193(arm_1);
                             GlStateManager.translatef(-(float)(boolean_1 ? -1 : 1) / 16.0F, 0.625F, -0.125F);
                         } else {
-                            GL11.glMultMatrixd(CustomModelClient.currentInvTransform.val);
+                            GL11.glMultMatrixd(context.currentInvTransform.val);
                             GL11.glMultMatrixd(model.getTransform(bone).val);
                         }
 

@@ -8,6 +8,7 @@ import com.github.gamepiaynmo.custommodel.expression.ParseException;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
 import com.github.gamepiaynmo.custommodel.render.PlayerBone;
 import com.github.gamepiaynmo.custommodel.render.PlayerFeature;
+import com.github.gamepiaynmo.custommodel.render.RenderContext;
 import com.github.gamepiaynmo.custommodel.util.*;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonElement;
@@ -21,6 +22,7 @@ import org.lwjgl.opengl.GL11;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class Bone implements IBone {
@@ -61,7 +63,7 @@ public class Bone implements IBone {
     private boolean compiled = false;
     private int glList;
 
-    public static Bone getBoneFromJson(ModelPack pack, CustomJsonModel model, JsonObject jsonObj) throws ParseException {
+    public static Bone getBoneFromJson(ModelPack pack, CustomJsonModel model, JsonObject jsonObj, RenderContext context) throws ParseException {
         Bone bone = new Bone(model);
 
         bone.id = Json.getString(jsonObj, CustomJsonModel.ID);
@@ -112,11 +114,11 @@ public class Bone implements IBone {
         });
 
         Json.parseJsonArray(jsonObj.get(CustomJsonModel.BOXES), element -> {
-            bone.boxes.add(Box.getBoxFromJson(bone, element.getAsJsonObject()));
+            bone.boxes.add(Box.getBoxFromJson(bone, element.getAsJsonObject(), context));
         });
 
         Json.parseJsonArray(jsonObj.get(CustomJsonModel.QUADS), element -> {
-            bone.quads.add(Quad.getQuadFromJson(bone, element.getAsJsonObject()));
+            bone.quads.add(Quad.getQuadFromJson(bone, element.getAsJsonObject(), context));
         });
 
         Json.parseJsonArray(jsonObj.get(CustomJsonModel.PARTICLES), element -> {
@@ -142,40 +144,40 @@ public class Bone implements IBone {
     }
 
     @Override
-    public Vector3 getPosition() {
+    public Vector3 getPosition(RenderContext context) {
         return position.cpy();
     }
 
     @Override
-    public Vector3 getRotation() {
+    public Vector3 getRotation(RenderContext context) {
         return rotation.cpy();
     }
 
     @Override
-    public Vector3 getScale() {
+    public Vector3 getScale(RenderContext context) {
         return scale.cpy();
     }
 
     @Override
-    public boolean isVisible() { return visible; }
+    public boolean isVisible(RenderContext context) { return visible; }
 
     @Override
-    public Vec2d getTextureSize() {
+    public Vec2d getTextureSize(RenderContext context) {
         if (textureSize == null) {
-            return textureSize = model.pack.getTextureSize(getTexture().get());
+            return textureSize = model.pack.getTextureSize(getTexture(context).apply(context));
         }
         return textureSize;
     }
 
     @Override
-    public Supplier<Identifier> getTexture() {
+    public Function<RenderContext, Identifier> getTexture(RenderContext context) {
         if (texture == null) {
-            Supplier<Identifier> res = parent.getTexture();
+            Function<RenderContext, Identifier> res = parent.getTexture(context);
             if (parent instanceof Bone)
                 texture = ((Bone) parent).texture;
             return res;
         }
-        return model.pack.getTexture((int) texture.eval());
+        return model.pack.getTexture((int) texture.eval(context));
     }
 
     @Override
@@ -192,15 +194,15 @@ public class Bone implements IBone {
     public double[] getPhysicsParams() { return physicsParams; }
     public double getLength() { return length; }
 
-    public void render() {
-        float scaleFactor = CustomModelClient.currentParameter.scale;
+    public void render(RenderContext context) {
+        float scaleFactor = context.currentParameter.scale;
         if (!compiled)
             compile(scaleFactor);
         GlStateManager.color4f(color[0], color[1], color[2], alpha);
         GlStateManager.callList(glList);
 
         for (ItemPart item : items)
-            item.render();
+            item.render(context);
         GlStateManager.enableRescaleNormal();
     }
 
@@ -220,25 +222,25 @@ public class Bone implements IBone {
 
     private static double degToRad = Math.PI / 180;
 
-    public void update() {
-        position.set(positionExpr[0].eval(), positionExpr[1].eval(), positionExpr[2].eval()).scl(-1, -1, 1);
-        rotation.set(rotationExpr[0].eval(), rotationExpr[1].eval(), rotationExpr[2].eval()).scl(degToRad);
-        scale.set(scaleExpr[0].eval(), scaleExpr[1].eval(), scaleExpr[2].eval());
-        visible = parent.isVisible() && visibleExpr.eval();
+    public void update(RenderContext context) {
+        position.set(positionExpr[0].eval(context), positionExpr[1].eval(context), positionExpr[2].eval(context)).scl(-1, -1, 1);
+        rotation.set(rotationExpr[0].eval(context), rotationExpr[1].eval(context), rotationExpr[2].eval(context)).scl(degToRad);
+        scale.set(scaleExpr[0].eval(context), scaleExpr[1].eval(context), scaleExpr[2].eval(context));
+        visible = parent.isVisible(context) && visibleExpr.eval(context);
         length = position.len() * 0.0625;
-        color[0] = colorExpr[0].eval();
-        color[1] = colorExpr[1].eval();
-        color[2] = colorExpr[2].eval();
-        alpha = alphaExpr.eval();
+        color[0] = colorExpr[0].eval(context);
+        color[1] = colorExpr[1].eval(context);
+        color[2] = colorExpr[2].eval(context);
+        alpha = alphaExpr.eval(context);
         if (physicalize) {
             for (int i = 0; i < physicsParams.length; i++)
-                physicsParams[i] = physicsExpr[i].eval();
+                physicsParams[i] = physicsExpr[i].eval(context);
         }
     }
 
-    public void tick(Matrix4 transform) {
+    public void tick(Matrix4 transform, RenderContext context) {
         for (ParticleEmitter emitter : particles)
-            emitter.tick(transform);
+            emitter.tick(transform, context);
     }
 
     public void release() {

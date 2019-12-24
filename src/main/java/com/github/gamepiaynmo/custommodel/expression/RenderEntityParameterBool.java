@@ -1,6 +1,7 @@
 package com.github.gamepiaynmo.custommodel.expression;
 
 import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
+import com.github.gamepiaynmo.custommodel.render.RenderContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -25,9 +26,9 @@ public enum RenderEntityParameterBool implements IExpressionBool {
 
    private String name;
    private static final RenderEntityParameterBool[] VALUES = values();
-   private final Function<PlayerEntity, Boolean> valueGetter;
+   private final Function<LivingEntity, Boolean> valueGetter;
 
-   RenderEntityParameterBool(String name, Function<PlayerEntity, Boolean> getter) {
+   RenderEntityParameterBool(String name, Function<LivingEntity, Boolean> getter) {
       this.name = name;
       valueGetter = getter;
    }
@@ -36,8 +37,8 @@ public enum RenderEntityParameterBool implements IExpressionBool {
       return this.name;
    }
 
-   public boolean eval() {
-      return valueGetter.apply(CustomModelClient.currentPlayer);
+   public boolean eval(RenderContext context) {
+      return valueGetter.apply(context.currentEntity);
    }
 
    public static RenderEntityParameterBool parse(String str) {

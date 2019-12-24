@@ -47,24 +47,25 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
         for (int i = 0; i < this.features.size(); i++) {
             FeatureRenderer feature = this.features.get(i);
             if (feature instanceof ArmorBipedFeatureRenderer)
-                feature = new CustomArmorBiped<>(this, new BipedEntityModel(0.5F), new BipedEntityModel(1.0F));
+                feature = new CustomArmorBiped<>(this, new BipedEntityModel(0.5F), new BipedEntityModel(1.0F), context);
             if (feature instanceof HeldItemFeatureRenderer)
-                feature = new CustomHeldItem<>(this);
+                feature = new CustomHeldItem<>(this, context);
             if (feature instanceof StuckArrowsFeatureRenderer)
-                feature = new CustomStuckArrows<>(this);
+                feature = new CustomStuckArrows<>(this, context);
             if (feature instanceof CapeFeatureRenderer)
-                feature = new CustomCape(this);
+                feature = new CustomCape(this, context);
             if (feature instanceof HeadFeatureRenderer)
-                feature = new CustomHead<>(this);
+                feature = new CustomHead<>(this, context);
             if (feature instanceof ElytraFeatureRenderer)
-                feature = new CustomElytra<>(this);
+                feature = new CustomElytra<>(this, context);
             if (feature instanceof ShoulderParrotFeatureRenderer)
-                feature = new CustomShoulderParrot<>(this);
+                feature = new CustomShoulderParrot<>(this, context);
             this.features.set(i, feature);
         }
     }
 
     public boolean disableSetModelPose;
+    private static RenderContext context = new RenderContext();
 
     @Inject(method = "setModelPose(Lnet/minecraft/client/network/AbstractClientPlayerEntity;)V", at = @At("HEAD"), cancellable = true)
     private void setModelPose(AbstractClientPlayerEntity playerEntity, CallbackInfo info) {
@@ -89,21 +90,21 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
 
             ModelPack model = CustomModelClient.getModelForPlayer(playerEntity);
             if (model != null) {
-                CustomModelClient.currentJsonModel = model.getModel();
-                CustomModelClient.currentJsonModel.clearTransform();
+                context.currentJsonModel = model.getModel();
+                context.currentJsonModel.clearTransform();
                 if (CustomModelClient.isRenderingInventory) {
                     EntityParameter currentParameter = new EntityParameter(playerEntity);
                     CustomModelClient.inventoryEntityParameter.apply(playerEntity);
-                    CustomModelClient.currentParameter = calculateTransform(playerEntity);
-                    CustomModelClient.currentJsonModel.update(this.transform);
+                    context.currentParameter = calculateTransform(playerEntity);
+                    context.currentJsonModel.update(this.transform, context);
                     currentParameter.apply(playerEntity);
                 }
 
-                CustomModelClient.currentParameter = calculateTransform(playerEntity);
-                CustomModelClient.currentInvTransform = transform.cpy().inv();
+                context.currentParameter = calculateTransform(playerEntity);
+                context.currentInvTransform = transform.cpy().inv();
 
-                model.getModel().updateSkeleton();
-                CustomModelClient.currentJsonModel.render(transform);
+                model.getModel().updateSkeleton(context);
+                context.currentJsonModel.render(transform, context);
                 resetSkeleton();
             }
 
@@ -122,11 +123,10 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
             CustomModelClient.isRenderingFirstPerson = true;
             CustomJsonModel model = pack.getModel();
             partial = CustomModelClient.getPartial();
-            CustomModelClient.currentJsonModel = model;
-            CustomModelClient.currentModel = getModel();
-            CustomModelClient.currentParameter = calculateTransform(abstractClientPlayerEntity);
-            CustomModelClient.currentPlayer = abstractClientPlayerEntity;
-            CustomModelClient.currentRenderer = (PlayerEntityRenderer) (Object) this;
+            context.currentJsonModel = model;
+            context.currentModel = getModel();
+            context.currentParameter = calculateTransform(abstractClientPlayerEntity);
+            context.setPlayer(abstractClientPlayerEntity);
 
             GlStateManager.color3f(1.0F, 1.0F, 1.0F);
             PlayerEntityModel<AbstractClientPlayerEntity> playerEntityModel = getModel();
@@ -140,13 +140,13 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
             playerEntityModel.rightArmOverlay.pitch = 0;
 
             model.clearTransform();
-            model.update(this.transform);
+            model.update(this.transform, context);
 
             if (!model.isHidden(PlayerBone.RIGHT_ARM))
                 playerEntityModel.rightArm.render(0.0625F);
             if (!model.isHidden(PlayerBone.RIGHT_ARM_OVERLAY))
                 playerEntityModel.rightArmOverlay.render(0.0625F);
-            model.renderArm(model.getTransform(PlayerBone.RIGHT_ARM.getBone()), Arm.RIGHT);
+            model.renderArm(model.getTransform(PlayerBone.RIGHT_ARM.getBone()), Arm.RIGHT, context);
 
             GlStateManager.disableBlend();
             CustomModelClient.isRenderingFirstPerson = false;
@@ -161,11 +161,10 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
             CustomModelClient.isRenderingFirstPerson = true;
             CustomJsonModel model = pack.getModel();
             partial = CustomModelClient.getPartial();
-            CustomModelClient.currentJsonModel = model;
-            CustomModelClient.currentModel = getModel();
-            CustomModelClient.currentParameter = calculateTransform(abstractClientPlayerEntity);
-            CustomModelClient.currentPlayer = abstractClientPlayerEntity;
-            CustomModelClient.currentRenderer = (PlayerEntityRenderer) (Object) this;
+            context.currentJsonModel = model;
+            context.currentModel = getModel();
+            context.currentParameter = calculateTransform(abstractClientPlayerEntity);
+            context.setPlayer(abstractClientPlayerEntity);
 
             GlStateManager.color3f(1.0F, 1.0F, 1.0F);
             PlayerEntityModel<AbstractClientPlayerEntity> playerEntityModel = getModel();
@@ -179,13 +178,13 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
             playerEntityModel.leftArmOverlay.pitch = 0.0F;
 
             model.clearTransform();
-            model.update(this.transform);
+            model.update(this.transform, context);
 
             if (!model.isHidden(PlayerBone.LEFT_ARM))
                 playerEntityModel.leftArm.render(0.0625F);
             if (!model.isHidden(PlayerBone.LEFT_ARM_OVERLAY))
                 playerEntityModel.leftArmOverlay.render(0.0625F);
-            model.renderArm(model.getTransform(PlayerBone.LEFT_ARM.getBone()), Arm.LEFT);
+            model.renderArm(model.getTransform(PlayerBone.LEFT_ARM.getBone()), Arm.LEFT, context);
 
             GlStateManager.disableBlend();
             CustomModelClient.isRenderingFirstPerson = false;
@@ -194,25 +193,29 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
     }
 
     @Override
-    public void tick(AbstractClientPlayerEntity playerEntity) {
-        ModelPack model = CustomModelClient.getModelForPlayer(playerEntity);
-        if (model != null) {
-            this.model.handSwingProgress = this.getHandSwingProgress(playerEntity, 1);
-            this.model.isRiding = playerEntity.hasVehicle();
-            this.model.isChild = playerEntity.isBaby();
+    public void tick(LivingEntity livingEntity) {
+        ModelPack model = null;
+        context.setEntity(livingEntity);
+        if (context.isPlayer()) {
+            CustomModelClient.getModelForPlayer(context.getPlayer());
+            AbstractClientPlayerEntity playerEntity = context.getPlayer();
 
-            this.partial = 1;
-            CustomModelClient.currentModel = getModel();
-            CustomModelClient.currentParameter = calculateTransform(playerEntity);
+            if (model != null) {
+                this.model.handSwingProgress = this.getHandSwingProgress(playerEntity, 1);
+                this.model.isRiding = playerEntity.hasVehicle();
+                this.model.isChild = playerEntity.isBaby();
 
-            CustomModelClient.currentPlayer = playerEntity;
-            CustomModelClient.currentRenderer = (PlayerEntityRenderer) (Object) this;
-            CustomModelClient.currentJsonModel = model.getModel();
-            CustomModelClient.currentInvTransform = transform.cpy().inv();
+                this.partial = 1;
+                context.currentModel = getModel();
+                context.currentParameter = calculateTransform(playerEntity);
 
-            model.getModel().updateSkeleton();
-            model.getModel().tick(transform);
-            resetSkeleton();
+                context.currentJsonModel = model.getModel();
+                context.currentInvTransform = transform.cpy().inv();
+
+                model.getModel().updateSkeleton(context);
+                model.getModel().tick(transform, context);
+                resetSkeleton();
+            }
         }
     }
 
@@ -220,9 +223,8 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/PlayerEntityRenderer;setModelPose(Lnet/minecraft/client/network/AbstractClientPlayerEntity;)V"))
     public void render(AbstractClientPlayerEntity playerEntity, double offX, double offY, double offZ, float rotYaw, float partial, CallbackInfo info) {
         ModelPack model = CustomModelClient.getModelForPlayer(playerEntity);
-        CustomModelClient.currentPlayer = playerEntity;
-        CustomModelClient.currentRenderer = (PlayerEntityRenderer) (Object) this;
-        CustomModelClient.currentModel = getModel();
+        context.setPlayer(playerEntity);
+        context.currentModel = getModel();
 
         disableSetModelPose = model != null;
         if (disableSetModelPose) {
@@ -232,7 +234,7 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
     }
 
     public void resetSkeleton() {
-        PlayerEntityModel model = CustomModelClient.currentModel;
+        PlayerEntityModel model = context.currentModel;
         model.head.setRotationPoint(0.0F, 0.0F, 0.0F);
         model.headwear.setRotationPoint(0.0F, 0.0F, 0.0F);
         model.body.setRotationPoint(0.0F, 0.0F, 0.0F);
@@ -261,7 +263,7 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
     private float partial;
     private Matrix4 transform;
 
-    private void method_4048_c(AbstractClientPlayerEntity abstractClientPlayerEntity_1, double partial) {
+    private void method_4048_c(LivingEntity abstractClientPlayerEntity_1, double partial) {
         double double_1 = MathHelper.lerp(partial, abstractClientPlayerEntity_1.prevX, abstractClientPlayerEntity_1.x);
         double double_2 = MathHelper.lerp(partial, abstractClientPlayerEntity_1.prevY, abstractClientPlayerEntity_1.y);
         double double_3 = MathHelper.lerp(partial, abstractClientPlayerEntity_1.prevZ, abstractClientPlayerEntity_1.z);
@@ -294,39 +296,41 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
         }
     }
 
-    private void setupTransforms_c(AbstractClientPlayerEntity abstractClientPlayerEntity_1, float float_1, float float_2, float float_3) {
-        EntityPose entityPose_1 = abstractClientPlayerEntity_1.getPose();
-        if (entityPose_1 != EntityPose.SLEEPING) {
-            transform.rotate(0.0F, 1.0F, 0.0F, 180.0F - float_2);
-        }
-
-        if (abstractClientPlayerEntity_1.deathTime > 0) {
-            float float_4 = ((float)abstractClientPlayerEntity_1.deathTime + float_3 - 1.0F) / 20.0F * 1.6F;
-            float_4 = MathHelper.sqrt(float_4);
-            if (float_4 > 1.0F) {
-                float_4 = 1.0F;
+    private void setupTransforms_c(LivingEntity entity, float float_1, float float_2, float float_3) {
+        if (entity instanceof AbstractClientPlayerEntity) {
+            AbstractClientPlayerEntity abstractClientPlayerEntity_1 = (AbstractClientPlayerEntity) entity;
+            EntityPose entityPose_1 = abstractClientPlayerEntity_1.getPose();
+            if (entityPose_1 != EntityPose.SLEEPING) {
+                transform.rotate(0.0F, 1.0F, 0.0F, 180.0F - float_2);
             }
 
-            transform.rotate(0.0F, 0.0F, 1.0F, float_4 * this.getLyingAngle(abstractClientPlayerEntity_1));
-        } else if (abstractClientPlayerEntity_1.isUsingRiptide()) {
-            transform.rotate(1.0F, 0.0F, 0.0F, -90.0F - abstractClientPlayerEntity_1.pitch);
-            transform.rotate(0.0F, 1.0F, 0.0F, ((float)abstractClientPlayerEntity_1.age + float_3) * -75.0F);
-        } else if (entityPose_1 == EntityPose.SLEEPING) {
-            Direction direction_1 = abstractClientPlayerEntity_1.getSleepingDirection();
-            transform.rotate(0.0F, 1.0F, 0.0F, direction_1 != null ? method_18656_c(direction_1) : float_2);
-            transform.rotate(0.0F, 0.0F, 1.0F, this.getLyingAngle(abstractClientPlayerEntity_1));
-            transform.rotate(0.0F, 1.0F, 0.0F, 270.0F);
-        } else {
-            String string_1 = Formatting.strip(abstractClientPlayerEntity_1.getName().getString());
-            if (string_1 != null && ("Dinnerbone".equals(string_1) || "Grumm".equals(string_1)) && abstractClientPlayerEntity_1.isSkinOverlayVisible(PlayerModelPart.CAPE)) {
-                transform.translate(0.0F, abstractClientPlayerEntity_1.getHeight() + 0.1F, 0.0F);
-                transform.rotate(0.0F, 0.0F, 1.0F, 180.0F);
+            if (abstractClientPlayerEntity_1.deathTime > 0) {
+                float float_4 = ((float) abstractClientPlayerEntity_1.deathTime + float_3 - 1.0F) / 20.0F * 1.6F;
+                float_4 = MathHelper.sqrt(float_4);
+                if (float_4 > 1.0F) {
+                    float_4 = 1.0F;
+                }
+
+                transform.rotate(0.0F, 0.0F, 1.0F, float_4 * this.getLyingAngle(abstractClientPlayerEntity_1));
+            } else if (abstractClientPlayerEntity_1.isUsingRiptide()) {
+                transform.rotate(1.0F, 0.0F, 0.0F, -90.0F - abstractClientPlayerEntity_1.pitch);
+                transform.rotate(0.0F, 1.0F, 0.0F, ((float) abstractClientPlayerEntity_1.age + float_3) * -75.0F);
+            } else if (entityPose_1 == EntityPose.SLEEPING) {
+                Direction direction_1 = abstractClientPlayerEntity_1.getSleepingDirection();
+                transform.rotate(0.0F, 1.0F, 0.0F, direction_1 != null ? method_18656_c(direction_1) : float_2);
+                transform.rotate(0.0F, 0.0F, 1.0F, this.getLyingAngle(abstractClientPlayerEntity_1));
+                transform.rotate(0.0F, 1.0F, 0.0F, 270.0F);
+            } else {
+                String string_1 = Formatting.strip(abstractClientPlayerEntity_1.getName().getString());
+                if (string_1 != null && ("Dinnerbone".equals(string_1) || "Grumm".equals(string_1)) && abstractClientPlayerEntity_1.isSkinOverlayVisible(PlayerModelPart.CAPE)) {
+                    transform.translate(0.0F, abstractClientPlayerEntity_1.getHeight() + 0.1F, 0.0F);
+                    transform.rotate(0.0F, 0.0F, 1.0F, 180.0F);
+                }
             }
         }
-
     }
 
-    private void method_4212_c(AbstractClientPlayerEntity abstractClientPlayerEntity_1, float float_1, float float_2, float float_3) {
+    private void method_4212_c(LivingEntity abstractClientPlayerEntity_1, float float_1, float float_2, float float_3) {
         float float_4 = abstractClientPlayerEntity_1.method_6024(float_3);
         float float_7;
         float float_6;
@@ -363,7 +367,7 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
 
     }
 
-    private float scaleAndTranslate_c(AbstractClientPlayerEntity playerEntity, float float_1) {
+    private float scaleAndTranslate_c(LivingEntity playerEntity, float float_1) {
         transform.scale(-1.0F, -1.0F, 1.0F);
         transform.scale(0.9375F, 0.9375F, 0.9375F);
         transform.translate(0.0F, -1.501F, 0.0F);

@@ -61,27 +61,33 @@ public class ModelResolver implements IExpressionResolver {
             return pack.getTexture(second);
          }
          case "inv": {
-            PlayerInventory inventory = CustomModelClient.currentPlayer.inventory;
             IExpressionFloat result = null;
             switch (second) {
-               case "mainhand": result = () ->
-                       Registry.ITEM.getRawId(inventory.getMainHandStack().getItem()); break;
-               case "offhand": result = () ->
-                       Registry.ITEM.getRawId(inventory.offHand.get(0).getItem()); break;
-               case "helmet": result = () ->
-                       Registry.ITEM.getRawId(inventory.getArmorStack(3).getItem()); break;
-               case "chestplate": result = () ->
-                       Registry.ITEM.getRawId(inventory.getArmorStack(2).getItem()); break;
-               case "leggings": result = () ->
-                       Registry.ITEM.getRawId(inventory.getArmorStack(1).getItem()); break;
-               case "boots": result = () ->
-                       Registry.ITEM.getRawId(inventory.getArmorStack(0).getItem()); break;
+               case "mainhand": result = (context) ->
+                       !context.isPlayer() ? 0:
+                       Registry.ITEM.getRawId(context.getPlayer().inventory.getMainHandStack().getItem()); break;
+               case "offhand": result = (context) ->
+                       !context.isPlayer() ? 0:
+                       Registry.ITEM.getRawId(context.getPlayer().inventory.offHand.get(0).getItem()); break;
+               case "helmet": result = (context) ->
+                       !context.isPlayer() ? 0:
+                       Registry.ITEM.getRawId(context.getPlayer().inventory.getArmorStack(3).getItem()); break;
+               case "chestplate": result = (context) ->
+                       !context.isPlayer() ? 0:
+                       Registry.ITEM.getRawId(context.getPlayer().inventory.getArmorStack(2).getItem()); break;
+               case "leggings": result = (context) ->
+                       !context.isPlayer() ? 0:
+                       Registry.ITEM.getRawId(context.getPlayer().inventory.getArmorStack(1).getItem()); break;
+               case "boots": result = (context) ->
+                       !context.isPlayer() ? 0:
+                       Registry.ITEM.getRawId(context.getPlayer().inventory.getArmorStack(0).getItem()); break;
                default:
                   try {
                      if (second.startsWith("main")) {
                         int index = Integer.parseInt(second.substring(4));
-                        if (index >= 0 && index < inventory.main.size())
-                           result = () -> Registry.ITEM.getRawId(inventory.main.get(index).getItem());
+                        if (index >= 0 && index < 36)
+                           result = (context) -> !context.isPlayer() ? 0:
+                                   Registry.ITEM.getRawId(context.getPlayer().inventory.main.get(index).getItem());
                      }
                   } catch (NumberFormatException e) {
                   }

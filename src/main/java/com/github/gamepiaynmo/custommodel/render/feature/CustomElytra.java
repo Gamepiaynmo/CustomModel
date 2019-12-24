@@ -4,6 +4,7 @@ import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.client.ModelPack;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
 import com.github.gamepiaynmo.custommodel.render.PlayerFeature;
+import com.github.gamepiaynmo.custommodel.render.RenderContext;
 import com.github.gamepiaynmo.custommodel.render.model.IBone;
 import com.github.gamepiaynmo.custommodel.server.CustomModel;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -27,9 +28,11 @@ import java.util.function.Supplier;
 public class CustomElytra<T extends AbstractClientPlayerEntity, M extends PlayerEntityModel<T>> extends ElytraFeatureRenderer<T, M> {
     private static final Identifier SKIN = new Identifier("textures/entity/elytra.png");
     private final ElytraEntityModel<T> elytra = new ElytraEntityModel();
+    private final RenderContext context;
 
-    public CustomElytra(FeatureRendererContext<T, M> featureRendererContext_1) {
+    public CustomElytra(FeatureRendererContext<T, M> featureRendererContext_1, RenderContext context) {
         super(featureRendererContext_1);
+        this.context = context;
     }
 
     @Override
@@ -48,10 +51,10 @@ public class CustomElytra<T extends AbstractClientPlayerEntity, M extends Player
             GlStateManager.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
 
             for (IBone bone : model.getFeatureAttached(PlayerFeature.ELYTRA)) {
-                if (!bone.isVisible()) continue;
+                if (!bone.isVisible(context)) continue;
 
-                Identifier customElytraTex = bone.getTexture().get();
-                boolean customElytra = !customElytraTex.equals(pack.getBaseTexture().get());
+                Identifier customElytraTex = bone.getTexture(context).apply(context);
+                boolean customElytra = !customElytraTex.equals(pack.getBaseTexture().apply(context));
                 if (customElytra) {
                     this.bindTexture(customElytraTex);
                 } else if (livingEntity_1.canRenderElytraTexture() && livingEntity_1.getElytraTexture() != null) {
@@ -65,7 +68,7 @@ public class CustomElytra<T extends AbstractClientPlayerEntity, M extends Player
                 GlStateManager.pushMatrix();
                 GlStateManager.translatef(0.0F, 0.0F, 0.125F);
 
-                GL11.glMultMatrixd(CustomModelClient.currentInvTransform.val);
+                GL11.glMultMatrixd(context.currentInvTransform.val);
                 GL11.glMultMatrixd(model.getTransform(bone).val);
 
                 this.elytra.method_17079(livingEntity_1, float_1, float_2, float_4, float_5, float_6, float_7);

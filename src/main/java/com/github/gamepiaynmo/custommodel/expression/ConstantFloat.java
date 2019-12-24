@@ -1,5 +1,7 @@
 package com.github.gamepiaynmo.custommodel.expression;
 
+import com.github.gamepiaynmo.custommodel.render.RenderContext;
+
 public class ConstantFloat implements IExpressionFloat {
    private float value;
 
@@ -7,7 +9,7 @@ public class ConstantFloat implements IExpressionFloat {
       this.value = value;
    }
 
-   public float eval() {
+   public float eval(RenderContext context) {
       return this.value;
    }
 

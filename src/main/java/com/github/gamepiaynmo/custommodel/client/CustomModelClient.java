@@ -49,13 +49,6 @@ public class CustomModelClient implements ClientModInitializer {
 
     public static final Logger LOGGER = LogManager.getLogger();
 
-    public static AbstractClientPlayerEntity currentPlayer;
-    public static RenderParameter currentParameter;
-    public static PlayerEntityRenderer currentRenderer;
-    public static PlayerEntityModel currentModel;
-    public static CustomJsonModel currentJsonModel;
-    public static Matrix4 currentInvTransform;
-
     public static boolean isRenderingInventory;
     public static EntityParameter inventoryEntityParameter;
     public static boolean isRenderingFirstPerson;

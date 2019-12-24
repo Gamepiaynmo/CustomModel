@@ -4,6 +4,7 @@ import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.client.ModelPack;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
 import com.github.gamepiaynmo.custommodel.render.PlayerFeature;
+import com.github.gamepiaynmo.custommodel.render.RenderContext;
 import com.github.gamepiaynmo.custommodel.render.model.IBone;
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -35,8 +36,10 @@ import org.lwjgl.opengl.GL11;
 import java.util.UUID;
 
 public class CustomHead<T extends AbstractClientPlayerEntity, M extends PlayerEntityModel<T>> extends HeadFeatureRenderer<T, M> {
-    public CustomHead(FeatureRendererContext featureRendererContext_1) {
+    private final RenderContext context;
+    public CustomHead(FeatureRendererContext featureRendererContext_1, RenderContext context) {
         super(featureRendererContext_1);
+        this.context = context;
     }
 
     @Override
@@ -53,14 +56,14 @@ public class CustomHead<T extends AbstractClientPlayerEntity, M extends PlayerEn
             Item item_1 = itemStack_1.getItem();
 
             for (IBone bone : model.getFeatureAttached(PlayerFeature.HEAD_WEARING)) {
-                if (!bone.isVisible()) continue;
+                if (!bone.isVisible(context)) continue;
 
                 GlStateManager.pushMatrix();
                 if (livingEntity_1.isInSneakingPose()) {
                     GlStateManager.translatef(0.0F, 0.2F, 0.0F);
                 }
 
-                GL11.glMultMatrixd(CustomModelClient.currentInvTransform.val);
+                GL11.glMultMatrixd(context.currentInvTransform.val);
                 GL11.glMultMatrixd(model.getTransform(bone).val);
 
                 GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
