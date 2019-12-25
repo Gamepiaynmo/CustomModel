@@ -11,6 +11,7 @@ import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.command.CommandHandler;
 import net.minecraft.command.ServerCommandManager;
 import net.minecraft.entity.player.EntityPlayer;
@@ -131,7 +132,7 @@ public class CustomModel {
 
                     if (broadcast)
                         NetworkHandler.CHANNEL.sendToAllTracking(packetModel, playerEntity);
-                    else NetworkHandler.CHANNEL.sendTo(packetModel, playerEntity);
+                    NetworkHandler.CHANNEL.sendTo(packetModel, playerEntity);
                 }
             }
         } catch (Exception e) {
@@ -155,6 +156,7 @@ public class CustomModel {
                     modelMap.put(uuid, ModelInfo.fromFile(modelFile));
                     modelSelector.setModelForPlayer(profile, model);
                     NetworkHandler.CHANNEL.sendToAllTracking(packetModel, playerEntity);
+                    NetworkHandler.CHANNEL.sendTo(packetModel, playerEntity);
                 }
             }
         } catch (Exception e) {
@@ -188,6 +190,8 @@ public class CustomModel {
 
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
-        NetworkHandler.CHANNEL.sendTo(new PacketReplyConfig(), (EntityPlayerMP) event.player);
+        ((EntityPlayerMP) event.player).getServerWorld().addScheduledTask(() -> {
+            NetworkHandler.CHANNEL.sendTo(new PacketReplyConfig(), (EntityPlayerMP) event.player);
+        });
     }
 }

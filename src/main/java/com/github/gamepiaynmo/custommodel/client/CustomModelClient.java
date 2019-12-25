@@ -15,6 +15,7 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.model.ModelPlayer;
+import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -135,21 +136,19 @@ public class CustomModelClient {
     }
 
     @SubscribeEvent
-    public static void onWorldTick(TickEvent.WorldTickEvent event) {
-        Minecraft minecraft = Minecraft.getMinecraft();
-        if (minecraft.world == event.world) {
-            for (AbstractClientPlayer player : event.world.getPlayers(AbstractClientPlayer.class, player -> true)) {
-                Render<Entity> renderer = minecraft.getRenderManager().getEntityRenderObject(player);
-                if (renderer instanceof ICustomPlayerRenderer)
-                    ((ICustomPlayerRenderer) renderer).tick(player);
+    public static void onWorldTick(TickEvent.ClientTickEvent event) {
+        WorldClient world = Minecraft.getMinecraft().world;
+        if (world != null && !Minecraft.getMinecraft().isGamePaused() && event.phase == TickEvent.Phase.END) {
+            for (AbstractClientPlayer player : world.getPlayers(AbstractClientPlayer.class, player -> true)) {
+                RenderPlayerHandler.tick(player);
             }
 
             if (clearCounter++ > 200) {
                 clearCounter = 0;
                 Set<UUID> uuids = Sets.newHashSet();
-                for (AbstractClientPlayer playerEntity : event.world.getPlayers(AbstractClientPlayer.class, player -> true))
+                for (AbstractClientPlayer playerEntity : world.getPlayers(AbstractClientPlayer.class, player -> true))
                     uuids.add(EntityPlayer.getUUID(playerEntity.getGameProfile()));
-                for (Iterator<Map.Entry<UUID, ModelPack>> iter = modelPacks.entrySet().iterator(); iter.hasNext();) {
+                for (Iterator<Map.Entry<UUID, ModelPack>> iter = modelPacks.entrySet().iterator(); iter.hasNext(); ) {
                     Map.Entry<UUID, ModelPack> entry = iter.next();
                     if (!uuids.contains(entry.getKey())) {
                         entry.getValue().release();

@@ -13,7 +13,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import java.io.IOException;
 import java.util.UUID;
 
-public class PacketQuery implements IMessage, IMessageHandler<PacketQuery, PacketModel> {
+public class PacketQuery implements IMessage, IMessageHandler<PacketQuery, IMessage> {
     private UUID playerUuid;
 
     public PacketQuery(GameProfile profile) {
@@ -38,7 +38,7 @@ public class PacketQuery implements IMessage, IMessageHandler<PacketQuery, Packe
     }
 
     @Override
-    public PacketModel onMessage(PacketQuery message, MessageContext ctx) {
+    public IMessage onMessage(PacketQuery message, MessageContext ctx) {
         ctx.getServerHandler().player.getServerWorld().addScheduledTask(() -> {
             try {
                 CustomModel.reloadModel(ctx.getServerHandler().player, message.getPlayerUuid(), false);

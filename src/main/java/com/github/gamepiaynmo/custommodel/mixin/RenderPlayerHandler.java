@@ -68,12 +68,16 @@ public abstract class RenderPlayerHandler {
             if (model != null)
                 setModelPose(context.getPlayer(), model.getModel());
 
-            getModel(playerEntity).render(playerEntity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale);
+            if (playerEntity instanceof AbstractClientPlayer) {
+                Minecraft.getMinecraft().renderEngine.bindTexture(((AbstractClientPlayer) playerEntity).getLocationSkin());
+                getModel(playerEntity).render(playerEntity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale);
+            }
 
             if (model != null) {
                 context.currentJsonModel = model.getModel();
                 context.currentJsonModel.clearTransform();
                 if (CustomModelClient.isRenderingInventory) {
+                    partial = 1;
                     EntityParameter currentParameter = new EntityParameter(playerEntity);
                     CustomModelClient.inventoryEntityParameter.apply(playerEntity);
                     context.currentParameter = calculateTransform(playerEntity);
@@ -96,7 +100,7 @@ public abstract class RenderPlayerHandler {
 
         if (context.isPlayer())
             setModelPose_c(context.getPlayer());
-        return false;
+        return true;
     }
 
     public static boolean renderRightArm(AbstractClientPlayer abstractClientPlayerEntity) {
@@ -201,7 +205,7 @@ public abstract class RenderPlayerHandler {
         context.setPlayer((AbstractClientPlayer) event.getEntityPlayer());
         context.currentModel = getModel(event.getEntityPlayer());
         ModelPack model = CustomModelClient.getModelForPlayer(context.getPlayer());
-        partial = partial;
+        partial = CustomModelClient.getPartial();
     }
 
     public static void resetSkeleton() {
@@ -245,7 +249,7 @@ public abstract class RenderPlayerHandler {
     }
 
     private static void setupTransforms_c(EntityLivingBase entityLiving, float float_1, float float_2, float float_3) {
-        GlStateManager.rotate(180.0F - float_2, 0.0F, 1.0F, 0.0F);
+        transform.rotate(0.0F, 1.0F, 0.0F, 180.0F - float_2);
 
         if (entityLiving.deathTime > 0)
         {
@@ -257,7 +261,7 @@ public abstract class RenderPlayerHandler {
                 f = 1.0F;
             }
 
-            GlStateManager.rotate(f * 90, 0.0F, 0.0F, 1.0F);
+            transform.rotate(0.0F, 0.0F, 1.0F, f * 90);
         }
         else
         {
@@ -265,8 +269,8 @@ public abstract class RenderPlayerHandler {
 
             if (s != null && ("Dinnerbone".equals(s) || "Grumm".equals(s)) && (!(entityLiving instanceof EntityPlayer) || ((EntityPlayer)entityLiving).isWearing(EnumPlayerModelParts.CAPE)))
             {
-                GlStateManager.translate(0.0F, entityLiving.height + 0.1F, 0.0F);
-                GlStateManager.rotate(180.0F, 0.0F, 0.0F, 1.0F);
+                transform.translate(0.0F, entityLiving.height + 0.1F, 0.0F);
+                transform.rotate(0.0F, 0.0F, 1.0F, 180.0F);
             }
         }
     }

@@ -1,6 +1,7 @@
 package com.github.gamepiaynmo.custommodel.util;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 
 public class Matrix4 {
@@ -85,7 +86,7 @@ public class Matrix4 {
         set(position, rotation, scale);
     }
 
-    static DoubleBuffer buffer = ByteBuffer.allocateDirect(8 * 16).asDoubleBuffer();
+    static DoubleBuffer buffer = ByteBuffer.allocateDirect(8 * 16).order(ByteOrder.nativeOrder()).asDoubleBuffer();
     public DoubleBuffer toBuffer() {
         buffer.rewind();
         buffer.put(val);

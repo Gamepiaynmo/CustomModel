@@ -26,6 +26,10 @@ import net.minecraft.util.EnumHandSide;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.DoubleBuffer;
+import java.nio.FloatBuffer;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -287,6 +291,7 @@ public class CustomJsonModel {
         float partial = params.partial;
         GlStateManager.pushMatrix();
         GL11.glMultMatrix(baseMat.cpy().inv().toBuffer());
+
         TextureManager textureManager = Minecraft.getMinecraft().renderEngine;
 
         for (Bone bone : bones) {

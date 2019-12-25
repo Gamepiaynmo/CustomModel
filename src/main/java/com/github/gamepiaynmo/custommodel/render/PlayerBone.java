@@ -73,6 +73,7 @@ public enum PlayerBone {
     public static class OriginalBone implements IBone {
         private Function<ModelPlayer, ModelRenderer> cuboidGetter;
         private PlayerBone playerBone;
+        private static double rad2deg = 180 / Math.PI;
 
         OriginalBone(PlayerBone playerBone, Function<ModelPlayer, ModelRenderer> cuboidGetter) {
             this.playerBone = playerBone;
