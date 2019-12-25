@@ -26,6 +26,7 @@ Each model entry is either a folder or a zip archive file. It must contain one m
 - refresh: Force the mod to refresh to model list when you add new models to the folder.
 - select xxx: Select the model with id xxx for the player.
 - list: List all models that the mod loaded. Then you can click on the message returned by the command to get the model selecting command.
+- clear: Clear the current model of the player.
 
 #### FAQ
 
@@ -42,6 +43,7 @@ I would say both. You can have this only at client side so that only yourself ca
 - This mod is inspired by [Optifine](https://optifine.net/) and [More Player Models](https://www.curseforge.com/minecraft/mc-mods/more-player-models).
 - Some of the models come from [Touhou Little Maid](https://www.curseforge.com/minecraft/mc-mods/touhou-little-maid) mod.
 - Minecraft modeling software [Blockbench](https://www.blockbench.net/web/).
+- [ASMHelper](https://github.com/squeek502/ASMHelper) from [squeek502](https://github.com/squeek502) assisting Core Mod development.
 
 
 
@@ -85,3 +87,5 @@ Fabric版本需要fabric-api模组作为依赖项。此外建议使用Mod Menu�
 - 部分模型来源于模组[车万女仆](https://www.curseforge.com/minecraft/mc-mods/touhou-little-maid)。
 
 - 方块风格建模软件[Blockbench](https://www.blockbench.net/web/)。
+
+- [squeek502](https://github.com/squeek502)编写的[ASMHelper](https://github.com/squeek502/ASMHelper)辅助Core Mod开发。
