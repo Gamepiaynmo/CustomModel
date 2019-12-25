@@ -56,4 +56,10 @@ public class DefaultModelSelector implements IModelSelector {
         models.add(new ModelEntry(profile, modelId));
         saveModelList();
     }
+
+    @Override
+    public void clearModelForPlayer(GameProfile profile) {
+        models.remove(profile);
+        saveModelList();
+    }
 }

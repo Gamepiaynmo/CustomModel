@@ -90,6 +90,7 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
 
             ModelPack model = CustomModelClient.getModelForPlayer(playerEntity);
             if (model != null) {
+                context.isInvisible = boolean_2;
                 context.currentJsonModel = model.getModel();
                 context.currentJsonModel.clearTransform();
                 if (CustomModelClient.isRenderingInventory) {
@@ -127,6 +128,7 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
             context.currentModel = getModel();
             context.currentParameter = calculateTransform(abstractClientPlayerEntity);
             context.setPlayer(abstractClientPlayerEntity);
+            context.isInvisible = false;
 
             GlStateManager.color3f(1.0F, 1.0F, 1.0F);
             PlayerEntityModel<AbstractClientPlayerEntity> playerEntityModel = getModel();
@@ -165,6 +167,7 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
             context.currentModel = getModel();
             context.currentParameter = calculateTransform(abstractClientPlayerEntity);
             context.setPlayer(abstractClientPlayerEntity);
+            context.isInvisible = false;
 
             GlStateManager.color3f(1.0F, 1.0F, 1.0F);
             PlayerEntityModel<AbstractClientPlayerEntity> playerEntityModel = getModel();

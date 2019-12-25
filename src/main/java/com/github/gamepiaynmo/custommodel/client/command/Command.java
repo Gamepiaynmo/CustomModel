@@ -63,7 +63,17 @@ public class Command implements ClientCommandPlugin {
             CustomModel.refreshModelList();
             context.getSource().sendFeedback(new TranslatableText("command.custommodel.listmodels", CustomModel.models.size()));
             return 1;
-        })));
+        })).then(ArgumentBuilders.literal("clear").executes(context -> {
+            CustomModelClient.clearModel(MinecraftClient.getInstance().player.getGameProfile());
+            context.getSource().sendFeedback(new TranslatableText("command.custommodel.clear", 1));
+            return 1;
+        }).then(ArgumentBuilders.argument("targets", EntityArgumentType.players()).executes(context -> {
+            List<GameProfile> players = ((IClientEntitySelector) (Object) context.getArgument("targets", EntitySelector.class)).getPlayers(context.getSource());
+            for (GameProfile player : players)
+                CustomModelClient.clearModel(player);
+            context.getSource().sendFeedback(new TranslatableText("command.custommodel.clear", players.size()));
+            return players.size();
+        }))));
     }
 
     public static interface IClientEntitySelector {

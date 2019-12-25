@@ -144,7 +144,8 @@ public class ParticleEmitter {
                     particle.setColor(MathHelper.lerp(random.nextFloat(), color[0][0], color[0][1]),
                             MathHelper.lerp(random.nextFloat(), color[1][0], color[1][1]),
                             MathHelper.lerp(random.nextFloat(), color[2][0], color[2][1]));
-                    particle.setAlpha(MathHelper.lerp(random.nextFloat(), color[3][0], color[3][1]));
+                    float alpha = MathHelper.lerp(random.nextFloat(), color[3][0], color[3][1]);
+                    particle.setAlpha(context.isInvisible ? 0.15f * alpha : alpha);
                     particle.setGravity(gravity);
                     particle.setCollide(collide);
                     particle.setTexture(bone.getTexture(context).apply(context));

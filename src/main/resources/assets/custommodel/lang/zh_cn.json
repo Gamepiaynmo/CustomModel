@@ -62,5 +62,6 @@
 
   "command.custommodel.listmodels": "当前共有%d个模型",
   "command.custommodel.reload": "重新加载了%d个玩家的模型",
-  "command.custommodel.select": "将%d个玩家的模型设置为%s"
+  "command.custommodel.select": "将%d个玩家的模型设置为%s",
+  "command.custommodel.clear": "已清除%d个玩家的模型"
 }

@@ -198,7 +198,7 @@ public class Bone implements IBone {
         float scaleFactor = context.currentParameter.scale;
         if (!compiled)
             compile(scaleFactor);
-        GlStateManager.color4f(color[0], color[1], color[2], alpha);
+        GlStateManager.color4f(color[0], color[1], color[2], context.isInvisible ? 0.15f * alpha : alpha);
         GlStateManager.callList(glList);
 
         for (ItemPart item : items)

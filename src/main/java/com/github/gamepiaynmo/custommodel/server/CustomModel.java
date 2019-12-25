@@ -128,6 +128,14 @@ public class CustomModel implements ModInitializer {
         return res;
     }
 
+    public static void clearModel(ServerPlayerEntity playerEntity) {
+        GameProfile profile = playerEntity.getGameProfile();
+        UUID uuid = PlayerEntity.getUuidFromProfile(profile);
+        modelSelector.clearModelForPlayer(profile);
+        Packet packet = formPacket(PacketModel.ID, new PacketModel(uuid));
+        playerEntity.getServerWorld().method_14178().sendToNearbyPlayers(playerEntity, packet);
+    }
+
     public static void reloadModel(PlayerEntity receiver, boolean broadcast) throws LoadModelException {
         reloadModel(receiver, PlayerEntity.getUuidFromProfile(receiver.getGameProfile()), broadcast);
     }

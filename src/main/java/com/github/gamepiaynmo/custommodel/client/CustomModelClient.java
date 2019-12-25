@@ -73,6 +73,16 @@ public class CustomModelClient implements ClientModInitializer {
         configQueried = false;
     }
 
+    public static void clearModel(GameProfile profile) {
+        clearModel(PlayerEntity.getUuidFromProfile(profile));
+    }
+
+    public static void clearModel(UUID uuid) {
+        ModelPack old = modelPacks.remove(uuid);
+        if (old != null)
+            old.release();
+    }
+
     private static void addModel(UUID name, ModelPack pack) {
         ModelPack old = modelPacks.get(name);
         if (old != null)
@@ -192,14 +202,18 @@ public class CustomModelClient implements ClientModInitializer {
                 context.getTaskQueue().execute(() -> {
                     ModelPack pack = null;
                     try {
-                        pack = ModelPack.fromZipMemory(textureManager, packet.getUuid(), packet.getData());
+                        if (packet.getData().length > 0) {
+                            pack = ModelPack.fromZipMemory(textureManager, packet.getUuid(), packet.getData());
+                            if (pack != null && pack.successfulLoaded())
+                                addModel(packet.getUuid(), pack);
+                        } else {
+                            CustomModelClient.clearModel(packet.getUuid());
+                        }
                     } catch (Exception e) {
                         MinecraftClient.getInstance().inGameHud.addChatMessage(MessageType.CHAT,
                                 new TranslatableText("error.custommodel.loadmodelpack", "", e.getMessage()).formatted(Formatting.RED));
                         LOGGER.warn(e.getMessage(), e);
                     }
-                    if (pack != null && pack.successfulLoaded())
-                        addModel(packet.getUuid(), pack);
                 });
             } catch (Exception e) {
                 LOGGER.warn(e.getMessage(), e);

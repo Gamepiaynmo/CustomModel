@@ -16,6 +16,7 @@ import com.google.gson.JsonObject;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
+import net.minecraft.client.network.OtherClientPlayerEntity;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.entity.EntityPose;
@@ -420,14 +421,13 @@ public class CustomJsonModel {
                     curEnd.sub(curStart).nor().scl(bone.getLength()).add(curStart);
 
                     bone.velocity.add(targetEnd.cpy().sub(curEnd).scl(bone.getPhysicsParams()[0]));
-                    bone.velocity.add(new Vector3(entity.getVelocity()).scl(-1, -1, -1).scl(bone.getPhysicsParams()[3]));
+                    Vector3 velocity = new Vector3(entity.x - entity.prevX, entity.y - entity.prevY, entity.z - entity.prevZ);
+                    bone.velocity.add(velocity.scl(-1, -1, -1).scl(bone.getPhysicsParams()[3]));
                     bone.velocity.y -= bone.getPhysicsParams()[4];
                     bone.velocity.scl(bone.getPhysicsParams()[2]);
 
                     Quaternion direction = new Quaternion().setFromCross(lastEnd.cpy().sub(lastStart).nor(), curEnd.cpy().sub(curStart).nor());
                     direction.mul(lastTrans.cpy().getRotation(new Quaternion())).nor();
-//                    Quaternion curDir = curTrans.getRotation(new Quaternion());
-//                    direction.setEulerAngles(direction.getYaw(), direction.getPitch(), curDir.getRoll());
                     curTrans = new Matrix4(curStart, direction.slerp(curTrans.getRotation(new Quaternion()), bone.getPhysicsParams()[1]), bone.getScale(context));
                     curTrans.translate(bone.getPosition(context).scl(0.0625));
                 }

@@ -27,6 +27,13 @@ public interface IModelSelector {
     void setModelForPlayer(GameProfile profile, String modelId);
 
     /**
+     * Invoked each time when the model is cleared.
+     * Note that the player maybe offline.
+     * @param profile Profile of the player.
+     */
+    void clearModelForPlayer(GameProfile profile);
+
+    /**
      * Implement your own Model Selector to choose Model Packs for players.
      * Set to null to restore the default selector.
      * @param modelSelector New Model Selector.

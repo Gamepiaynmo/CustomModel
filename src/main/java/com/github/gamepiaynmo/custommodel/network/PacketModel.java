@@ -54,6 +54,11 @@ public class PacketModel implements Packet<ClientPlayPacketListener> {
         }
     }
 
+    public PacketModel(UUID uuid) {
+        this.uuid = uuid;
+        this.data = new byte[0];
+    }
+
     public PacketModel() {}
 
     @Override
@@ -61,14 +66,16 @@ public class PacketModel implements Packet<ClientPlayPacketListener> {
         uuid = buf.readUuid();
         int len = buf.readInt();
         data = new byte[len];
-        buf.readBytes(data);
+        if (len > 0)
+            buf.readBytes(data);
     }
 
     @Override
     public void write(PacketByteBuf buf) throws IOException {
         buf.writeUuid(uuid);
         buf.writeInt(data.length);
-        buf.writeBytes(data);
+        if (data.length > 0)
+            buf.writeBytes(data);
     }
 
     @Override

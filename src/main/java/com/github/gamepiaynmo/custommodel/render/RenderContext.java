@@ -11,6 +11,7 @@ public class RenderContext {
     public PlayerEntityModel currentModel;
     public CustomJsonModel currentJsonModel;
     public Matrix4 currentInvTransform;
+    public boolean isInvisible;
 
     private boolean isPlayer;
 
