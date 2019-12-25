@@ -78,6 +78,8 @@ public class CustomModelClient implements ClientModInitializer {
     }
 
     public static void clearModel(UUID uuid) {
+        PlayerEntity playerEntity = MinecraftClient.getInstance().world.getPlayerByUuid(uuid);
+        CustomModel.getModelSelector().clearModelForPlayer(playerEntity.getGameProfile());
         ModelPack old = modelPacks.remove(uuid);
         if (old != null)
             old.release();
@@ -91,6 +93,7 @@ public class CustomModelClient implements ClientModInitializer {
     }
 
     private static boolean loadModel(UUID uuid, String model) {
+        PlayerEntity playerEntity = MinecraftClient.getInstance().world.getPlayerByUuid(uuid);
         ModelInfo info = CustomModel.models.get(model);
         ModelPack pack = null;
 
@@ -103,6 +106,9 @@ public class CustomModelClient implements ClientModInitializer {
                 pack = ModelPack.fromDirectory(textureManager, modelFile, uuid);
             if (modelFile.isFile())
                 pack = ModelPack.fromZipFile(textureManager, modelFile, uuid);
+        } catch (ModelNotFoundException e) {
+            if (!model.equals(ModConfig.getDefaultModel()))
+                throw e;
         } catch (Exception e) {
             MinecraftClient.getInstance().inGameHud.addChatMessage(MessageType.CHAT,
                     new TranslatableText("error.custommodel.loadmodelpack", model, e.getMessage()).formatted(Formatting.RED));
@@ -110,6 +116,7 @@ public class CustomModelClient implements ClientModInitializer {
         }
 
         if (pack != null && pack.successfulLoaded()) {
+            CustomModel.getModelSelector().setModelForPlayer(playerEntity.getGameProfile(), model);
             addModel(uuid, pack);
             return true;
         }
