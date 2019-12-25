@@ -74,6 +74,7 @@ public abstract class RenderPlayerHandler {
             }
 
             if (model != null) {
+                context.isInvisible = boolean_2;
                 context.currentJsonModel = model.getModel();
                 context.currentJsonModel.clearTransform();
                 if (CustomModelClient.isRenderingInventory) {
@@ -112,6 +113,7 @@ public abstract class RenderPlayerHandler {
             context.currentJsonModel = model;
             context.currentModel = getModel(abstractClientPlayerEntity);
             context.currentParameter = calculateTransform(abstractClientPlayerEntity);
+            context.isInvisible = false;
             context.setPlayer(abstractClientPlayerEntity);
 
             GlStateManager.color(1.0F, 1.0F, 1.0F);
@@ -149,6 +151,7 @@ public abstract class RenderPlayerHandler {
             context.currentJsonModel = model;
             context.currentModel = getModel(abstractClientPlayerEntity);
             context.currentParameter = calculateTransform(abstractClientPlayerEntity);
+            context.isInvisible = false;
             context.setPlayer(abstractClientPlayerEntity);
 
             GlStateManager.color(1.0F, 1.0F, 1.0F);

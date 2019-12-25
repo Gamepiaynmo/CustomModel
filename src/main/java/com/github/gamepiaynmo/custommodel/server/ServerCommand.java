@@ -1,6 +1,7 @@
 package com.github.gamepiaynmo.custommodel.server;
 
 import com.github.gamepiaynmo.custommodel.util.LoadModelException;
+import com.github.gamepiaynmo.custommodel.util.ModelNotFoundException;
 import com.google.common.collect.Lists;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.*;
@@ -9,6 +10,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 
@@ -41,7 +43,7 @@ public class ServerCommand extends CommandBase {
 
     @Override
     public boolean isUsernameIndex(String[] args, int index) {
-        if ("reload".equalsIgnoreCase(args[0]))
+        if ("reload".equalsIgnoreCase(args[0]) || "clear".equalsIgnoreCase(args[0]))
             return index == 1;
 
         if ("select".equalsIgnoreCase(args[0]))
@@ -59,13 +61,13 @@ public class ServerCommand extends CommandBase {
             if (args[0].equals("refresh")) {
                 checkPermission(sender, ModConfig.getListModelsPermission());
                 CustomModel.refreshModelList();
-                notifyCommandListener(sender, this, "command.custommodel.listmodels", CustomModel.models.size());
+                sender.sendMessage(new TextComponentTranslation("command.custommodel.listmodels", CustomModel.models.size()));
                 return;
             }
 
             if (args[0].equals("list")) {
                 checkPermission(sender, ModConfig.getListModelsPermission());
-                notifyCommandListener(sender, this, "command.custommodel.listmodels", CustomModel.models.size());
+                sender.sendMessage(new TextComponentTranslation("command.custommodel.listmodels", CustomModel.models.size()));
                 for (ITextComponent text : CustomModel.getModelInfoList())
                     sender.sendMessage(text);
                 return;
@@ -75,13 +77,28 @@ public class ServerCommand extends CommandBase {
                 if (args.length > 1) {
                     checkPermission(sender, ModConfig.getReloadOthersPermission());
                     Collection<EntityPlayerMP> players = getPlayers(server, sender, args[1]);
-                    notifyCommandListener(sender, this, "command.custommodel.reload", players.size());
                     for (EntityPlayerMP player : players)
                         CustomModel.reloadModel(player, true);
+                    notifyCommandListener(sender, this, "command.custommodel.reload", players.size());
                 } else {
                     checkPermission(sender, ModConfig.getReloadSelfPermission());
-                    notifyCommandListener(sender, this, "command.custommodel.reload", 1);
                     CustomModel.reloadModel(getCommandSenderAsPlayer(sender), true);
+                    notifyCommandListener(sender, this, "command.custommodel.reload", 1);
+                }
+                return;
+            }
+
+            if (args[0].equals("clear")) {
+                if (args.length > 1) {
+                    checkPermission(sender, ModConfig.getSelectOthersPermission());
+                    Collection<EntityPlayerMP> players = getPlayers(server, sender, args[1]);
+                    for (EntityPlayerMP player : players)
+                        CustomModel.clearModel(player);
+                    notifyCommandListener(sender, this, "command.custommodel.clear", players.size());
+                } else {
+                    checkPermission(sender, ModConfig.getSelectSelfPermission());
+                    CustomModel.clearModel(getCommandSenderAsPlayer(sender));
+                    notifyCommandListener(sender, this, "command.custommodel.clear", 1);
                 }
                 return;
             }
@@ -93,18 +110,23 @@ public class ServerCommand extends CommandBase {
                 if (args.length > 2) {
                     checkPermission(sender, ModConfig.getSelectOthersPermission());
                     Collection<EntityPlayerMP> players = getPlayers(server, sender, args[2]);
-                    notifyCommandListener(sender, this, "command.custommodel.select", players.size(), args[2]);
                     for (EntityPlayerMP player : players)
                         CustomModel.selectModel(player, args[1]);
+                    notifyCommandListener(sender, this, "command.custommodel.select", players.size(), args[2]);
                 } else {
                     checkPermission(sender, ModConfig.getSelectSelfPermission());
-                    notifyCommandListener(sender, this, "command.custommodel.select", 1, args[1]);
                     CustomModel.selectModel(getCommandSenderAsPlayer(sender), args[1]);
+                    notifyCommandListener(sender, this, "command.custommodel.select", 1, args[1]);
                 }
                 return;
             }
         } catch (LoadModelException e) {
             ITextComponent text = new TextComponentTranslation("error.custommodel.loadmodelpack", e.getFileName(), e.getMessage());
+            text.getStyle().setColor(TextFormatting.RED);
+            sender.sendMessage(text);
+            return;
+        } catch (ModelNotFoundException e) {
+            ITextComponent text = new TextComponentString(e.getMessage());
             text.getStyle().setColor(TextFormatting.RED);
             sender.sendMessage(text);
             return;
@@ -116,11 +138,14 @@ public class ServerCommand extends CommandBase {
     @Override
     public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
         if (args.length == 1)
-            return getListOfStringsMatchingLastWord(args, "refresh", "list", "reload", "select");
+            return getListOfStringsMatchingLastWord(args, "refresh", "list", "reload", "select", "clear");
 
         switch (args[0]) {
-            case "reload": return args.length == 2 ? getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames()) : Collections.emptyList();
-            case "select": return args.length == 2 ? getListOfStringsMatchingLastWord(args, CustomModel.getModelIdList()) :
+            case "reload":
+            case "clear":
+                return args.length == 2 ? getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames()) : Collections.emptyList();
+            case "select":
+                return args.length == 2 ? getListOfStringsMatchingLastWord(args, CustomModel.getModelIdList()) :
                 args.length == 3 ? getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames()) : Collections.emptyList();
         }
 

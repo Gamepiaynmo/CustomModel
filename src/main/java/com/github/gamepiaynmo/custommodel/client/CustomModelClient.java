@@ -58,6 +58,16 @@ public class CustomModelClient {
         modelPacks.put(name, pack);
     }
 
+    public static void clearModel(GameProfile profile) {
+        clearModel(EntityPlayer.getUUID(profile));
+    }
+
+    public static void clearModel(UUID uuid) {
+        ModelPack old = modelPacks.remove(uuid);
+        if (old != null)
+            old.release();
+    }
+
     private static boolean loadModel(UUID uuid, String model) {
         ModelInfo info = CustomModel.models.get(model);
         ModelPack pack = null;

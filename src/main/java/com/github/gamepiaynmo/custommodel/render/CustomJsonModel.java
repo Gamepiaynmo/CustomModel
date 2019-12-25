@@ -432,8 +432,6 @@ public class CustomJsonModel {
 
                     Quaternion direction = new Quaternion().setFromCross(lastEnd.cpy().sub(lastStart).nor(), curEnd.cpy().sub(curStart).nor());
                     direction.mul(lastTrans.cpy().getRotation(new Quaternion())).nor();
-//                    Quaternion curDir = curTrans.getRotation(new Quaternion());
-//                    direction.setEulerAngles(direction.getYaw(), direction.getPitch(), curDir.getRoll());
                     curTrans = new Matrix4(curStart, direction.slerp(curTrans.getRotation(new Quaternion()), bone.getPhysicsParams()[1]), bone.getScale(context));
                     curTrans.translate(bone.getPosition(context).scl(0.0625));
                 }

@@ -19,4 +19,9 @@ public class TranslatableException extends RuntimeException {
     public TranslatableException(Throwable cause) {
         super(cause);
     }
+
+    @Override
+    public String toString() {
+        return getMessage();
+    }
 }

@@ -14,6 +14,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.client.IClientCommand;
@@ -51,7 +52,7 @@ public class Command implements IClientCommand {
 
     @Override
     public boolean isUsernameIndex(String[] args, int index) {
-        if ("reload".equalsIgnoreCase(args[0]))
+        if ("reload".equalsIgnoreCase(args[0]) || "clear".equalsIgnoreCase(args[0]))
             return index == 1;
 
         if ("select".equalsIgnoreCase(args[0]))
@@ -73,12 +74,12 @@ public class Command implements IClientCommand {
 
             if (args[0].equals("refresh")) {
                 CustomModel.refreshModelList();
-                CommandBase.notifyCommandListener(sender, this, "command.custommodel.listmodels", CustomModel.models.size());
+                sender.sendMessage(new TextComponentTranslation("command.custommodel.listmodels", CustomModel.models.size()));
                 return;
             }
 
             if (args[0].equals("list")) {
-                CommandBase.notifyCommandListener(sender, this, "command.custommodel.listmodels", CustomModel.models.size());
+                sender.sendMessage(new TextComponentTranslation("command.custommodel.listmodels", CustomModel.models.size()));
                 for (ITextComponent text : CustomModel.getModelInfoList())
                     sender.sendMessage(text);
                 return;
@@ -87,12 +88,25 @@ public class Command implements IClientCommand {
             if (args[0].equals("reload")) {
                 if (args.length > 1) {
                     Collection<GameProfile> players = getPlayers(args[1]);
-                    CommandBase.notifyCommandListener(sender, this, "command.custommodel.reload", players.size());
                     for (GameProfile player : players)
                         CustomModelClient.reloadModel(player);
+                    CommandBase.notifyCommandListener(sender, this, "command.custommodel.reload", players.size());
                 } else {
-                    CommandBase.notifyCommandListener(sender, this, "command.custommodel.reload", 1);
                     CustomModelClient.reloadModel(Minecraft.getMinecraft().player.getGameProfile());
+                    CommandBase.notifyCommandListener(sender, this, "command.custommodel.reload", 1);
+                }
+                return;
+            }
+
+            if (args[0].equals("clear")) {
+                if (args.length > 1) {
+                    Collection<GameProfile> players = getPlayers(args[1]);
+                    for (GameProfile player : players)
+                        CustomModelClient.clearModel(player);
+                    CommandBase.notifyCommandListener(sender, this, "command.custommodel.clear", players.size());
+                } else {
+                    CustomModelClient.clearModel(Minecraft.getMinecraft().player.getGameProfile());
+                    CommandBase.notifyCommandListener(sender, this, "command.custommodel.clear", 1);
                 }
                 return;
             }
@@ -103,17 +117,22 @@ public class Command implements IClientCommand {
             if (args[0].equals("select")) {
                 if (args.length > 2) {
                     Collection<GameProfile> players = getPlayers(args[2]);
-                    CommandBase.notifyCommandListener(sender, this, "command.custommodel.select", players.size());
                     for (GameProfile player : players)
                         CustomModelClient.selectModel(player, args[1]);
+                    CommandBase.notifyCommandListener(sender, this, "command.custommodel.select", players.size(), args[2]);
                 } else {
-                    CommandBase.notifyCommandListener(sender, this, "command.custommodel.select", 1);
                     CustomModelClient.selectModel(Minecraft.getMinecraft().player.getGameProfile(), args[1]);
+                    CommandBase.notifyCommandListener(sender, this, "command.custommodel.select", 1, args[1]);
                 }
                 return;
             }
         } catch (LoadModelException e) {
             ITextComponent text = new TextComponentTranslation("error.custommodel.loadmodelpack", e.getFileName(), e.getMessage());
+            text.getStyle().setColor(TextFormatting.RED);
+            sender.sendMessage(text);
+            return;
+        } catch (ModelNotFoundException e) {
+            ITextComponent text = new TextComponentString(e.getMessage());
             text.getStyle().setColor(TextFormatting.RED);
             sender.sendMessage(text);
             return;
@@ -126,10 +145,11 @@ public class Command implements IClientCommand {
     public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
         if (!CustomModelClient.isServerModded) {
             if (args.length == 1)
-                return CommandBase.getListOfStringsMatchingLastWord(args, "refresh", "list", "reload", "select");
+                return CommandBase.getListOfStringsMatchingLastWord(args, "refresh", "list", "reload", "select", "clear");
 
             switch (args[0]) {
                 case "reload":
+                case "clear":
                     return args.length == 2 ? CommandBase.getListOfStringsMatchingLastWord(args, getPlayerNames()) : Collections.emptyList();
                 case "select":
                     return args.length == 2 ? CommandBase.getListOfStringsMatchingLastWord(args, CustomModel.getModelIdList()) :

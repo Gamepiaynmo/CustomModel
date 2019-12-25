@@ -61,6 +61,11 @@ public class PacketModel implements IMessage, IMessageHandler<PacketModel, IMess
         }
     }
 
+    public PacketModel(UUID name) {
+        this.uuid = name;
+        this.data = new byte[0];
+    }
+
     public PacketModel() {}
 
     public UUID getUuid() {
@@ -76,7 +81,8 @@ public class PacketModel implements IMessage, IMessageHandler<PacketModel, IMess
         uuid = new UUID(buf.readLong(), buf.readLong());
         int len = buf.readInt();
         data = new byte[len];
-        buf.readBytes(data);
+        if (len > 0)
+            buf.readBytes(data);
     }
 
     @Override
@@ -84,7 +90,8 @@ public class PacketModel implements IMessage, IMessageHandler<PacketModel, IMess
         buf.writeLong(uuid.getMostSignificantBits());
         buf.writeLong(uuid.getLeastSignificantBits());
         buf.writeInt(data.length);
-        buf.writeBytes(data);
+        if (data.length > 0)
+            buf.writeBytes(data);
     }
 
     @Override
@@ -92,16 +99,20 @@ public class PacketModel implements IMessage, IMessageHandler<PacketModel, IMess
         Minecraft.getMinecraft().addScheduledTask(() -> {
             ModelPack pack = null;
             try {
-                TextureManager textureManager = Minecraft.getMinecraft().renderEngine;
-                pack = ModelPack.fromZipMemory(textureManager, message.getUuid(), message.getData());
+                if (message.getData().length > 0) {
+                    TextureManager textureManager = Minecraft.getMinecraft().renderEngine;
+                    pack = ModelPack.fromZipMemory(textureManager, message.getUuid(), message.getData());
+                    if (pack != null && pack.successfulLoaded())
+                        CustomModelClient.addModel(message.getUuid(), pack);
+                } else {
+                    CustomModelClient.clearModel(message.getUuid());
+                }
             } catch (Exception e) {
                 TextComponentTranslation text = new TextComponentTranslation("error.custommodel.loadmodelpack", "", e.getMessage());
                 text.getStyle().setColor(TextFormatting.RED);
                 Minecraft.getMinecraft().ingameGUI.addChatMessage(ChatType.CHAT, text);
                 CustomModelClient.LOGGER.warn(e.getMessage(), e);
             }
-            if (pack != null && pack.successfulLoaded())
-                CustomModelClient.addModel(message.getUuid(), pack);
         });
         return null;
     }

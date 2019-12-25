@@ -107,6 +107,15 @@ public class CustomModel {
         return res;
     }
 
+    public static void clearModel(EntityPlayerMP playerEntity) {
+        GameProfile profile = playerEntity.getGameProfile();
+        UUID uuid = EntityPlayer.getUUID(profile);
+        modelSelector.clearModelForPlayer(profile);
+        PacketModel packetModel = new PacketModel(uuid);
+        NetworkHandler.CHANNEL.sendToAllTracking(packetModel, playerEntity);
+        NetworkHandler.CHANNEL.sendTo(packetModel, playerEntity);
+    }
+
     public static void reloadModel(EntityPlayer receiver, boolean broadcast) throws LoadModelException {
         reloadModel(receiver, EntityPlayer.getUUID(receiver.getGameProfile()), broadcast);
     }
