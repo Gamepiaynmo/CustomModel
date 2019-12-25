@@ -30,6 +30,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.relauncher.Side;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -116,11 +117,11 @@ public class CustomModel {
         NetworkHandler.CHANNEL.sendTo(packetModel, playerEntity);
     }
 
-    public static void reloadModel(EntityPlayer receiver, boolean broadcast) throws LoadModelException {
+    public static void reloadModel(EntityPlayerMP receiver, boolean broadcast) throws LoadModelException {
         reloadModel(receiver, EntityPlayer.getUUID(receiver.getGameProfile()), broadcast);
     }
 
-    public static void reloadModel(EntityPlayer receiver, UUID uuid, boolean broadcast) throws LoadModelException {
+    public static void reloadModel(EntityPlayerMP receiver, UUID uuid, boolean broadcast) throws LoadModelException {
         EntityPlayerMP playerEntity = server.getPlayerList().getPlayerByUUID(uuid);
         GameProfile profile = playerEntity.getGameProfile();
         uuid = EntityPlayer.getUUID(profile);
@@ -139,9 +140,12 @@ public class CustomModel {
                     modelMap.put(uuid, ModelInfo.fromFile(modelFile));
                     modelSelector.setModelForPlayer(profile, entry);
 
-                    if (broadcast)
+                    if (!broadcast)
+                        NetworkHandler.CHANNEL.sendTo(packetModel, receiver);
+                    else {
                         NetworkHandler.CHANNEL.sendToAllTracking(packetModel, playerEntity);
-                    NetworkHandler.CHANNEL.sendTo(packetModel, playerEntity);
+                        NetworkHandler.CHANNEL.sendTo(packetModel, playerEntity);
+                    }
                 }
             }
         } catch (Exception e) {
@@ -197,10 +201,29 @@ public class CustomModel {
         }
     }
 
+    static private List<EntityPlayerMP> toSendConfigList = Lists.newArrayList();
+
+    @SubscribeEvent
+    public static void onPlayerUpdate(TickEvent.PlayerTickEvent event) {
+        if (event.side == Side.SERVER && event.phase == TickEvent.Phase.END) {
+            if (toSendConfigList.contains(event.player)) {
+                NetworkHandler.CHANNEL.sendTo(new PacketReplyConfig(), (EntityPlayerMP) event.player);
+                toSendConfigList.remove(event.player);
+            }
+        }
+    }
+
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
-        ((EntityPlayerMP) event.player).getServerWorld().addScheduledTask(() -> {
-            NetworkHandler.CHANNEL.sendTo(new PacketReplyConfig(), (EntityPlayerMP) event.player);
-        });
+        toSendConfigList.add((EntityPlayerMP) event.player);
+    }
+
+    public static void onServerStart(MinecraftServer server) {
+        CustomModel.server = server;
+        ((CommandHandler) server.commandManager).registerCommand(new ServerCommand());
+    }
+
+    public static void onServerStop() {
+        CustomModel.server = null;
     }
 }

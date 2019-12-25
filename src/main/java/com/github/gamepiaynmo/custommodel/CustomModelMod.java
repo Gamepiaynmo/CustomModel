@@ -6,8 +6,6 @@ import com.github.gamepiaynmo.custommodel.mixin.asm.TransformRenderPlayer;
 import com.github.gamepiaynmo.custommodel.network.NetworkHandler;
 import com.github.gamepiaynmo.custommodel.server.CustomModel;
 import com.github.gamepiaynmo.custommodel.server.ServerCommand;
-import net.minecraft.client.Minecraft;
-import net.minecraft.command.CommandHandler;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -21,10 +19,10 @@ import squeek.asmhelper.ObfHelper;
 import javax.annotation.Nullable;
 import java.util.Map;
 
-@IFMLLoadingPlugin.SortingIndex(1000)
+@IFMLLoadingPlugin.SortingIndex(1100)
 @IFMLLoadingPlugin.MCVersion("1.12.2")
 @IFMLLoadingPlugin.TransformerExclusions({"com.github.gamepiaynmo.custommodel"})
-@Mod(modid = CustomModel.MODID, useMetadata = true, guiFactory = "com.github.gamepiaynmo.custommodel.client.ModMenu")
+@Mod(modid = CustomModel.MODID, useMetadata = true, acceptableRemoteVersions = "*", guiFactory = "com.github.gamepiaynmo.custommodel.client.ModMenu")
 public class CustomModelMod implements IFMLLoadingPlugin {
     public static Logger LOGGER;
 
@@ -48,13 +46,12 @@ public class CustomModelMod implements IFMLLoadingPlugin {
 
     @Mod.EventHandler
     public void serverStart(FMLServerStartingEvent event) {
-        CustomModel.server = event.getServer();
-        ((CommandHandler) CustomModel.server.commandManager).registerCommand(new ServerCommand());
+        CustomModel.onServerStart(event.getServer());
     }
 
     @Mod.EventHandler
     public void serverStop(FMLServerStoppingEvent event) {
-        CustomModel.server = null;
+        CustomModel.onServerStop();
     }
 
     @Override

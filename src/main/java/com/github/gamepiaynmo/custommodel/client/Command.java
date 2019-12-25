@@ -90,10 +90,10 @@ public class Command implements IClientCommand {
                     Collection<GameProfile> players = getPlayers(args[1]);
                     for (GameProfile player : players)
                         CustomModelClient.reloadModel(player);
-                    CommandBase.notifyCommandListener(sender, this, "command.custommodel.reload", players.size());
+                    sender.sendMessage(new TextComponentTranslation("command.custommodel.reload", players.size()));
                 } else {
                     CustomModelClient.reloadModel(Minecraft.getMinecraft().player.getGameProfile());
-                    CommandBase.notifyCommandListener(sender, this, "command.custommodel.reload", 1);
+                    sender.sendMessage(new TextComponentTranslation("command.custommodel.reload", 1));
                 }
                 return;
             }
@@ -103,10 +103,10 @@ public class Command implements IClientCommand {
                     Collection<GameProfile> players = getPlayers(args[1]);
                     for (GameProfile player : players)
                         CustomModelClient.clearModel(player);
-                    CommandBase.notifyCommandListener(sender, this, "command.custommodel.clear", players.size());
+                    sender.sendMessage(new TextComponentTranslation("command.custommodel.clear", players.size()));
                 } else {
                     CustomModelClient.clearModel(Minecraft.getMinecraft().player.getGameProfile());
-                    CommandBase.notifyCommandListener(sender, this, "command.custommodel.clear", 1);
+                    sender.sendMessage(new TextComponentTranslation("command.custommodel.clear", 1));
                 }
                 return;
             }
@@ -119,10 +119,10 @@ public class Command implements IClientCommand {
                     Collection<GameProfile> players = getPlayers(args[2]);
                     for (GameProfile player : players)
                         CustomModelClient.selectModel(player, args[1]);
-                    CommandBase.notifyCommandListener(sender, this, "command.custommodel.select", players.size(), args[2]);
+                    sender.sendMessage(new TextComponentTranslation("command.custommodel.select", players.size(), args[1]));
                 } else {
                     CustomModelClient.selectModel(Minecraft.getMinecraft().player.getGameProfile(), args[1]);
-                    CommandBase.notifyCommandListener(sender, this, "command.custommodel.select", 1, args[1]);
+                    sender.sendMessage(new TextComponentTranslation("command.custommodel.select", 1, args[1]));
                 }
                 return;
             }

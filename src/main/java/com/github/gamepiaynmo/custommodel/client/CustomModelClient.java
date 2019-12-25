@@ -63,12 +63,15 @@ public class CustomModelClient {
     }
 
     public static void clearModel(UUID uuid) {
+        EntityPlayer entityPlayer = Minecraft.getMinecraft().world.getPlayerEntityByUUID(uuid);
+        CustomModel.getModelSelector().clearModelForPlayer(entityPlayer.getGameProfile());
         ModelPack old = modelPacks.remove(uuid);
         if (old != null)
             old.release();
     }
 
     private static boolean loadModel(UUID uuid, String model) {
+        EntityPlayer entityPlayer = Minecraft.getMinecraft().world.getPlayerEntityByUUID(uuid);
         ModelInfo info = CustomModel.models.get(model);
         ModelPack pack = null;
 
@@ -82,6 +85,9 @@ public class CustomModelClient {
                 pack = ModelPack.fromDirectory(textureManager, modelFile, uuid);
             if (modelFile.isFile())
                 pack = ModelPack.fromZipFile(textureManager, modelFile, uuid);
+        } catch (ModelNotFoundException e) {
+            if (!model.equals(ModConfig.getDefaultModel()))
+                throw e;
         } catch (Exception e) {
             ITextComponent text = new TextComponentTranslation("error.custommodel.loadmodelpack", model, e.getMessage());
             text.getStyle().setColor(TextFormatting.RED);
@@ -91,6 +97,7 @@ public class CustomModelClient {
 
         if (pack != null && pack.successfulLoaded()) {
             addModel(uuid, pack);
+            CustomModel.getModelSelector().setModelForPlayer(entityPlayer.getGameProfile(), model);
             return true;
         }
 
@@ -99,8 +106,8 @@ public class CustomModelClient {
 
     public static void queryModel(GameProfile profile) {
         UUID uuid = EntityPlayer.getUUID(profile);
-        queried.add(uuid);
 
+        queried.add(uuid);
         if (isServerModded)
             NetworkHandler.CHANNEL.sendToServer(new PacketQuery(profile));
         else reloadModel(profile);

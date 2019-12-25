@@ -13,7 +13,7 @@ apply plugin: 'net.minecraftforge.gradle.forge'
 
 version = "1.1.0-forge-mc1.12.2-beta"
 group = "com.github.gamepiaynmo.custommodel" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = "custommodel"
+archivesBaseName = "cpm"
 
 sourceCompatibility = targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
 compileJava {
