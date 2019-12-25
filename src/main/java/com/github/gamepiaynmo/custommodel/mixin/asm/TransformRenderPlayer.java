@@ -77,13 +77,7 @@ public class TransformRenderPlayer implements IClassTransformer {
             insn.add(retNode);
             methodNode.instructions.insertBefore(startNode, insn);
 
-            byte[] result = ASMHelper.writeClassToBytes(classNode, ClassWriter.COMPUTE_FRAMES);
-            try {
-                FileUtils.writeByteArrayToFile(new File("test.class"), result);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return result;
+            return ASMHelper.writeClassToBytes(classNode, ClassWriter.COMPUTE_FRAMES);
         }
 
         return basicClass;
