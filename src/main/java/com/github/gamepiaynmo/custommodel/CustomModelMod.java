@@ -38,6 +38,9 @@ public class CustomModelMod implements IFMLLoadingPlugin {
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
         NetworkHandler.init();
+
+        if (FMLCommonHandler.instance().getSide() == Side.CLIENT)
+            CustomModelClient.initPlayerRenderer();
     }
 
     @Mod.EventHandler

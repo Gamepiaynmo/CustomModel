@@ -3,6 +3,7 @@ package com.github.gamepiaynmo.custommodel.mixin;
 import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.client.ModelPack;
 import com.github.gamepiaynmo.custommodel.render.*;
+import com.github.gamepiaynmo.custommodel.render.feature.*;
 import com.github.gamepiaynmo.custommodel.util.Matrix4;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
@@ -13,7 +14,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderLivingBase;
 import net.minecraft.client.renderer.entity.RenderPlayer;
-import net.minecraft.client.renderer.entity.layers.LayerRenderer;
+import net.minecraft.client.renderer.entity.layers.*;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -37,6 +38,20 @@ public abstract class RenderPlayerHandler {
         List<LayerRenderer<EntityLivingBase>> features = ObfuscationReflectionHelper.getPrivateValue(RenderLivingBase.class, renderer, 4);
         for (int i = 0; i < features.size(); i++) {
             LayerRenderer feature = features.get(i);
+            if (feature instanceof LayerBipedArmor)
+                feature = new CustomBipedArmor(renderer, context);
+            if (feature instanceof LayerHeldItem)
+                feature = new CustomHeldItem(renderer, context);
+            if (feature instanceof LayerArrow)
+                feature = new CustomArrow(renderer, context);
+            if (feature instanceof LayerCape)
+                feature = new CustomCape(renderer, context);
+            if (feature instanceof LayerCustomHead)
+                feature = new CustomHead(renderer.getMainModel().bipedHead, context);
+            if (feature instanceof LayerElytra)
+                feature = new CustomElytra(renderer, context);
+            if (feature instanceof LayerEntityOnShoulder)
+                feature = new CustomEntityOnShoulder(Minecraft.getMinecraft().getRenderManager(), context);
             features.set(i, feature);
         }
     }

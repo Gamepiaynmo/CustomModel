@@ -20,6 +20,7 @@ import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.ITextComponent;
@@ -123,6 +124,10 @@ public class CustomModelClient {
         loadModel(uuid, CustomModel.getModelSelector().getModelForPlayer(profile));
     }
 
+    public static ModelPack getModelForPlayer(EntityLivingBase entity) {
+        return entity instanceof AbstractClientPlayer ? getModelForPlayer(((AbstractClientPlayer) entity)) : null;
+    }
+
     public static ModelPack getModelForPlayer(AbstractClientPlayer player) {
         GameProfile profile = player.getGameProfile();
         if (profile != null) {
@@ -150,6 +155,11 @@ public class CustomModelClient {
         MinecraftForge.EVENT_BUS.register(CustomModelClient.class);
         MinecraftForge.EVENT_BUS.register(RenderPlayerHandler.class);
         ClientCommandHandler.instance.registerCommand(new Command());
+    }
+
+    public static void initPlayerRenderer() {
+        for (RenderPlayer renderer : Minecraft.getMinecraft().getRenderManager().getSkinMap().values())
+            RenderPlayerHandler.customize(renderer);
     }
 
     @SubscribeEvent
