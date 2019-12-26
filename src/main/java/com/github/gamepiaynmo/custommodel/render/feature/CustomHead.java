@@ -59,10 +59,6 @@ public class CustomHead<T extends AbstractClientPlayerEntity, M extends PlayerEn
                 if (!bone.isVisible(context)) continue;
 
                 GlStateManager.pushMatrix();
-                if (livingEntity_1.isInSneakingPose()) {
-                    GlStateManager.translatef(0.0F, 0.2F, 0.0F);
-                }
-
                 GL11.glMultMatrixd(context.currentInvTransform.val);
                 GL11.glMultMatrixd(model.getTransform(bone).val);
 
