@@ -57,10 +57,6 @@ public class CustomHead extends LayerCustomHead {
                 if (!bone.isVisible(context)) continue;
 
                 GlStateManager.pushMatrix();
-                if (entitylivingbaseIn.isSneaking()) {
-                    GlStateManager.translate(0.0F, 0.2F, 0.0F);
-                }
-
                 boolean flag = entitylivingbaseIn instanceof EntityVillager || entitylivingbaseIn instanceof EntityZombieVillager;
 
                 if (entitylivingbaseIn.isChild() && !(entitylivingbaseIn instanceof EntityVillager)) {
