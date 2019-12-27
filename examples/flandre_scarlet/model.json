@@ -13,10 +13,10 @@
 	"variables": {
 		"left_arm_roll": "if(is_first_person,0,-25)",
 		"right_arm_roll": "if(is_first_person,0,25)",
-		"p0": "0.5",
+		"p0": "0.4",
 		"p1": "0.1",
 		"p2": "0.9",
-		"p3": "0.1",
+		"p3": "0.05",
 		"p4": "0.0"
 	},
 	"bones": [

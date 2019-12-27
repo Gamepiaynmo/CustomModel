@@ -1487,7 +1487,7 @@
 			"parent": "body",
 			"texture": "tex.shirakami_fubuki",
 			"textureSize": [128, 128],
-			"position": [0, -8.5, 0],
+			"position": [0, -7.5, 0],
 			"scale": ["4/3", "4/3", "4/3"]
 		},
 		{
