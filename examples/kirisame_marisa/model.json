@@ -2741,7 +2741,8 @@
 			"id": "right_arm_item",
 			"parent": "armRight",
 			"attached": ["held_item_right"],
-			"position": [1, -8, -1]
+			"position": [1, -12, -1],
+			"scale": [0.75, 0.75, 0.75]
 		},
 		{
 			"id": "armRight_cpm_dummy",
@@ -2776,7 +2777,8 @@
 			"id": "left_arm_item",
 			"parent": "armLeft",
 			"attached": ["held_item_left"],
-			"position": [-1, -8, -1]
+			"position": [-1, -12, -1],
+			"scale": [0.75, 0.75, 0.75]
 		},
 		{
 			"id": "armLeft_cpm_dummy",
@@ -2804,13 +2806,15 @@
 			"id": "body_parrot_left",
 			"parent": "body_c",
 			"attached": ["shoulder_parrot_left"],
-			"position": [-5, 7, 0]
+			"position": [-6.5, 10, 0],
+			"scale": [0.75, 0.75, 0.75]
 		},
 		{
 			"id": "body_parrot_right",
 			"parent": "body_c",
 			"attached": ["shoulder_parrot_right"],
-			"position": [5, 7, 0]
+			"position": [6.5, 10, 0],
+			"scale": [0.75, 0.75, 0.75]
 		},
 		{
 			"id": "body_armor",
