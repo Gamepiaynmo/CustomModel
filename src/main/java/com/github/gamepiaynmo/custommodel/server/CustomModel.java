@@ -131,6 +131,7 @@ public class CustomModel implements ModInitializer {
     public static void clearModel(ServerPlayerEntity playerEntity) {
         GameProfile profile = playerEntity.getGameProfile();
         UUID uuid = PlayerEntity.getUuidFromProfile(profile);
+        modelMap.remove(uuid);
         modelSelector.clearModelForPlayer(profile);
         Packet packet = formPacket(PacketModel.ID, new PacketModel(uuid));
         playerEntity.getServerWorld().method_14178().sendToNearbyPlayers(playerEntity, packet);

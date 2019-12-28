@@ -126,6 +126,7 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
             partial = CustomModelClient.getPartial();
             context.currentJsonModel = model;
             context.currentModel = getModel();
+            context.currentModel.isSneaking = false;
             context.currentParameter = calculateTransform(abstractClientPlayerEntity);
             context.setPlayer(abstractClientPlayerEntity);
             context.isInvisible = false;
@@ -134,7 +135,6 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
             PlayerEntityModel<AbstractClientPlayerEntity> playerEntityModel = getModel();
             GlStateManager.enableBlend();
 
-            playerEntityModel.isSneaking = false;
             playerEntityModel.handSwingProgress = 0.0F;
             playerEntityModel.field_3396 = 0.0F;
             playerEntityModel.method_17087(abstractClientPlayerEntity, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F);
@@ -165,6 +165,7 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
             partial = CustomModelClient.getPartial();
             context.currentJsonModel = model;
             context.currentModel = getModel();
+            context.currentModel.isSneaking = false;
             context.currentParameter = calculateTransform(abstractClientPlayerEntity);
             context.setPlayer(abstractClientPlayerEntity);
             context.isInvisible = false;
@@ -173,7 +174,6 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
             PlayerEntityModel<AbstractClientPlayerEntity> playerEntityModel = getModel();
             GlStateManager.enableBlend();
 
-            playerEntityModel.isSneaking = false;
             playerEntityModel.handSwingProgress = 0.0F;
             playerEntityModel.field_3396 = 0.0F;
             playerEntityModel.method_17087(abstractClientPlayerEntity, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F);
@@ -210,6 +210,7 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
 
                 this.partial = 1;
                 context.currentModel = getModel();
+                context.currentModel.isSneaking = playerEntity.isInSneakingPose();
                 context.currentParameter = calculateTransform(playerEntity);
 
                 context.currentJsonModel = model.getModel();
@@ -228,6 +229,7 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
         ModelPack model = CustomModelClient.getModelForPlayer(playerEntity);
         context.setPlayer(playerEntity);
         context.currentModel = getModel();
+        context.currentModel.isSneaking = playerEntity.isInSneakingPose();
 
         disableSetModelPose = model != null;
         if (disableSetModelPose) {
