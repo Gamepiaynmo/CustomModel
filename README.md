@@ -69,6 +69,7 @@ Fabric版本需要fabric-api模组作为依赖项。此外建议使用Mod Menu�
 - refresh：将新模型添加到文件夹时，强制Mod刷新模型列表。
 - select xxx：为玩家选择ID为xxx的模型。
 - list：列出mod加载的所有模型。 然后，您可以单击命令返回的消息以获取模型选择命令。
+- clear：清除玩家的当前模型。
 
 #### 常见问题
 
@@ -83,9 +84,6 @@ Fabric版本需要fabric-api模组作为依赖项。此外建议使用Mod Menu�
 #### 致谢
 
 - 模组的灵感来源于[Optifine](https://optifine.net/)和[更多玩家模型](https://www.curseforge.com/minecraft/mc-mods/more-player-models)。
-
 - 部分模型来源于模组[车万女仆](https://www.curseforge.com/minecraft/mc-mods/touhou-little-maid)。
-
 - 方块风格建模软件[Blockbench](https://www.blockbench.net/web/)。
-
 - [squeek502](https://github.com/squeek502)编写的[ASMHelper](https://github.com/squeek502/ASMHelper)辅助Core Mod开发。
