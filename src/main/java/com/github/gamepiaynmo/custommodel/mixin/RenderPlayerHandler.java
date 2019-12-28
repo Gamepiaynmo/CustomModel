@@ -127,6 +127,7 @@ public abstract class RenderPlayerHandler {
             partial = CustomModelClient.getPartial();
             context.currentJsonModel = model;
             context.currentModel = getModel(abstractClientPlayerEntity);
+            context.currentModel.isSneak = false;
             context.currentParameter = calculateTransform(abstractClientPlayerEntity);
             context.isInvisible = false;
             context.setPlayer(abstractClientPlayerEntity);
@@ -135,7 +136,6 @@ public abstract class RenderPlayerHandler {
             ModelPlayer playerModel = getModel(abstractClientPlayerEntity);
             GlStateManager.enableBlend();
 
-            playerModel.isSneak = false;
             playerModel.swingProgress = 0.0F;
             playerModel.setRotationAngles(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F, abstractClientPlayerEntity);
             playerModel.bipedRightArm.rotateAngleX = 0;
@@ -165,6 +165,7 @@ public abstract class RenderPlayerHandler {
             partial = CustomModelClient.getPartial();
             context.currentJsonModel = model;
             context.currentModel = getModel(abstractClientPlayerEntity);
+            context.currentModel.isSneak = false;
             context.currentParameter = calculateTransform(abstractClientPlayerEntity);
             context.isInvisible = false;
             context.setPlayer(abstractClientPlayerEntity);
@@ -173,7 +174,6 @@ public abstract class RenderPlayerHandler {
             ModelPlayer playerModel = getModel(abstractClientPlayerEntity);
             GlStateManager.enableBlend();
 
-            playerModel.isSneak = false;
             playerModel.swingProgress = 0.0F;
             playerModel.setRotationAngles(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F, abstractClientPlayerEntity);
             playerModel.bipedLeftArm.rotateAngleX = 0.0F;
@@ -208,6 +208,7 @@ public abstract class RenderPlayerHandler {
 
             partial = 1;
             context.currentModel = playerModel;
+            context.currentModel.isSneak = context.getPlayer().isSneaking();
             context.currentParameter = calculateTransform(playerEntity);
             context.currentJsonModel = model.getModel();
             context.currentInvTransform = transform.cpy().inv();
@@ -222,6 +223,7 @@ public abstract class RenderPlayerHandler {
     public static void render(RenderPlayerEvent.Pre event) {
         context.setPlayer((AbstractClientPlayer) event.getEntityPlayer());
         context.currentModel = getModel(event.getEntityPlayer());
+        context.currentModel.isSneak = context.getPlayer().isSneaking();
         ModelPack model = CustomModelClient.getModelForPlayer(context.getPlayer());
         partial = CustomModelClient.getPartial();
     }

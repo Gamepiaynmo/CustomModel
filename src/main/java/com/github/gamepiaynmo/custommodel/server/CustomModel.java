@@ -111,6 +111,7 @@ public class CustomModel {
     public static void clearModel(EntityPlayerMP playerEntity) {
         GameProfile profile = playerEntity.getGameProfile();
         UUID uuid = EntityPlayer.getUUID(profile);
+        modelMap.remove(uuid);
         modelSelector.clearModelForPlayer(profile);
         PacketModel packetModel = new PacketModel(uuid);
         NetworkHandler.CHANNEL.sendToAllTracking(packetModel, playerEntity);

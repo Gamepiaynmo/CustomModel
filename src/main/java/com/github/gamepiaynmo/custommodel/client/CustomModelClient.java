@@ -59,6 +59,13 @@ public class CustomModelClient {
         modelPacks.put(name, pack);
     }
 
+    public static void clearModels() {
+        for (ModelPack pack : modelPacks.values())
+            pack.release();
+        modelPacks.clear();
+        queried.clear();
+    }
+
     public static void clearModel(GameProfile profile) {
         clearModel(EntityPlayer.getUUID(profile));
     }

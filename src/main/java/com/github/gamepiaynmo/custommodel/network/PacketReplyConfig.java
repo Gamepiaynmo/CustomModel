@@ -44,6 +44,7 @@ public class PacketReplyConfig implements IMessage, IMessageHandler<PacketReplyC
         Minecraft.getMinecraft().addScheduledTask(() -> {
             CustomModelClient.serverConfig = message.getConfig();
             CustomModelClient.isServerModded = true;
+            CustomModelClient.clearModels();
         });
         return null;
     }
