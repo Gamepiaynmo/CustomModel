@@ -13,10 +13,8 @@ import com.github.gamepiaynmo.custommodel.util.*;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.GLAllocation;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.*;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 
@@ -38,6 +36,7 @@ public class Bone implements IBone {
     private double[] physicsParams;
     private float[] color = new float[] { 1, 1, 1 };
     private float alpha = 1;
+    private boolean emissive;
 
     private IExpressionFloat[] positionExpr;
     private IExpressionFloat[] rotationExpr;
@@ -46,6 +45,7 @@ public class Bone implements IBone {
     private IExpressionFloat[] physicsExpr;
     private IExpressionFloat[] colorExpr;
     private IExpressionFloat alphaExpr;
+    private IExpressionBool emissiveExpr;
 
     public List<PlayerFeature> attachments = Lists.newArrayList();
     private List<Box> boxes = Lists.newArrayList();
@@ -103,6 +103,7 @@ public class Bone implements IBone {
 
         bone.colorExpr = Json.parseFloatExpressionArray(jsonObj.get(CustomJsonModel.COLOR), 3, new float[] { 1, 1, 1 }, model.getParser());
         bone.alphaExpr = Json.getFloatExpression(jsonObj, CustomJsonModel.ALPHA, 1, model.getParser());
+        bone.emissiveExpr = Json.getBooleanExpression(jsonObj, CustomJsonModel.EMISSIVE, false, model.getParser());
 
         Json.parseJsonArray(jsonObj.get(CustomJsonModel.ATTACHED), element -> {
             String id = element.getAsString();
@@ -193,16 +194,22 @@ public class Bone implements IBone {
     public boolean isPhysicalized() { return physicalize; }
     public double[] getPhysicsParams() { return physicsParams; }
     public double getLength() { return length; }
+    public boolean isEmissive() { return emissive; }
 
     public void render(RenderContext context) {
         float scaleFactor = context.currentParameter.scale;
         if (!compiled)
             compile(scaleFactor);
-        GlStateManager.color(color[0], color[1], color[2], context.isInvisible ? 0.15f * alpha : alpha);
-        GlStateManager.callList(glList);
 
-        for (ItemPart item : items)
-            item.render(context);
+        if (context.renderEmissive == emissive) {
+            GlStateManager.color(color[0], color[1], color[2], context.isInvisible ? 0.15f * alpha : alpha);
+            GlStateManager.callList(glList);
+        }
+
+        if (!context.renderEmissive) {
+            for (ItemPart item : items)
+                item.render(context);
+        }
         GlStateManager.enableRescaleNormal();
     }
 
@@ -232,6 +239,7 @@ public class Bone implements IBone {
         color[1] = colorExpr[1].eval(context);
         color[2] = colorExpr[2].eval(context);
         alpha = alphaExpr.eval(context);
+        emissive = emissiveExpr.eval(context);
         if (physicalize) {
             for (int i = 0; i < physicsParams.length; i++)
                 physicsParams[i] = physicsExpr[i].eval(context);

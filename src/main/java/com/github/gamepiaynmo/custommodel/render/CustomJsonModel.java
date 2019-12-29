@@ -19,6 +19,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.EnumHand;
@@ -60,6 +61,7 @@ public class CustomJsonModel {
     public static final String VISIBLE = "visible";
     public static final String COLOR = "color";
     public static final String ALPHA = "alpha";
+    public static final String EMISSIVE = "emissive";
     public static final String BOXES = "boxes";
     public static final String QUADS = "quads";
     public static final String PARTICLES = "particles";
@@ -67,6 +69,7 @@ public class CustomJsonModel {
     public static final String TEXTURE_OFFSET = "textureOffset";
     public static final String COORDINATES = "coordinates";
     public static final String SIZE_ADD = "sizeAdd";
+    public static final String MIRROR = "mirror";
     public static final String PHYSICS = "physics";
     public static final String ATTACHED = "attached";
     public static final String FP_LEFT = "fpLeft";
@@ -305,6 +308,43 @@ public class CustomJsonModel {
                 GlStateManager.popMatrix();
             }
         }
+        GlStateManager.popMatrix();
+    }
+
+    public void renderEmissive(RenderContext context) {
+        RenderParameter params = context.currentParameter;
+        ModelPlayer model = context.currentModel;
+
+        float partial = params.partial;
+        GlStateManager.pushMatrix();
+        GL11.glMultMatrix(context.currentInvTransform.toBuffer());
+
+        TextureManager textureManager = Minecraft.getMinecraft().renderEngine;
+        GlStateManager.enableBlend();
+        GlStateManager.disableAlpha();
+        GlStateManager.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
+        GlStateManager.depthMask(!context.currentEntity.isInvisible());
+        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 61680.0F, 0.0F);
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        Minecraft.getMinecraft().entityRenderer.setupFogColor(true);
+
+        for (Bone bone : bones) {
+            if (bone.isVisible(context) && bone.isEmissive()) {
+                textureManager.bindTexture(bone.getTexture(context).apply(context));
+                GlStateManager.pushMatrix();
+                Matrix4 transform = tmpBoneMats.get(bone.getId());
+
+                GL11.glMultMatrix(transform.toBuffer());
+                bone.render(context);
+                GlStateManager.popMatrix();
+            }
+        }
+
+        Minecraft.getMinecraft().entityRenderer.setupFogColor(false);
+        int i = context.currentEntity.getBrightnessForRender();
+        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, i % 65536, i / 65536);
+        GlStateManager.disableBlend();
+        GlStateManager.enableAlpha();
         GlStateManager.popMatrix();
     }
 

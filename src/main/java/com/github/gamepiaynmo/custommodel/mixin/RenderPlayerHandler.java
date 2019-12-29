@@ -54,6 +54,8 @@ public abstract class RenderPlayerHandler {
                 feature = new CustomEntityOnShoulder(Minecraft.getMinecraft().getRenderManager(), context);
             features.set(i, feature);
         }
+
+        features.add(new CustomEmissive(context));
     }
 
     private static RenderContext context = new RenderContext();

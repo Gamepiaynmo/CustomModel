@@ -3,10 +3,13 @@ package com.github.gamepiaynmo.custommodel.expression;
 import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.client.ModelPack;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
+import com.github.gamepiaynmo.custommodel.render.EntityPose;
 import com.github.gamepiaynmo.custommodel.render.TickVariable;
 import com.github.gamepiaynmo.custommodel.render.model.IBone;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.Item;
+import net.minecraft.potion.Potion;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.ResourceLocation;
 
 import java.util.Map;
@@ -46,6 +49,10 @@ public class ModelResolver implements IExpressionResolver {
 
    public static String[] tokenize(String str, String delim) {
       return str.split(delim);
+   }
+
+   private IExpressionFloat toFloat(IExpressionFloat expr) {
+      return expr;
    }
 
    public IExpression getModelVariable(String name) {
@@ -114,6 +121,17 @@ public class ModelResolver implements IExpressionResolver {
          case "tvp": {
             TickVariable var = model.getTickVar(second);
             return var == null ? null : var.getParValue();
+         }
+         case "pose": {
+            EntityPose pose = EntityPose.getByName(second);
+            return pose == null ? null : new ConstantFloat(pose.getId());
+         }
+         case "effect": {
+            Potion potion = Potion.REGISTRY.getObject(new ResourceLocation(second));
+            return potion == null ? null : toFloat(context -> {
+               PotionEffect effect = context.currentEntity.getActivePotionEffect(potion);
+               return effect == null ? -1 : effect.getAmplifier();
+            });
          }
          default: {
             IBone mr = this.getModelRenderer(first);

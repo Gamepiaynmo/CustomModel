@@ -1,6 +1,7 @@
 package com.github.gamepiaynmo.custommodel.expression;
 
 import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
+import com.github.gamepiaynmo.custommodel.mixin.PlayerStatureHandler;
 import com.github.gamepiaynmo.custommodel.render.RenderContext;
 import com.github.gamepiaynmo.custommodel.render.RenderParameter;
 import net.minecraft.entity.EntityLivingBase;
@@ -28,7 +29,8 @@ public enum RenderEntityParameterFloat implements IExpressionFloat {
    YAW("yaw", (entity, params) -> (float) MathHelper.clampedLerp(entity.prevRotationYaw, entity.rotationYaw, params.partial)),
    BODY_YAW("body_yaw", (entity, params) -> (float) MathHelper.clampedLerp(entity.prevRenderYawOffset, entity.renderYawOffset, params.partial)),
    PITCH("pitch", (entity, params) -> (float) MathHelper.clampedLerp(entity.prevRotationPitch, entity.rotationPitch, params.partial)),
-   SWING_PROGRESS("swing_progress", (entity, params) -> entity.getSwingProgress(params.partial));
+   SWING_PROGRESS("swing_progress", (entity, params) -> entity.getSwingProgress(params.partial)),
+   CURRENT_POSE("current_pose", (entity, params) -> (float) PlayerStatureHandler.getPose(entity).getId());
 
    private String name;
    private static final RenderEntityParameterFloat[] VALUES = values();

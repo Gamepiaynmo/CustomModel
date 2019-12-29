@@ -20,7 +20,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import java.util.Map;
 
 public class PlayerStatureHandler {
-    private static EntityPose getPose(EntityLivingBase entity) {
+    public static EntityPose getPose(EntityLivingBase entity) {
         if (entity.isElytraFlying()) return EntityPose.FALL_FLYING;
         if (entity.isPlayerSleeping()) return EntityPose.SLEEPING;
         if (entity.isSneaking()) return EntityPose.SNEAKING;
