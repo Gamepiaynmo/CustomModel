@@ -28,7 +28,8 @@ public enum RenderEntityParameterFloat implements IExpressionFloat {
    YAW("yaw", (entity, params) -> MathHelper.lerp(params.partial, entity.prevYaw, entity.yaw)),
    BODY_YAW("body_yaw", (entity, params) -> MathHelper.lerp(params.partial, entity.field_6220, entity.field_6283)),
    PITCH("pitch", (entity, params) -> MathHelper.lerp(params.partial, entity.prevPitch, entity.pitch)),
-   SWING_PROGRESS("swing_progress", (entity, params) -> entity.getHandSwingProgress(params.partial));
+   SWING_PROGRESS("swing_progress", (entity, params) -> entity.getHandSwingProgress(params.partial)),
+   CURRENT_POSE("current_pose", (entity, params) -> (float) ModelResolver.poseId.get(entity.getPose()));
 
    private String name;
    private static final RenderEntityParameterFloat[] VALUES = values();

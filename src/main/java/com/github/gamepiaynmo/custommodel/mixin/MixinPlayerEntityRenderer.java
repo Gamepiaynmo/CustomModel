@@ -62,6 +62,8 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
                 feature = new CustomShoulderParrot<>(this, context);
             this.features.set(i, feature);
         }
+
+        features.add(new CustomEmissive(this, context));
     }
 
     public boolean disableSetModelPose;

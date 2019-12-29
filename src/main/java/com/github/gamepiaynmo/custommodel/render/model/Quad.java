@@ -61,6 +61,15 @@ public class Quad {
         Tessellator.getInstance().draw();
     }
 
+    public void flipFace() {
+        Vertex[] apositiontexturevertex = new Vertex[this.vertices.length];
+        for (int i = 0; i < this.vertices.length; ++i) {
+            apositiontexturevertex[i] = this.vertices[this.vertices.length - i - 1];
+        }
+
+        this.vertices = apositiontexturevertex;
+    }
+
     public static Quad getQuadFromJson(Bone bone, JsonObject jsonObj, RenderContext context) {
         int uMin = 0, vMin = 0;
         float xMin = 0, yMin = 0, zMin = 0, width = 0, height = 0, size = 0;

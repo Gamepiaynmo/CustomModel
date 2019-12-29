@@ -5,7 +5,12 @@ import com.github.gamepiaynmo.custommodel.client.ModelPack;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
 import com.github.gamepiaynmo.custommodel.render.TickVariable;
 import com.github.gamepiaynmo.custommodel.render.model.IBone;
+import com.google.common.collect.Maps;
+import net.minecraft.entity.EntityPose;
+import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.potion.Potion;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
@@ -46,6 +51,10 @@ public class ModelResolver implements IExpressionResolver {
 
    public static String[] tokenize(String str, String delim) {
       return str.split(delim);
+   }
+
+   private IExpressionFloat toFloat(IExpressionFloat expr) {
+      return expr;
    }
 
    public IExpression getModelVariable(String name) {
@@ -115,6 +124,17 @@ public class ModelResolver implements IExpressionResolver {
             TickVariable var = model.getTickVar(second);
             return var == null ? null : var.getParValue();
          }
+         case "pose": {
+            EntityPose pose = CustomJsonModel.poseMap.get(second);
+            return pose == null ? null : new ConstantFloat(poseId.get(pose));
+         }
+         case "effect": {
+            StatusEffect potion = Registry.STATUS_EFFECT.get(new Identifier(second));
+            return potion == null ? null : toFloat(context -> {
+               StatusEffectInstance effect = context.currentEntity.getStatusEffect(potion);
+               return effect == null ? -1 : effect.getAmplifier();
+            });
+         }
          default: {
             IBone mr = this.getModelRenderer(first);
             if (mr == null) {
@@ -125,5 +145,16 @@ public class ModelResolver implements IExpressionResolver {
             }
          }
       }
+   }
+
+   public static final Map<EntityPose, Integer> poseId = Maps.newEnumMap(EntityPose.class);
+   static {
+      poseId.put(EntityPose.STANDING, 0);
+      poseId.put(EntityPose.FALL_FLYING, 1);
+      poseId.put(EntityPose.SLEEPING, 2);
+      poseId.put(EntityPose.SWIMMING, 3);
+      poseId.put(EntityPose.SPIN_ATTACK, 4);
+      poseId.put(EntityPose.SNEAKING, 5);
+      poseId.put(EntityPose.DYING, 6);
    }
 }

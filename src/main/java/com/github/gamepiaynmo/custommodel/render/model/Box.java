@@ -21,7 +21,7 @@ public class Box {
     public final float yMax;
     public final float zMax;
 
-    private Box(int int_1, int int_2, float float_1, float float_2, float float_3, float int_3, float int_4, float int_5, float float_4, float texWidth, float texHeight) {
+    private Box(int int_1, int int_2, float float_1, float float_2, float float_3, float int_3, float int_4, float int_5, float float_4, float texWidth, float texHeight, boolean mirror) {
         this.xMin = float_1 - int_3 - float_4;
         this.yMin = float_2 - int_4 - float_4;
         this.zMin = float_3 - int_5 - float_4;
@@ -39,6 +39,12 @@ public class Box {
         float_5 += float_4;
         float_6 += float_4;
         float_7 += float_4;
+
+        if (mirror) {
+            float f3 = float_5;
+            float_5 = float_1;
+            float_1 = f3;
+        }
 
         Vertex vertex_1 = new Vertex(float_1, float_2, float_3, 0.0F, 0.0F);
         Vertex vertex_2 = new Vertex(float_5, float_2, float_3, 0.0F, 8.0F);
@@ -63,6 +69,11 @@ public class Box {
         this.polygons[4] = new Quad(new Vertex[]{vertex_2, vertex_1, vertex_4, vertex_3}, int_1 + int_5, int_2 + int_5, int_1 + int_5 + int_3, int_2 + int_5 + int_4, texWidth, texHeight);
         this.polygons[5] = new Quad(new Vertex[]{vertex_5, vertex_6, vertex_7, vertex_8}, int_1 + int_5 + int_3 + int_5, int_2 + int_5, int_1 + int_5 + int_3 + int_5 + int_3, int_2 + int_5 + int_4, texWidth, texHeight);
 
+        if (mirror) {
+            for (Quad texturedquad : this.polygons) {
+                texturedquad.flipFace();
+            }
+        }
     }
 
     public void render(BufferBuilder bufferBuilder_1, float float_1) {
@@ -102,6 +113,7 @@ public class Box {
         if (sizeVal != null)
             size = sizeVal.getAsFloat();
 
-        return new Box(uMin, vMin, xMin, yMin, zMin, width, height, depth, size, (float) bone.getTextureSize(context).x, (float) bone.getTextureSize(context).y);
+        boolean mirror = Json.getBoolean(jsonObj, CustomJsonModel.MIRROR, false);
+        return new Box(uMin, vMin, xMin, yMin, zMin, width, height, depth, size, (float) bone.getTextureSize(context).x, (float) bone.getTextureSize(context).y, mirror);
     }
 }
