@@ -13,7 +13,8 @@ public class CustomEmissive implements LayerRenderer<EntityLivingBase> {
     @Override
     public void doRenderLayer(EntityLivingBase entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
         context.renderEmissive = true;
-        context.currentJsonModel.renderEmissive(context);
+        if (context.currentJsonModel != null)
+            context.currentJsonModel.renderEmissive(context);
         context.renderEmissive = false;
     }
 

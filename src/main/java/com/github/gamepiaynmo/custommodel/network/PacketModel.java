@@ -112,6 +112,7 @@ public class PacketModel implements IMessage, IMessageHandler<PacketModel, IMess
                 text.getStyle().setColor(TextFormatting.RED);
                 Minecraft.getMinecraft().ingameGUI.addChatMessage(ChatType.CHAT, text);
                 CustomModelClient.LOGGER.warn(e.getMessage(), e);
+                CustomModelClient.clearModel(message.getUuid());
             }
         });
         return null;

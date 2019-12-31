@@ -2,6 +2,7 @@ package com.github.gamepiaynmo.custommodel.mixin;
 
 import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.client.ModelPack;
+import com.github.gamepiaynmo.custommodel.entity.NpcHelper;
 import com.github.gamepiaynmo.custommodel.render.*;
 import com.github.gamepiaynmo.custommodel.render.feature.*;
 import com.github.gamepiaynmo.custommodel.util.Matrix4;
@@ -15,7 +16,6 @@ import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderLivingBase;
 import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.client.renderer.entity.layers.*;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EnumPlayerModelParts;
@@ -25,11 +25,9 @@ import net.minecraft.util.EnumHandSide;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import scala.tools.nsc.interpreter.Formatting;
 
 import java.util.List;
 
@@ -59,13 +57,22 @@ public abstract class RenderPlayerHandler {
     }
 
     private static RenderContext context = new RenderContext();
+    public static RenderContext getContext() {
+        return context;
+    }
 
     private static ModelPlayer getModel(EntityLivingBase entityLivingBase) {
         Render render = Minecraft.getMinecraft().getRenderManager().getEntityRenderObject(entityLivingBase);
-        if (render instanceof RenderLivingBase) {
-            ModelBase model = ((RenderLivingBase) render).getMainModel();
-            if (model instanceof ModelPlayer)
-                return (ModelPlayer) model;
+        if (entityLivingBase instanceof AbstractClientPlayer) {
+            if (render instanceof RenderLivingBase) {
+                ModelBase model = ((RenderLivingBase) render).getMainModel();
+                if (model instanceof ModelPlayer)
+                    return (ModelPlayer) model;
+            }
+        } else {
+            if (render instanceof RenderNpc) {
+                return ((RenderNpc) render).getModelPlayer();
+            }
         }
         return null;
     }
@@ -80,9 +87,8 @@ public abstract class RenderPlayerHandler {
             }
 
             ModelPack model = null;
-            if (context.isPlayer())
-                model = CustomModelClient.getModelForPlayer(context.getPlayer());
-            if (model != null)
+            model = CustomModelClient.getModelForEntity(context.currentEntity);
+            if (model != null && context.isPlayer())
                 setModelPose(context.getPlayer(), model.getModel());
 
             if (playerEntity instanceof AbstractClientPlayer) {
@@ -200,8 +206,7 @@ public abstract class RenderPlayerHandler {
     public static void tick(EntityLivingBase playerEntity) {
         ModelPack model = null;
         context.setEntity(playerEntity);
-        if (context.isPlayer())
-            model = CustomModelClient.getModelForPlayer(context.getPlayer());
+        model = CustomModelClient.getModelForEntity(context.currentEntity);
         ModelPlayer playerModel = getModel(playerEntity);
         if (model != null) {
             playerModel.swingProgress = playerEntity.getSwingProgress(1);
@@ -210,7 +215,7 @@ public abstract class RenderPlayerHandler {
 
             partial = 1;
             context.currentModel = playerModel;
-            context.currentModel.isSneak = context.getPlayer().isSneaking();
+            context.currentModel.isSneak = context.currentEntity.isSneaking();
             context.currentParameter = calculateTransform(playerEntity);
             context.currentJsonModel = model.getModel();
             context.currentInvTransform = transform.cpy().inv();
@@ -222,11 +227,19 @@ public abstract class RenderPlayerHandler {
     }
 
     @SubscribeEvent
-    public static void render(RenderPlayerEvent.Pre event) {
+    public static void renderPre(RenderPlayerEvent.Pre event) {
         context.setPlayer((AbstractClientPlayer) event.getEntityPlayer());
         context.currentModel = getModel(event.getEntityPlayer());
         context.currentModel.isSneak = context.getPlayer().isSneaking();
         ModelPack model = CustomModelClient.getModelForPlayer(context.getPlayer());
+        partial = CustomModelClient.getPartial();
+    }
+
+    public static void renderPre(EntityLivingBase entity, ModelPlayer model) {
+        context.setEntity(entity);
+        context.currentModel = model;
+        context.currentModel.isSneak = entity.isSneaking();
+        ModelPack pack = CustomModelClient.getModelForEntity(entity);
         partial = CustomModelClient.getPartial();
     }
 

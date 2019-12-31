@@ -1,5 +1,9 @@
 package com.github.gamepiaynmo.custommodel.client;
 
+import com.github.gamepiaynmo.custommodel.entity.CustomModelFemaleNpc;
+import com.github.gamepiaynmo.custommodel.entity.CustomModelMaleNpc;
+import com.github.gamepiaynmo.custommodel.entity.CustomModelNpc;
+import com.github.gamepiaynmo.custommodel.entity.NpcHelper;
 import com.github.gamepiaynmo.custommodel.mixin.RenderPlayerHandler;
 import com.github.gamepiaynmo.custommodel.network.*;
 import com.github.gamepiaynmo.custommodel.render.*;
@@ -27,9 +31,12 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.client.ClientCommandHandler;
+import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.fml.client.registry.RenderingRegistry;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.apache.logging.log4j.LogManager;
@@ -72,7 +79,8 @@ public class CustomModelClient {
 
     public static void clearModel(UUID uuid) {
         EntityPlayer entityPlayer = Minecraft.getMinecraft().world.getPlayerEntityByUUID(uuid);
-        CustomModel.getModelSelector().clearModelForPlayer(entityPlayer.getGameProfile());
+        if (entityPlayer != null)
+            CustomModel.getModelSelector().clearModelForPlayer(entityPlayer.getGameProfile());
         ModelPack old = modelPacks.remove(uuid);
         if (old != null)
             old.release();
@@ -105,7 +113,8 @@ public class CustomModelClient {
 
         if (pack != null && pack.successfulLoaded()) {
             addModel(uuid, pack);
-            CustomModel.getModelSelector().setModelForPlayer(entityPlayer.getGameProfile(), model);
+            if (entityPlayer != null)
+                CustomModel.getModelSelector().setModelForPlayer(entityPlayer.getGameProfile(), model);
             return true;
         }
 
@@ -117,8 +126,14 @@ public class CustomModelClient {
 
         queried.add(uuid);
         if (isServerModded)
-            NetworkHandler.CHANNEL.sendToServer(new PacketQuery(profile));
+            NetworkHandler.CHANNEL.sendToServer(new PacketQuery(uuid));
         else reloadModel(profile);
+    }
+
+    public static void queryModel(UUID uuid) {
+        queried.add(uuid);
+        if (isServerModded)
+            NetworkHandler.CHANNEL.sendToServer(new PacketQuery(uuid));
     }
 
     public static void selectModel(GameProfile profile, String model) {
@@ -131,8 +146,21 @@ public class CustomModelClient {
         loadModel(uuid, CustomModel.getModelSelector().getModelForPlayer(profile));
     }
 
-    public static ModelPack getModelForPlayer(EntityLivingBase entity) {
-        return entity instanceof AbstractClientPlayer ? getModelForPlayer(((AbstractClientPlayer) entity)) : null;
+    public static ModelPack getModelForEntity(EntityLivingBase entity) {
+        if (entity instanceof AbstractClientPlayer)
+            return getModelForPlayer(((AbstractClientPlayer) entity));
+
+        entity = NpcHelper.getParent(entity);
+        if (entity != null) {
+            UUID uuid = entity.getUniqueID();
+            ModelPack pack = modelPacks.get(uuid);
+            if (pack != null)
+                return pack;
+
+            if (!queried.contains(uuid))
+                queryModel(uuid);
+        }
+        return null;
     }
 
     public static ModelPack getModelForPlayer(AbstractClientPlayer player) {
@@ -167,6 +195,10 @@ public class CustomModelClient {
     public static void initPlayerRenderer() {
         for (RenderPlayer renderer : Minecraft.getMinecraft().getRenderManager().getSkinMap().values())
             RenderPlayerHandler.customize(renderer);
+        if (Loader.isModLoaded("customnpcs")) {
+            RenderingRegistry.registerEntityRenderingHandler(CustomModelMaleNpc.class, new RenderNpc(new ModelPlayer(0, true), true));
+            RenderingRegistry.registerEntityRenderingHandler(CustomModelFemaleNpc.class, new RenderNpc(new ModelPlayer(0, false), false));
+        }
     }
 
     @SubscribeEvent
@@ -177,11 +209,16 @@ public class CustomModelClient {
                 RenderPlayerHandler.tick(player);
             }
 
+            for (EntityLivingBase entity : NpcHelper.getCustomModelNpcs(world)) {
+                RenderPlayerHandler.tick(entity);
+            }
+
             if (clearCounter++ > 200) {
                 clearCounter = 0;
                 Set<UUID> uuids = Sets.newHashSet();
                 for (AbstractClientPlayer playerEntity : world.getPlayers(AbstractClientPlayer.class, player -> true))
                     uuids.add(EntityPlayer.getUUID(playerEntity.getGameProfile()));
+                uuids.addAll(NpcHelper.getNpcUUIDs(world));
                 for (Iterator<Map.Entry<UUID, ModelPack>> iter = modelPacks.entrySet().iterator(); iter.hasNext(); ) {
                     Map.Entry<UUID, ModelPack> entry = iter.next();
                     if (!uuids.contains(entry.getKey())) {

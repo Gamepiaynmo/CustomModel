@@ -31,7 +31,7 @@ public class CustomBipedArmor extends LayerBipedArmor {
 
     @Override
     public void doRenderLayer(EntityLivingBase entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
-        ModelPack pack = CustomModelClient.getModelForPlayer(entitylivingbaseIn);
+        ModelPack pack = CustomModelClient.getModelForEntity(entitylivingbaseIn);
         CustomJsonModel model = pack == null ? null : pack.getModel();
         if (model == null) {
             super.doRenderLayer(entitylivingbaseIn, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch, scale);
@@ -45,7 +45,7 @@ public class CustomBipedArmor extends LayerBipedArmor {
     }
 
     private void renderArmorLayer(EntityLivingBase entityLivingBaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale, EntityEquipmentSlot slotIn) {
-        ModelPack pack = CustomModelClient.getModelForPlayer(entityLivingBaseIn);
+        ModelPack pack = CustomModelClient.getModelForEntity(entityLivingBaseIn);
         CustomJsonModel model = pack == null ? null : pack.getModel();
 
         ItemStack itemstack = entityLivingBaseIn.getItemStackFromSlot(slotIn);

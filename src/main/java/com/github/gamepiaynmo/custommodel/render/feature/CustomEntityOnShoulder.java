@@ -48,7 +48,7 @@ public class CustomEntityOnShoulder extends LayerEntityOnShoulder {
 
     @Override
     public void doRenderLayer(EntityPlayer entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
-        ModelPack pack = CustomModelClient.getModelForPlayer(entitylivingbaseIn);
+        ModelPack pack = CustomModelClient.getModelForEntity(entitylivingbaseIn);
         CustomJsonModel model = pack == null ? null : pack.getModel();
         if (model == null) {
             super.doRenderLayer(entitylivingbaseIn, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch, scale);
@@ -101,7 +101,7 @@ public class CustomEntityOnShoulder extends LayerEntityOnShoulder {
             }
         }
 
-        ModelPack pack = CustomModelClient.getModelForPlayer(p_192864_1_);
+        ModelPack pack = CustomModelClient.getModelForEntity(p_192864_1_);
         CustomJsonModel model = pack == null ? null : pack.getModel();
 
         for (IBone bone : model.getFeatureAttached(p_192864_15_ ? PlayerFeature.SHOULDER_PARROT_LEFT : PlayerFeature.SHOULDER_PARROT_RIGHT)) {

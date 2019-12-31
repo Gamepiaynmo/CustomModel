@@ -16,8 +16,8 @@ import java.util.UUID;
 public class PacketQuery implements IMessage, IMessageHandler<PacketQuery, IMessage> {
     private UUID playerUuid;
 
-    public PacketQuery(GameProfile profile) {
-        playerUuid = EntityPlayer.getUUID(profile);
+    public PacketQuery(UUID profile) {
+        playerUuid = profile;
     }
 
     public PacketQuery() {}

@@ -1,6 +1,10 @@
 package com.github.gamepiaynmo.custommodel.server;
 
 import com.github.gamepiaynmo.custommodel.api.IModelSelector;
+import com.github.gamepiaynmo.custommodel.entity.CustomModelFemaleNpc;
+import com.github.gamepiaynmo.custommodel.entity.CustomModelMaleNpc;
+import com.github.gamepiaynmo.custommodel.entity.CustomModelNpc;
+import com.github.gamepiaynmo.custommodel.entity.NpcHelper;
 import com.github.gamepiaynmo.custommodel.mixin.PlayerStatureHandler;
 import com.github.gamepiaynmo.custommodel.network.*;
 import com.github.gamepiaynmo.custommodel.util.LoadModelException;
@@ -14,6 +18,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.command.CommandHandler;
 import net.minecraft.command.ServerCommandManager;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
@@ -26,10 +32,16 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.common.registry.EntityEntry;
+import net.minecraftforge.fml.common.registry.EntityEntryBuilder;
+import net.minecraftforge.fml.common.registry.EntityRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -123,35 +135,47 @@ public class CustomModel {
     }
 
     public static void reloadModel(EntityPlayerMP receiver, UUID uuid, boolean broadcast) throws LoadModelException {
-        EntityPlayerMP playerEntity = server.getPlayerList().getPlayerByUUID(uuid);
-        GameProfile profile = playerEntity.getGameProfile();
-        uuid = EntityPlayer.getUUID(profile);
+        Entity entity = receiver.getServerWorld().getEntityFromUuid(uuid);
+        if (entity instanceof EntityLivingBase) {
+            String entry = NpcHelper.getModelFromEntity((EntityLivingBase) entity);
+            EntityPlayerMP playerEntity = null;
+            GameProfile profile = null;
 
-        String entry = modelSelector.getModelForPlayer(profile);
-        ModelInfo info = models.get(entry);
+            if (entity instanceof EntityPlayerMP) {
+                playerEntity = (EntityPlayerMP) entity;
+                profile = playerEntity.getGameProfile();
+                uuid = EntityPlayer.getUUID(profile);
+                entry = modelSelector.getModelForPlayer(profile);
+            }
 
-        try {
-            if (info == null)
-                throw new ModelNotFoundException(entry);
-            File modelFile = new File(CustomModel.MODEL_DIR + "/" + info.fileName);
+            if (entry == null) return;
+            ModelInfo info = models.get(entry);
 
-            if (modelFile.exists()) {
-                PacketModel packetModel = new PacketModel(modelFile, uuid);
-                if (packetModel.success) {
-                    modelMap.put(uuid, ModelInfo.fromFile(modelFile));
-                    modelSelector.setModelForPlayer(profile, entry);
+            try {
+                if (info == null)
+                    throw new ModelNotFoundException(entry);
+                File modelFile = new File(CustomModel.MODEL_DIR + "/" + info.fileName);
 
-                    if (!broadcast)
-                        NetworkHandler.CHANNEL.sendTo(packetModel, receiver);
-                    else {
-                        NetworkHandler.CHANNEL.sendToAllTracking(packetModel, playerEntity);
-                        NetworkHandler.CHANNEL.sendTo(packetModel, playerEntity);
+                if (modelFile.exists()) {
+                    PacketModel packetModel = new PacketModel(modelFile, uuid);
+                    if (packetModel.success) {
+                        modelMap.put(uuid, ModelInfo.fromFile(modelFile));
+                        if (profile != null)
+                            modelSelector.setModelForPlayer(profile, entry);
+
+                        if (!broadcast)
+                            NetworkHandler.CHANNEL.sendTo(packetModel, receiver);
+                        else {
+                            NetworkHandler.CHANNEL.sendToAllTracking(packetModel, entity);
+                            if (playerEntity != null)
+                                NetworkHandler.CHANNEL.sendTo(packetModel, playerEntity);
+                        }
                     }
                 }
+            } catch (Exception e) {
+                LOGGER.warn(e.getMessage(), e);
+                throw new LoadModelException(entry, e);
             }
-        } catch (Exception e) {
-            LOGGER.warn(e.getMessage(), e);
-            throw new LoadModelException(entry, e);
         }
     }
 
@@ -179,6 +203,27 @@ public class CustomModel {
         }
     }
 
+    public static void selectModel(EntityLivingBase entity, String model) throws LoadModelException {
+        UUID uuid = entity.getUniqueID();
+        ModelInfo info = models.get(model);
+        if (info == null)
+            throw new ModelNotFoundException(model);
+        File modelFile = new File(CustomModel.MODEL_DIR + "/" + info.fileName);
+
+        try {
+            if (modelFile.exists()) {
+                PacketModel packetModel = new PacketModel(modelFile, uuid);
+                if (packetModel.success) {
+                    modelMap.put(uuid, ModelInfo.fromFile(modelFile));
+                    NetworkHandler.CHANNEL.sendToAllTracking(packetModel, entity);
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.warn(e.getMessage(), e);
+            throw new LoadModelException(model, e);
+        }
+    }
+
     public static void onInitialize() {
         new File(MODEL_DIR).mkdirs();
         ModConfig.updateConfig();
@@ -190,11 +235,16 @@ public class CustomModel {
 
     @SubscribeEvent
     public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (clearCounter++ > 200) {
+        for (WorldServer worldServer : server.worlds)
+            NpcHelper.updateCustomModelNpcs(worldServer);
+
+        if (clearCounter++ > 1000) {
             clearCounter = 0;
             Set<UUID> uuids = Sets.newHashSet();
             for (EntityPlayerMP playerEntity : server.getPlayerList().getPlayers())
                 uuids.add(EntityPlayer.getUUID(playerEntity.getGameProfile()));
+            for (WorldServer worldServer : server.worlds)
+                uuids.addAll(NpcHelper.getNpcUUIDs(worldServer));
             for (Iterator<Map.Entry<UUID, ModelInfo>> iter = modelMap.entrySet().iterator(); iter.hasNext();) {
                 if (!uuids.contains(iter.next().getKey()))
                     iter.remove();
@@ -226,5 +276,26 @@ public class CustomModel {
 
     public static void onServerStop() {
         CustomModel.server = null;
+    }
+
+    @SubscribeEvent
+    public static void onRegisterEntity(RegistryEvent.Register<EntityEntry> event) {
+        if (Loader.isModLoaded("customnpcs")) {
+            event.getRegistry().registerAll(
+                    EntityEntryBuilder.create()
+                            .entity(CustomModelMaleNpc.class)
+                            .id(new ResourceLocation(MODID, "custommodel.male"), 0)
+                            .name("Custom Male Model")
+                            .tracker(64, 3, true)
+                            .build(),
+
+                    EntityEntryBuilder.create()
+                            .entity(CustomModelFemaleNpc.class)
+                            .id(new ResourceLocation(MODID, "custommodel.female"), 0)
+                            .name("Custom Female Model")
+                            .tracker(64, 3, true)
+                            .build()
+            );
+        }
     }
 }

@@ -26,7 +26,7 @@ public class CustomHeldItem extends LayerHeldItem {
 
     @Override
     public void doRenderLayer(EntityLivingBase entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
-        ModelPack pack = CustomModelClient.getModelForPlayer(entitylivingbaseIn);
+        ModelPack pack = CustomModelClient.getModelForEntity(entitylivingbaseIn);
         CustomJsonModel model = pack == null ? null : pack.getModel();
         if (model == null) {
             super.doRenderLayer(entitylivingbaseIn, limbSwing, limbSwingAmount, partialTicks, ageInTicks, netHeadYaw, headPitch, scale);
@@ -56,7 +56,7 @@ public class CustomHeldItem extends LayerHeldItem {
         if (!p_188358_2_.isEmpty()) {
             boolean flag = handSide == EnumHandSide.LEFT;
 
-            ModelPack pack = CustomModelClient.getModelForPlayer(p_188358_1_);
+            ModelPack pack = CustomModelClient.getModelForEntity(p_188358_1_);
             CustomJsonModel model = pack == null ? null : pack.getModel();
             if (model != null) {
                 PlayerFeature feature = flag ? PlayerFeature.HELD_ITEM_LEFT : PlayerFeature.HELD_ITEM_RIGHT;

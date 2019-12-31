@@ -208,8 +208,7 @@ public class ModelPack {
         id -= defGetter.length;
         if (id < textures.size()) {
             ResourceLocation identifier = textures.get(id);
-            if (context.isPlayer())
-                return (player) -> identifier;
+            return (player) -> identifier;
         }
         return defGetter[0];
     }
@@ -269,8 +268,8 @@ public class ModelPack {
     }
 
     static {
-        defGetter[0] = (context) -> context.isPlayer() ? context.getPlayer().getLocationSkin() : null;
-        defGetter[1] = (context) -> context.isPlayer() ? context.getPlayer().getLocationCape() : null;
-        defGetter[2] = (context) -> context.isPlayer() ? context.getPlayer().getLocationElytra() : null;
+        defGetter[0] = (context) -> context.isPlayer() ? context.getPlayer().getLocationSkin() : context.getNpc().getTextureSkin();
+        defGetter[1] = (context) -> context.isPlayer() ? context.getPlayer().getLocationCape() : context.getNpc().getTextureCape();
+        defGetter[2] = (context) -> context.isPlayer() ? context.getPlayer().getLocationElytra() : context.getNpc().getTextureSkin();
     }
 }

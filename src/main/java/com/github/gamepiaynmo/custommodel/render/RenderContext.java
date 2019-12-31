@@ -1,5 +1,6 @@
 package com.github.gamepiaynmo.custommodel.render;
 
+import com.github.gamepiaynmo.custommodel.entity.CustomModelNpc;
 import com.github.gamepiaynmo.custommodel.util.Matrix4;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.model.ModelPlayer;
@@ -16,15 +17,18 @@ public class RenderContext {
     public boolean renderEmissive;
 
     private boolean isPlayer;
+    private boolean isNpc;
 
     public void setEntity(EntityLivingBase entity) {
         currentEntity = entity;
         isPlayer = entity instanceof AbstractClientPlayer;
+        isNpc = entity instanceof CustomModelNpc;
     }
 
     public void setPlayer(AbstractClientPlayer player) {
         currentEntity = player;
         isPlayer = true;
+        isNpc = false;
     }
 
     public boolean isPlayer() {
@@ -34,6 +38,8 @@ public class RenderContext {
     public AbstractClientPlayer getPlayer() {
         return isPlayer ? (AbstractClientPlayer) currentEntity : null;
     }
+
+    public CustomModelNpc getNpc() { return isNpc ? (CustomModelNpc) currentEntity : null; }
 
     public EntityLivingBase getEntity() {
         return currentEntity;

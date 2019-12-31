@@ -1,10 +1,12 @@
 package com.github.gamepiaynmo.custommodel.server;
 
+import com.github.gamepiaynmo.custommodel.entity.NpcHelper;
 import com.github.gamepiaynmo.custommodel.util.LoadModelException;
 import com.github.gamepiaynmo.custommodel.util.ModelNotFoundException;
 import com.google.common.collect.Lists;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.*;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
@@ -13,6 +15,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.fml.common.Loader;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -21,6 +24,11 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class ServerCommand extends CommandBase {
+    private final boolean hasnpc;
+    public ServerCommand() {
+        hasnpc = Loader.isModLoaded("customnpcs");
+    }
+
     @Override
     public String getName() {
         return CustomModel.MODID;
@@ -120,6 +128,15 @@ public class ServerCommand extends CommandBase {
                 }
                 return;
             }
+
+            if (hasnpc && args[0].equals("npc")) {
+                checkPermission(sender, ModConfig.getSelectOthersPermission());
+                EntityPlayerMP player = getCommandSenderAsPlayer(sender);
+                EntityLivingBase entity = NpcHelper.getNearestNpc(player.world, player);
+                if (entity != null)
+                    NpcHelper.setCurrentModel(entity, args[1]);
+                return;
+            }
         } catch (LoadModelException e) {
             ITextComponent text = new TextComponentTranslation("error.custommodel.loadmodelpack", e.getFileName(), e.getMessage());
             text.getStyle().setColor(TextFormatting.RED);
@@ -138,7 +155,7 @@ public class ServerCommand extends CommandBase {
     @Override
     public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
         if (args.length == 1)
-            return getListOfStringsMatchingLastWord(args, "refresh", "list", "reload", "select", "clear");
+            return getListOfStringsMatchingLastWord(args, "refresh", "list", "reload", "select", "clear", "npc");
 
         switch (args[0]) {
             case "reload":
@@ -147,6 +164,8 @@ public class ServerCommand extends CommandBase {
             case "select":
                 return args.length == 2 ? getListOfStringsMatchingLastWord(args, CustomModel.getModelIdList()) :
                 args.length == 3 ? getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames()) : Collections.emptyList();
+            case "npc":
+                return getListOfStringsMatchingLastWord(args, CustomModel.getModelIdList());
         }
 
         return Collections.emptyList();
