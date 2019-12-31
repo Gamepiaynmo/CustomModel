@@ -22,7 +22,8 @@ import java.util.Map;
 @IFMLLoadingPlugin.SortingIndex(1100)
 @IFMLLoadingPlugin.MCVersion("1.12.2")
 @IFMLLoadingPlugin.TransformerExclusions({"com.github.gamepiaynmo.custommodel"})
-@Mod(modid = CustomModel.MODID, useMetadata = true, acceptableRemoteVersions = "*", guiFactory = "com.github.gamepiaynmo.custommodel.client.ModMenu")
+@Mod(modid = CustomModel.MODID, useMetadata = true, acceptableRemoteVersions = "*", guiFactory = "com.github.gamepiaynmo.custommodel.client.ModMenu",
+    dependencies = "after:customnpcs")
 public class CustomModelMod implements IFMLLoadingPlugin {
     public static Logger LOGGER;
 

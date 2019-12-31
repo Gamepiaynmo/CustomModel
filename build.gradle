@@ -40,6 +40,10 @@ jar {
     }
 }
 
+repositories {
+    flatDir{ dirs 'libs'}
+}
+
 dependencies {
     // you may put jars on which you depend on in ./libs
     // or you may define them like so..
@@ -61,7 +65,8 @@ dependencies {
     // for more info...
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
-
+    
+    compile "noppes.npcs:CustomNPCs_1.12.2:(01Oct19)-deobf"
 }
 
 processResources {

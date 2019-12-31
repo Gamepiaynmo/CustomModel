@@ -197,8 +197,8 @@ public class CustomModelClient {
         for (RenderPlayer renderer : Minecraft.getMinecraft().getRenderManager().getSkinMap().values())
             RenderPlayerHandler.customize(renderer);
         if (Loader.isModLoaded("customnpcs")) {
-            RenderingRegistry.registerEntityRenderingHandler(CustomModelMaleNpc.class, new RenderNpc(new ModelPlayer(0, true), true));
-            RenderingRegistry.registerEntityRenderingHandler(CustomModelFemaleNpc.class, new RenderNpc(new ModelPlayer(0, false), false));
+            RenderingRegistry.registerEntityRenderingHandler(CustomModelMaleNpc.class, new RenderNpc(new ModelPlayer(0, false), false));
+            RenderingRegistry.registerEntityRenderingHandler(CustomModelFemaleNpc.class, new RenderNpc(new ModelPlayer(0, true), true));
         }
     }
 

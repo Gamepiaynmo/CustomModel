@@ -1,5 +1,6 @@
 package com.github.gamepiaynmo.custommodel.render;
 
+import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.entity.CustomModelNpc;
 import com.github.gamepiaynmo.custommodel.entity.NpcHelper;
 import com.github.gamepiaynmo.custommodel.mixin.RenderPlayerHandler;
@@ -43,8 +44,21 @@ public class RenderNpc extends RenderLivingBase<CustomModelNpc> {
     }
 
     @Override
+    protected void preRenderCallback(CustomModelNpc entitylivingbaseIn, float partialTickTime) {
+        GlStateManager.scale(0.9375F, 0.9375F, 0.9375F);
+    }
+
+    @Override
     public void doRender(CustomModelNpc entity, double x, double y, double z, float entityYaw, float partialTicks) {
+        CustomModelClient.isRenderingInventory = true;
+        CustomModelClient.inventoryEntityParameter = new EntityParameter(entity);
+        EntityCustomNpc npc = entity.getParent();
+        CustomModelClient.inventoryEntityParameter.yaw = npc.rotationYaw;
+        CustomModelClient.inventoryEntityParameter.bodyYaw = npc.renderYawOffset;
+        CustomModelClient.inventoryEntityParameter.pitch = npc.rotationPitch;
+        CustomModelClient.inventoryEntityParameter.headYaw = npc.rotationYawHead;
         super.doRender(entity, x, y, z, entityYaw, partialTicks);
+        CustomModelClient.isRenderingInventory = false;
     }
 
     @Override

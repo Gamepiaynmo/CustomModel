@@ -77,6 +77,10 @@ public class CustomModel {
         return modelMap.get(EntityPlayer.getUUID(playerEntity.getGameProfile()));
     }
 
+    public static ModelInfo getBoundingBoxForEntity(UUID uuid) {
+        return modelMap.get(uuid);
+    }
+
     public static void refreshModelList() {
         models.clear();
         for (File file : new File(CustomModel.MODEL_DIR).listFiles()) {
@@ -235,19 +239,21 @@ public class CustomModel {
 
     @SubscribeEvent
     public static void onServerTick(TickEvent.ServerTickEvent event) {
-        for (WorldServer worldServer : server.worlds)
-            NpcHelper.updateCustomModelNpcs(worldServer);
-
-        if (clearCounter++ > 1000) {
-            clearCounter = 0;
-            Set<UUID> uuids = Sets.newHashSet();
-            for (EntityPlayerMP playerEntity : server.getPlayerList().getPlayers())
-                uuids.add(EntityPlayer.getUUID(playerEntity.getGameProfile()));
+        if (event.phase == TickEvent.Phase.END) {
             for (WorldServer worldServer : server.worlds)
-                uuids.addAll(NpcHelper.getNpcUUIDs(worldServer));
-            for (Iterator<Map.Entry<UUID, ModelInfo>> iter = modelMap.entrySet().iterator(); iter.hasNext();) {
-                if (!uuids.contains(iter.next().getKey()))
-                    iter.remove();
+                NpcHelper.updateCustomModelNpcs(worldServer);
+
+            if (clearCounter++ > 1000) {
+                clearCounter = 0;
+                Set<UUID> uuids = Sets.newHashSet();
+                for (EntityPlayerMP playerEntity : server.getPlayerList().getPlayers())
+                    uuids.add(EntityPlayer.getUUID(playerEntity.getGameProfile()));
+                for (WorldServer worldServer : server.worlds)
+                    uuids.addAll(NpcHelper.getNpcUUIDs(worldServer));
+                for (Iterator<Map.Entry<UUID, ModelInfo>> iter = modelMap.entrySet().iterator(); iter.hasNext(); ) {
+                    if (!uuids.contains(iter.next().getKey()))
+                        iter.remove();
+                }
             }
         }
     }
@@ -285,14 +291,14 @@ public class CustomModel {
                     EntityEntryBuilder.create()
                             .entity(CustomModelMaleNpc.class)
                             .id(new ResourceLocation(MODID, "custommodel.male"), 0)
-                            .name("Custom Male Model")
+                            .name("CPM Male")
                             .tracker(64, 3, true)
                             .build(),
 
                     EntityEntryBuilder.create()
                             .entity(CustomModelFemaleNpc.class)
                             .id(new ResourceLocation(MODID, "custommodel.female"), 0)
-                            .name("Custom Female Model")
+                            .name("CPM Female")
                             .tracker(64, 3, true)
                             .build()
             );

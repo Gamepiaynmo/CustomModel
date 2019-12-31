@@ -2,11 +2,13 @@ package com.github.gamepiaynmo.custommodel.expression;
 
 import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.client.ModelPack;
+import com.github.gamepiaynmo.custommodel.entity.NpcHelper;
 import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
 import com.github.gamepiaynmo.custommodel.render.EntityPose;
 import com.github.gamepiaynmo.custommodel.render.TickVariable;
 import com.github.gamepiaynmo.custommodel.render.model.IBone;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.Item;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
@@ -71,22 +73,22 @@ public class ModelResolver implements IExpressionResolver {
             IExpressionFloat result = null;
             switch (second) {
                case "mainhand": result = (context) ->
-                       !context.isPlayer() ? 0:
+                       !context.isPlayer() ? NpcHelper.getSlot(context.getEntity(), EntityEquipmentSlot.MAINHAND) :
                        Item.REGISTRY.getIDForObject(context.getPlayer().inventory.getCurrentItem().getItem()); break;
                case "offhand": result = (context) ->
-                       !context.isPlayer() ? 0:
+                       !context.isPlayer() ? NpcHelper.getSlot(context.getEntity(), EntityEquipmentSlot.OFFHAND) :
                        Item.REGISTRY.getIDForObject(context.getPlayer().inventory.offHandInventory.get(0).getItem()); break;
                case "helmet": result = (context) ->
-                       !context.isPlayer() ? 0:
+                       !context.isPlayer() ? NpcHelper.getSlot(context.getEntity(), EntityEquipmentSlot.HEAD) :
                        Item.REGISTRY.getIDForObject(context.getPlayer().inventory.armorItemInSlot(3).getItem()); break;
                case "chestplate": result = (context) ->
-                       !context.isPlayer() ? 0:
+                       !context.isPlayer() ? NpcHelper.getSlot(context.getEntity(), EntityEquipmentSlot.CHEST) :
                        Item.REGISTRY.getIDForObject(context.getPlayer().inventory.armorItemInSlot(2).getItem()); break;
                case "leggings": result = (context) ->
-                       !context.isPlayer() ? 0:
+                       !context.isPlayer() ? NpcHelper.getSlot(context.getEntity(), EntityEquipmentSlot.LEGS) :
                        Item.REGISTRY.getIDForObject(context.getPlayer().inventory.armorItemInSlot(1).getItem()); break;
                case "boots": result = (context) ->
-                       !context.isPlayer() ? 0:
+                       !context.isPlayer() ? NpcHelper.getSlot(context.getEntity(), EntityEquipmentSlot.FEET) :
                        Item.REGISTRY.getIDForObject(context.getPlayer().inventory.armorItemInSlot(0).getItem()); break;
                default:
                   try {

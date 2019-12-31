@@ -3,6 +3,9 @@ package com.github.gamepiaynmo.custommodel.entity;
 import com.google.common.collect.Lists;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import noppes.npcs.ModelDataShared;
@@ -16,7 +19,7 @@ public class NpcHelper {
         if (entity instanceof EntityCustomNpc) {
             EntityCustomNpc npc = (EntityCustomNpc) entity;
             if (npc.modelData.entityClass != null && CustomModelNpc.class.isAssignableFrom(npc.modelData.entityClass)) {
-                return ObfuscationReflectionHelper.getPrivateValue(ModelDataShared.class, npc.modelData, "entity");
+                return (CustomModelNpc) npc.modelData.getEntity(npc);
             }
         }
 
@@ -85,5 +88,20 @@ public class NpcHelper {
         CustomModelNpc npc = getCustomModelEntity(entity);
         if (npc != null)
             npc.setCurrentModel(model);
+    }
+
+    public static int getSlot(EntityLivingBase entity, EntityEquipmentSlot slot) {
+        if (entity instanceof EntityCustomNpc) {
+            EntityCustomNpc npc = (EntityCustomNpc) entity;
+            switch (slot) {
+                case MAINHAND: return Item.REGISTRY.getIDForObject(npc.inventory.getRightHand().getMCItemStack().getItem());
+                case OFFHAND: return Item.REGISTRY.getIDForObject(npc.inventory.getLeftHand().getMCItemStack().getItem());
+                case HEAD: return Item.REGISTRY.getIDForObject(npc.inventory.getArmor(0).getMCItemStack().getItem());
+                case CHEST: return Item.REGISTRY.getIDForObject(npc.inventory.getArmor(1).getMCItemStack().getItem());
+                case LEGS: return Item.REGISTRY.getIDForObject(npc.inventory.getArmor(2).getMCItemStack().getItem());
+                case FEET: return Item.REGISTRY.getIDForObject(npc.inventory.getArmor(3).getMCItemStack().getItem());
+            }
+        }
+        return 0;
     }
 }

@@ -2,6 +2,7 @@ package com.github.gamepiaynmo.custommodel.mixin;
 
 import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.client.ModelPack;
+import com.github.gamepiaynmo.custommodel.entity.CustomModelNpc;
 import com.github.gamepiaynmo.custommodel.entity.NpcHelper;
 import com.github.gamepiaynmo.custommodel.render.*;
 import com.github.gamepiaynmo.custommodel.render.feature.*;
@@ -88,11 +89,21 @@ public abstract class RenderPlayerHandler {
 
             ModelPack model = null;
             model = CustomModelClient.getModelForEntity(context.currentEntity);
-            if (model != null && context.isPlayer())
-                setModelPose(context.getPlayer(), model.getModel());
+            if (model != null) {
+                context.currentModel.setVisible(true);
+                if (context.isPlayer())
+                    setModelPose(context.getPlayer(), model.getModel());
+                for (PlayerBone bone : model.getModel().getHiddenBones()) {
+                    if (bone != PlayerBone.NONE)
+                        bone.getCuboid(context.currentModel).showModel = false;
+                }
+            }
 
             if (playerEntity instanceof AbstractClientPlayer) {
                 Minecraft.getMinecraft().renderEngine.bindTexture(((AbstractClientPlayer) playerEntity).getLocationSkin());
+                getModel(playerEntity).render(playerEntity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale);
+            } else if (playerEntity instanceof CustomModelNpc) {
+                Minecraft.getMinecraft().renderEngine.bindTexture(((CustomModelNpc) playerEntity).getTextureSkin());
                 getModel(playerEntity).render(playerEntity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale);
             }
 
@@ -526,11 +537,6 @@ public abstract class RenderPlayerHandler {
                 playerEntityModel_1.rightArmPose = modelbiped$armpose1;
                 playerEntityModel_1.leftArmPose = modelbiped$armpose;
             }
-        }
-
-        for (PlayerBone bone : model.getHiddenBones()) {
-            if (bone != PlayerBone.NONE)
-                bone.getCuboid(playerEntityModel_1).showModel = false;
         }
     }
 }
