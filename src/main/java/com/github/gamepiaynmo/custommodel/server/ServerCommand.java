@@ -135,6 +135,7 @@ public class ServerCommand extends CommandBase {
                 EntityLivingBase entity = NpcHelper.getNearestNpc(player.world, player);
                 if (entity != null)
                     NpcHelper.setCurrentModel(entity, args[1]);
+                notifyCommandListener(sender, this, "command.custommodel.select", 1, args[1]);
                 return;
             }
         } catch (LoadModelException e) {
