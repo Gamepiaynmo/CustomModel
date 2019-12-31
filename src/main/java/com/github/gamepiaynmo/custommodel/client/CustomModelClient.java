@@ -178,8 +178,9 @@ public class CustomModelClient {
         return null;
     }
 
+    private static float lastPartial;
     public static float getPartial() {
-        return Minecraft.getMinecraft().getRenderPartialTicks();
+        return Minecraft.getMinecraft().isGamePaused() ? lastPartial : (lastPartial = Minecraft.getMinecraft().getRenderPartialTicks());
     }
 
     public static void onInitializeClient() {

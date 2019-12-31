@@ -69,10 +69,12 @@ public class NpcHelper {
         EntityLivingBase res = null;
         double dis = 25;
         for (EntityLivingBase npc : getNpcEntities(world)) {
-            double sq = npc.getDistanceSq(entity);
-            if (sq < dis) {
-                dis = sq;
-                res = npc;
+            if (getCustomModelEntity(npc) != null) {
+                double sq = npc.getDistanceSq(entity);
+                if (sq < dis) {
+                    dis = sq;
+                    res = npc;
+                }
             }
         }
 

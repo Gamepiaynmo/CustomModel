@@ -45,8 +45,9 @@ public class CustomModelNpc extends EntityCustomNpc {
     }
     public void setCurrentModel(String model) {
         if (model != currentModel) {
-            currentModel = model;
             CustomModel.selectModel(getParent(), model);
+            getParent().modelData.extra.setString("CustomModel", model);
+            currentModel = model;
         }
     }
 
