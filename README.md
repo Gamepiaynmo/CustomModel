@@ -27,6 +27,7 @@ Each model entry is either a folder or a zip archive file. It must contain one m
 - select xxx: Select the model with id xxx for the player.
 - list: List all models that the mod loaded. Then you can click on the message returned by the command to get the model selecting command.
 - clear: Clear the current model of the player.
+- npc xxx: This is for the compatibility with **Custom Npcs**. After you create a NPC with CPM Male or CPM Female model, use this command to select model for the nearest NPC.
 
 #### FAQ
 
@@ -70,6 +71,7 @@ Fabric版本需要fabric-api模组作为依赖项。此外建议使用Mod Menu�
 - select xxx：为玩家选择ID为xxx的模型。
 - list：列出mod加载的所有模型。 然后，您可以单击命令返回的消息以获取模型选择命令。
 - clear：清除玩家的当前模型。
+- npc xxx: 为了兼容**自定义NPC**而提供的指令。当创建了使用CPM Male或CPM Female模型的NPC时，使用此指令来为距离最近的一个NPC选择模型。
 
 #### 常见问题
 
