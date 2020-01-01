@@ -28,37 +28,6 @@
 			"attached": ["helmet_all", "head_wearing"]
 		},
 		{
-			"id": "head_c_cpm_dummy",
-			"parent": "head_c",
-			"rotation": [0, 0, 0],
-			"boxes": [
-				{
-					"textureOffset": [0, 0],
-					"coordinates": [-4, 0, 4, 8, 8, 8]
-				},
-				{
-					"textureOffset": [0, 0],
-					"coordinates": [3, 1, -3, 1, 2, 1],
-					"sizeAdd": 0.3
-				},
-				{
-					"textureOffset": [0, 0],
-					"coordinates": [-4, 1, -3, 1, 2, 1],
-					"sizeAdd": 0.3
-				},
-				{
-					"textureOffset": [0, 16],
-					"coordinates": [3, -2, -3, 1, 4, 1],
-					"sizeAdd": 0.1
-				},
-				{
-					"textureOffset": [0, 16],
-					"coordinates": [-4, -2, -3, 1, 4, 1],
-					"sizeAdd": 0.1
-				}
-			]
-		},
-		{
 			"id": "blink",
 			"parent": "head_c",
 			"position": [0, 0, 0],
@@ -383,6 +352,38 @@
 				{
 					"textureOffset": [48, 32],
 					"coordinates": [-1.5, -9, 1.5, 3, 9, 3]
+				}
+			]
+		},
+		{
+			"id": "head_c_cpm_dummy",
+			"parent": "head_c",
+			"rotation": [0, 0, 0],
+			"boxes": [
+				{
+					"textureOffset": [0, 0],
+					"coordinates": [-4, 0, 4, 8, 8, 8]
+				},
+				{
+					"textureOffset": [0, 0],
+					"coordinates": [3, 1, -3, 1, 2, 1],
+					"sizeAdd": 0.3
+				},
+				{
+					"textureOffset": [0, 0],
+					"coordinates": [-4, 1, -3, 1, 2, 1],
+					"sizeAdd": 0.3
+				},
+				{
+					"textureOffset": [0, 16],
+					"coordinates": [3, -2, -3, 1, 4, 1],
+					"sizeAdd": 0.1
+				},
+				{
+					"textureOffset": [0, 16],
+					"coordinates": [-4, -2, -3, 1, 4, 1],
+					"sizeAdd": 0.1,
+					"mirror": true
 				}
 			]
 		}
