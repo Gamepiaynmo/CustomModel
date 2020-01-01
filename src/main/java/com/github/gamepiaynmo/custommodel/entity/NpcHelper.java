@@ -1,5 +1,6 @@
 package com.github.gamepiaynmo.custommodel.entity;
 
+import com.github.gamepiaynmo.custommodel.server.ModConfig;
 import com.google.common.collect.Lists;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -7,6 +8,7 @@ import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import noppes.npcs.ModelDataShared;
 import noppes.npcs.entity.EntityCustomNpc;
@@ -30,7 +32,7 @@ public class NpcHelper {
         CustomModelNpc npc = getCustomModelEntity(entity);
         if (npc != null)
             return npc.getCurrentModel();
-        return null;
+        return ModConfig.getDefaultModel();
     }
 
     public static EntityCustomNpc getParent(CustomModelNpc entity) {
@@ -103,5 +105,20 @@ public class NpcHelper {
             }
         }
         return 0;
+    }
+
+    public static EntityLivingBase getNpcByUUID(World world, UUID uuid) {
+        if (world instanceof WorldServer) {
+            Entity entity = ((WorldServer) world).getEntityFromUuid(uuid);
+            if (entity instanceof EntityCustomNpc)
+                return getCustomModelEntity((EntityLivingBase) entity);
+        } else {
+            for (EntityLivingBase npc : getNpcEntities(world)) {
+                if (npc.getUniqueID().equals(uuid))
+                    return getCustomModelEntity(npc);
+            }
+        }
+
+        return null;
     }
 }

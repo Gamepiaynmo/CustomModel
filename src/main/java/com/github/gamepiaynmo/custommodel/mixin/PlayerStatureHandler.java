@@ -59,49 +59,47 @@ public class PlayerStatureHandler {
 
     @SubscribeEvent
     public static void onPlayerUpdate(TickEvent.PlayerTickEvent event) {
-        if (event.phase == TickEvent.Phase.END) {
-            EntityPlayer player = event.player;
-            EntityPose pose = getPose(player);
+        EntityPlayer player = event.player;
+        EntityPose pose = getPose(player);
 
-            if (player instanceof AbstractClientPlayer) {
-                AbstractClientPlayer clientPlayer = (AbstractClientPlayer) player;
-                ModelPack pack = CustomModelClient.getModelForPlayer(clientPlayer);
-                if (pack != null) {
-                    if (CustomModelClient.serverConfig.customEyeHeight && event.phase == TickEvent.Phase.START) {
-                        Float eyeHeight = pack.getModel().getModelInfo().eyeHeightMap.get(pose);
-                        if (eyeHeight != null)
-                            player.eyeHeight = eyeHeight;
-                        else player.eyeHeight = player.getDefaultEyeHeight();
-                    }
+        if (player instanceof AbstractClientPlayer) {
+            AbstractClientPlayer clientPlayer = (AbstractClientPlayer) player;
+            ModelPack pack = CustomModelClient.getModelForPlayer(clientPlayer);
+            if (pack != null) {
+                if (CustomModelClient.serverConfig.customEyeHeight && event.phase == TickEvent.Phase.START) {
+                    Float eyeHeight = pack.getModel().getModelInfo().eyeHeightMap.get(pose);
+                    if (eyeHeight != null)
+                        player.eyeHeight = eyeHeight;
+                    else player.eyeHeight = player.getDefaultEyeHeight();
+                }
 
-                    if (CustomModelClient.serverConfig.customBoundingBox && event.phase == TickEvent.Phase.END) {
-                        EntityDimensions dimensions = pack.getModel().getModelInfo().dimensionsMap.get(pose);
-                        if (dimensions == null)
-                            dimensions = defaultDimensions.get(pose);
-                        if (dimensions != null)
-                            setSize(player, dimensions);
-                    }
+                if (CustomModelClient.serverConfig.customBoundingBox && event.phase == TickEvent.Phase.END) {
+                    EntityDimensions dimensions = pack.getModel().getModelInfo().dimensionsMap.get(pose);
+                    if (dimensions == null)
+                        dimensions = defaultDimensions.get(pose);
+                    if (dimensions != null)
+                        setSize(player, dimensions);
                 }
             }
+        }
 
-            if (player instanceof EntityPlayerMP) {
-                EntityPlayerMP serverPlayer = (EntityPlayerMP) player;
-                ModelInfo pack = CustomModel.getBoundingBoxForPlayer(serverPlayer);
-                if (pack != null) {
-                    if (ModConfig.isCustomEyeHeight() && event.phase == TickEvent.Phase.START) {
-                        Float eyeHeight = pack.eyeHeightMap.get(pose);
-                        if (eyeHeight != null)
-                            player.eyeHeight = eyeHeight;
-                        else player.eyeHeight = player.getDefaultEyeHeight();
-                    }
+        if (player instanceof EntityPlayerMP) {
+            EntityPlayerMP serverPlayer = (EntityPlayerMP) player;
+            ModelInfo pack = CustomModel.getBoundingBoxForPlayer(serverPlayer);
+            if (pack != null) {
+                if (ModConfig.isCustomEyeHeight() && event.phase == TickEvent.Phase.START) {
+                    Float eyeHeight = pack.eyeHeightMap.get(pose);
+                    if (eyeHeight != null)
+                        player.eyeHeight = eyeHeight;
+                    else player.eyeHeight = player.getDefaultEyeHeight();
+                }
 
-                    if (ModConfig.isCustomBoundingBox() && event.phase == TickEvent.Phase.END) {
-                        EntityDimensions dimensions = pack.dimensionsMap.get(pose);
-                        if (dimensions == null)
-                            dimensions = defaultDimensions.get(pose);
-                        if (dimensions != null)
-                            setSize(player, dimensions);
-                    }
+                if (ModConfig.isCustomBoundingBox() && event.phase == TickEvent.Phase.END) {
+                    EntityDimensions dimensions = pack.dimensionsMap.get(pose);
+                    if (dimensions == null)
+                        dimensions = defaultDimensions.get(pose);
+                    if (dimensions != null)
+                        setSize(player, dimensions);
                 }
             }
         }

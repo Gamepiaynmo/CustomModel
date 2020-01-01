@@ -1,5 +1,6 @@
 package com.github.gamepiaynmo.custommodel.client;
 
+import com.github.gamepiaynmo.custommodel.entity.NpcHelper;
 import com.github.gamepiaynmo.custommodel.expression.ConstantFloat;
 import com.github.gamepiaynmo.custommodel.expression.IExpressionFloat;
 import com.github.gamepiaynmo.custommodel.expression.ParseException;
@@ -186,6 +187,8 @@ public class ModelPack {
 
         RenderContext context = new RenderContext();
         context.setPlayer((AbstractClientPlayer) Minecraft.getMinecraft().world.getPlayerEntityByUUID(uuid));
+        if (context.currentEntity == null)
+            context.setEntity(NpcHelper.getNpcByUUID(Minecraft.getMinecraft().world, uuid));
         pack.model = CustomJsonModel.fromJson(pack, modelJson, context);
         pack.success = true;
         return pack;

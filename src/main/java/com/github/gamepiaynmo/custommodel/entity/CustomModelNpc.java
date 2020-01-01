@@ -21,7 +21,7 @@ import noppes.npcs.entity.EntityCustomNpc;
 import java.util.List;
 
 public class CustomModelNpc extends EntityCustomNpc {
-    private String currentModel = null;
+    private String currentModel = ModConfig.getDefaultModel();
     private EntityCustomNpc parent;
     private float eyeHeight;
 
@@ -41,6 +41,8 @@ public class CustomModelNpc extends EntityCustomNpc {
     public void readEntityFromNBT(NBTTagCompound compound) {
         super.readEntityFromNBT(compound);
         currentModel = compound.getString("CustomModel");
+        if (currentModel.isEmpty())
+            currentModel = ModConfig.getDefaultModel();
     }
 
     @Override
@@ -53,6 +55,9 @@ public class CustomModelNpc extends EntityCustomNpc {
         return currentModel;
     }
     public void setCurrentModel(String model) {
+        if (model.isEmpty())
+            model = ModConfig.getDefaultModel();
+
         if (model != currentModel) {
             CustomModel.selectModel(getParent(), model);
             getParent().modelData.extra.setString("CustomModel", model);
@@ -78,12 +83,14 @@ public class CustomModelNpc extends EntityCustomNpc {
                     EntityDimensions dimensions = pack.getModel().getModelInfo().dimensionsMap.get(pose);
                     if (dimensions == null)
                         dimensions = PlayerStatureHandler.defaultDimensions.get(pose);
-                    if (dimensions != null)
+                    if (dimensions != null && (dimensions.width != width || dimensions.height != height)) {
                         PlayerStatureHandler.setSize(this, dimensions);
+                        getParent().updateHitbox();
+                    }
                 }
             }
         } else {
-            ModelInfo pack = CustomModel.getBoundingBoxForEntity(this.getUniqueID());
+            ModelInfo pack = CustomModel.getBoundingBoxForEntity(getParent().getUniqueID());
             if (pack != null) {
                 if (ModConfig.isCustomEyeHeight()) {
                     Float eyeHeight = pack.eyeHeightMap.get(pose);
@@ -96,11 +103,18 @@ public class CustomModelNpc extends EntityCustomNpc {
                     EntityDimensions dimensions = pack.dimensionsMap.get(pose);
                     if (dimensions == null)
                         dimensions = PlayerStatureHandler.defaultDimensions.get(pose);
-                    if (dimensions != null)
+                    if (dimensions != null && (dimensions.width != width || dimensions.height != height)) {
                         PlayerStatureHandler.setSize(this, dimensions);
+                        getParent().updateHitbox();
+                    }
                 }
             }
         }
+    }
+
+    @Override
+    public void updateHitbox() {
+
     }
 
     public EntityCustomNpc getParent() {
