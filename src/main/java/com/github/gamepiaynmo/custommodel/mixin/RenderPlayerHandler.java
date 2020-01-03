@@ -284,14 +284,10 @@ public abstract class RenderPlayerHandler {
     private static Matrix4 transform;
 
     private static void method_4048_c(EntityLivingBase entityLivingBaseIn, double partial) {
-        double x = MathHelper.clampedLerp(entityLivingBaseIn.prevPosX, entityLivingBaseIn.posX, partial);
-        double y = MathHelper.clampedLerp(entityLivingBaseIn.prevPosY, entityLivingBaseIn.posY, partial);
-        double z = MathHelper.clampedLerp(entityLivingBaseIn.prevPosZ, entityLivingBaseIn.posZ, partial);
-
-        if (context.isPlayer() && entityLivingBaseIn.isEntityAlive() && entityLivingBaseIn.isPlayerSleeping()) {
-            AbstractClientPlayer player = context.getPlayer();
-            transform.translate(x + (double)player.renderOffsetX, y + (double)player.renderOffsetY, z + (double)player.renderOffsetZ);
-        } else transform.translate(x, y, z);
+        double x = (partial - 1) * (entityLivingBaseIn.posX - entityLivingBaseIn.prevPosX);
+        double y = (partial - 1) * (entityLivingBaseIn.posY - entityLivingBaseIn.prevPosY);
+        double z = (partial - 1) * (entityLivingBaseIn.posZ - entityLivingBaseIn.prevPosZ);
+        transform.translate(x, y, z);
     }
 
     private static void setupTransforms_c(EntityLivingBase entityLiving, float float_1, float float_2, float float_3) {

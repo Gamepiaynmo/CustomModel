@@ -31,29 +31,13 @@ public class PlayerStatureHandler {
     public static final Map<EntityPose, EntityDimensions> defaultDimensions = Maps.newEnumMap(EntityPose.class);
 
     public static void setSize(EntityLivingBase entity, EntityDimensions dimensions) {
-        AxisAlignedBB axisalignedbb = entity.getEntityBoundingBox();
-        axisalignedbb = new AxisAlignedBB(axisalignedbb.minX, axisalignedbb.minY, axisalignedbb.minZ,
-                axisalignedbb.minX + dimensions.width, axisalignedbb.minY + dimensions.height, axisalignedbb.minZ + dimensions.width);
+        if (dimensions.width != entity.width || dimensions.height != entity.height) {
+            float f = entity.width;
+            entity.width = dimensions.width;
+            entity.height = dimensions.height;
 
-        if (!entity.world.collidesWithAnyBlock(axisalignedbb)) {
-            if (dimensions.width != entity.width || dimensions.height != entity.height) {
-                float f = entity.width;
-                entity.width = dimensions.width;
-                entity.height = dimensions.height;
-
-                if (entity.width < f) {
-                    double d0 = (double)dimensions.width / 2.0D;
-                    entity.setEntityBoundingBox(new AxisAlignedBB(entity.posX - d0, entity.posY, entity.posZ - d0, entity.posX + d0, entity.posY + entity.height, entity.posZ + d0));
-                    return;
-                }
-
-                axisalignedbb = entity.getEntityBoundingBox();
-                entity.setEntityBoundingBox(new AxisAlignedBB(axisalignedbb.minX, axisalignedbb.minY, axisalignedbb.minZ, axisalignedbb.minX + entity.width, axisalignedbb.minY + entity.height, axisalignedbb.minZ + entity.width));
-
-                if (entity.width > f && !entity.world.isRemote) {
-                    entity.move(MoverType.SELF, f - entity.width, 0.0D, f - entity.width);
-                }
-            }
+            double d0 = (double)dimensions.width / 2.0D;
+            entity.setEntityBoundingBox(new AxisAlignedBB(entity.posX - d0, entity.posY, entity.posZ - d0, entity.posX + d0, entity.posY + entity.height, entity.posZ + d0));
         }
     }
 
@@ -75,8 +59,6 @@ public class PlayerStatureHandler {
 
                 if (CustomModelClient.serverConfig.customBoundingBox && event.phase == TickEvent.Phase.END) {
                     EntityDimensions dimensions = pack.getModel().getModelInfo().dimensionsMap.get(pose);
-                    if (dimensions == null)
-                        dimensions = defaultDimensions.get(pose);
                     if (dimensions != null)
                         setSize(player, dimensions);
                 }
@@ -96,8 +78,6 @@ public class PlayerStatureHandler {
 
                 if (ModConfig.isCustomBoundingBox() && event.phase == TickEvent.Phase.END) {
                     EntityDimensions dimensions = pack.dimensionsMap.get(pose);
-                    if (dimensions == null)
-                        dimensions = defaultDimensions.get(pose);
                     if (dimensions != null)
                         setSize(player, dimensions);
                 }
