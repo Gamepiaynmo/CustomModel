@@ -16,10 +16,15 @@
 				remember: false,
 				compile(options) {
 					var bones = []
-					var texture = null
+					var texture = "texturename"
+					var filename = "modelname"
 					if (textures[0]) {
-						texture = "tex." + textures[0].name.substring(0, textures[0].name.indexOf("."))
-						var textureSize = [ Project.texture_width, Project.texture_height ]
+						var index = textures[0].name.indexOf(".")
+						if (index >= 0) {
+							filename = textures[0].name.substring(0, index)
+							texture = "tex." + filename
+							var textureSize = [ Project.texture_width, Project.texture_height ]
+						}
 					}
 
 					var deg2rad = Math.PI / 180
@@ -145,8 +150,8 @@
 					})
 
 					var model = {
-						"modelId": "aaa",
-						"modelName": "aaa",
+						"modelId": filename,
+						"modelName": filename,
 						"hide": ["model_all"],
 						"bones": bones
 					}
