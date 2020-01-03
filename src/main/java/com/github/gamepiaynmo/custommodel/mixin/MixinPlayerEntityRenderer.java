@@ -271,19 +271,9 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
     private Matrix4 transform;
 
     private void method_4048_c(LivingEntity abstractClientPlayerEntity_1, double partial) {
-        double double_1 = MathHelper.lerp(partial, abstractClientPlayerEntity_1.prevX, abstractClientPlayerEntity_1.x);
-        double double_2 = MathHelper.lerp(partial, abstractClientPlayerEntity_1.prevY, abstractClientPlayerEntity_1.y);
-        double double_3 = MathHelper.lerp(partial, abstractClientPlayerEntity_1.prevZ, abstractClientPlayerEntity_1.z);
-
-        if (abstractClientPlayerEntity_1.getPose() == EntityPose.SLEEPING) {
-            Direction direction_1 = abstractClientPlayerEntity_1.getSleepingDirection();
-            if (direction_1 != null) {
-                float float_1 = abstractClientPlayerEntity_1.getEyeHeight(EntityPose.STANDING) - 0.1F;
-                transform.translate(double_1 - direction_1.getOffsetX() * float_1, double_2, double_3 - direction_1.getOffsetZ() * float_1);
-                return;
-            }
-        }
-
+        double double_1 = (partial - 1) * (abstractClientPlayerEntity_1.x - abstractClientPlayerEntity_1.prevX);
+        double double_2 = (partial - 1) * (abstractClientPlayerEntity_1.y - abstractClientPlayerEntity_1.prevY);
+        double double_3 = (partial - 1) * (abstractClientPlayerEntity_1.z - abstractClientPlayerEntity_1.prevZ);
         transform.translate(double_1, double_2, double_3);
     }
 
