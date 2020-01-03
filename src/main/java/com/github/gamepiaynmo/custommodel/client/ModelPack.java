@@ -187,7 +187,7 @@ public class ModelPack {
 
         RenderContext context = new RenderContext();
         context.setPlayer((AbstractClientPlayer) Minecraft.getMinecraft().world.getPlayerEntityByUUID(uuid));
-        if (context.currentEntity == null)
+        if (CustomModel.hasnpc && context.currentEntity == null)
             context.setEntity(NpcHelper.getNpcByUUID(Minecraft.getMinecraft().world, uuid));
         pack.model = CustomJsonModel.fromJson(pack, modelJson, context);
         pack.success = true;

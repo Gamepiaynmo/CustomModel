@@ -63,6 +63,8 @@ public class CustomModel {
     private static final IModelSelector defaultSelector = new DefaultModelSelector();
     private static IModelSelector modelSelector = defaultSelector;
 
+    public static boolean hasnpc;
+
     public static void setModelSelector(IModelSelector modelSelector) {
         CustomModel.modelSelector = modelSelector;
         if (modelSelector == null)
@@ -141,7 +143,9 @@ public class CustomModel {
     public static void reloadModel(EntityPlayerMP receiver, UUID uuid, boolean broadcast) throws LoadModelException {
         Entity entity = receiver.getServerWorld().getEntityFromUuid(uuid);
         if (entity instanceof EntityLivingBase) {
-            String entry = NpcHelper.getModelFromEntity((EntityLivingBase) entity);
+            String entry = null;
+            if (hasnpc)
+                entry = NpcHelper.getModelFromEntity((EntityLivingBase) entity);
             EntityPlayerMP playerEntity = null;
             GameProfile profile = null;
 
@@ -229,6 +233,8 @@ public class CustomModel {
     }
 
     public static void onInitialize() {
+        hasnpc = Loader.isModLoaded("customnpcs");
+
         new File(MODEL_DIR).mkdirs();
         ModConfig.updateConfig();
         refreshModelList();
@@ -240,16 +246,19 @@ public class CustomModel {
     @SubscribeEvent
     public static void onServerTick(TickEvent.ServerTickEvent event) {
         if (event.phase == TickEvent.Phase.END) {
-            for (WorldServer worldServer : server.worlds)
-                NpcHelper.updateCustomModelNpcs(worldServer);
+            if (hasnpc) {
+                for (WorldServer worldServer : server.worlds)
+                    NpcHelper.updateCustomModelNpcs(worldServer);
+            }
 
             if (clearCounter++ > 1000) {
                 clearCounter = 0;
                 Set<UUID> uuids = Sets.newHashSet();
                 for (EntityPlayerMP playerEntity : server.getPlayerList().getPlayers())
                     uuids.add(EntityPlayer.getUUID(playerEntity.getGameProfile()));
-                for (WorldServer worldServer : server.worlds)
-                    uuids.addAll(NpcHelper.getNpcUUIDs(worldServer));
+                if (hasnpc)
+                    for (WorldServer worldServer : server.worlds)
+                        uuids.addAll(NpcHelper.getNpcUUIDs(worldServer));
                 for (Iterator<Map.Entry<UUID, ModelInfo>> iter = modelMap.entrySet().iterator(); iter.hasNext(); ) {
                     if (!uuids.contains(iter.next().getKey()))
                         iter.remove();
@@ -286,7 +295,7 @@ public class CustomModel {
 
     @SubscribeEvent
     public static void onRegisterEntity(RegistryEvent.Register<EntityEntry> event) {
-        if (Loader.isModLoaded("customnpcs")) {
+        if (hasnpc) {
             event.getRegistry().registerAll(
                     EntityEntryBuilder.create()
                             .entity(CustomModelMaleNpc.class)

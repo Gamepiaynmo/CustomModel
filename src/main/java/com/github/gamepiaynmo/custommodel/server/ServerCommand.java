@@ -24,11 +24,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class ServerCommand extends CommandBase {
-    private final boolean hasnpc;
-    public ServerCommand() {
-        hasnpc = Loader.isModLoaded("customnpcs");
-    }
-
     @Override
     public String getName() {
         return CustomModel.MODID;
@@ -129,7 +124,7 @@ public class ServerCommand extends CommandBase {
                 return;
             }
 
-            if (hasnpc && args[0].equals("npc")) {
+            if (CustomModel.hasnpc && args[0].equals("npc")) {
                 checkPermission(sender, ModConfig.getSelectOthersPermission());
                 EntityPlayerMP player = getCommandSenderAsPlayer(sender);
                 EntityLivingBase entity = NpcHelper.getNearestNpc(player.world, player);

@@ -196,7 +196,7 @@ public class CustomModelClient {
     public static void initPlayerRenderer() {
         for (RenderPlayer renderer : Minecraft.getMinecraft().getRenderManager().getSkinMap().values())
             RenderPlayerHandler.customize(renderer);
-        if (Loader.isModLoaded("customnpcs")) {
+        if (CustomModel.hasnpc) {
             RenderingRegistry.registerEntityRenderingHandler(CustomModelMaleNpc.class, new RenderNpc(new ModelPlayer(0, false), false));
             RenderingRegistry.registerEntityRenderingHandler(CustomModelFemaleNpc.class, new RenderNpc(new ModelPlayer(0, true), true));
         }
@@ -210,8 +210,10 @@ public class CustomModelClient {
                 RenderPlayerHandler.tick(player);
             }
 
-            for (EntityLivingBase entity : NpcHelper.getCustomModelNpcs(world)) {
-                RenderPlayerHandler.tick(entity);
+            if (CustomModel.hasnpc) {
+                for (EntityLivingBase entity : NpcHelper.getCustomModelNpcs(world)) {
+                    RenderPlayerHandler.tick(entity);
+                }
             }
 
             if (clearCounter++ > 200) {
@@ -219,7 +221,8 @@ public class CustomModelClient {
                 Set<UUID> uuids = Sets.newHashSet();
                 for (AbstractClientPlayer playerEntity : world.getPlayers(AbstractClientPlayer.class, player -> true))
                     uuids.add(EntityPlayer.getUUID(playerEntity.getGameProfile()));
-                uuids.addAll(NpcHelper.getNpcUUIDs(world));
+                if (CustomModel.hasnpc)
+                    uuids.addAll(NpcHelper.getNpcUUIDs(world));
                 for (Iterator<Map.Entry<UUID, ModelPack>> iter = modelPacks.entrySet().iterator(); iter.hasNext(); ) {
                     Map.Entry<UUID, ModelPack> entry = iter.next();
                     if (!uuids.contains(entry.getKey())) {

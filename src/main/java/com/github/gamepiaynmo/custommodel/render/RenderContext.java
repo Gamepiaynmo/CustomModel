@@ -1,11 +1,13 @@
 package com.github.gamepiaynmo.custommodel.render;
 
 import com.github.gamepiaynmo.custommodel.entity.CustomModelNpc;
+import com.github.gamepiaynmo.custommodel.server.CustomModel;
 import com.github.gamepiaynmo.custommodel.util.Matrix4;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.client.renderer.entity.RenderPlayer;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraftforge.fml.common.Loader;
 
 public class RenderContext {
     public EntityLivingBase currentEntity;
@@ -22,7 +24,7 @@ public class RenderContext {
     public void setEntity(EntityLivingBase entity) {
         currentEntity = entity;
         isPlayer = entity instanceof AbstractClientPlayer;
-        isNpc = entity instanceof CustomModelNpc;
+        isNpc = CustomModel.hasnpc && entity instanceof CustomModelNpc;
     }
 
     public void setPlayer(AbstractClientPlayer player) {
