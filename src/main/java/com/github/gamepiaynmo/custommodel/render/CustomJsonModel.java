@@ -438,16 +438,21 @@ public class CustomJsonModel {
             }
 
         } else {
+            double dx = entity.x - entity.prevX;
+            double dy = entity.y - entity.prevY;
+            double dz = entity.z - entity.prevZ;
+            Matrix4 dpos = new Matrix4().setTranslation(-dx, -dy, -dz);
+
             for (PlayerBone playerBone : PlayerBone.values()) {
                 IBone bone = playerBone.getBone();
-                lastBoneMats.put(bone.getId(), boneMats.get(bone.getId()));
+                lastBoneMats.put(bone.getId(), boneMats.get(bone.getId()).mulLeft(dpos));
                 boneMats.put(bone.getId(), bone.getTransform(context).mulLeft(baseMat));
             }
 
             for (Bone bone : bones) {
                 bone.update(context);
                 Matrix4 lastTrans = boneMats.get(bone.getId());
-                lastBoneMats.put(bone.getId(), lastTrans);
+                lastBoneMats.put(bone.getId(), lastTrans.mulLeft(dpos));
                 IBone parent = bone.getParent();
                 Matrix4 lastParTrans = lastBoneMats.get(parent.getId());
                 Matrix4 curParTrans = boneMats.get(parent.getId());
