@@ -36,7 +36,7 @@ public class ExpressionParser {
          if (tokens == null) {
             return null;
          } else {
-            Deque deque = new ArrayDeque(Arrays.asList(tokens));
+            Deque<Token> deque = new ArrayDeque<Token>(Arrays.asList(tokens));
             return this.parseInfix(deque);
          }
       } catch (IOException var4) {
@@ -44,18 +44,18 @@ public class ExpressionParser {
       }
    }
 
-   private IExpression parseInfix(Deque deque) throws ParseException {
+   private IExpression parseInfix(Deque<Token> deque) throws ParseException {
       if (deque.isEmpty()) {
          return null;
       } else {
-         List listExpr = new LinkedList();
-         List listOperTokens = new LinkedList();
+         List<IExpression> listExpr = new LinkedList<IExpression>();
+         List<Token> listOperTokens = new LinkedList<Token>();
          IExpression expr = this.parseExpression(deque);
          checkNull(expr, "error.custommodel.parse.missexpr");
          listExpr.add(expr);
 
          while(true) {
-            Token tokenOper = (Token)deque.poll();
+            Token tokenOper = deque.poll();
             if (tokenOper == null) {
                return this.makeInfix(listExpr, listOperTokens);
             }
@@ -72,12 +72,12 @@ public class ExpressionParser {
       }
    }
 
-   private IExpression makeInfix(List listExpr, List listOper) throws ParseException {
-      List listFunc = new LinkedList();
-      Iterator it = listOper.iterator();
+   private IExpression makeInfix(List<IExpression> listExpr, List<Token> listOper) throws ParseException {
+      List<FunctionType> listFunc = new LinkedList<FunctionType>();
+      Iterator<Token> it = listOper.iterator();
 
       while(it.hasNext()) {
-         Token token = (Token)it.next();
+         Token token = it.next();
          FunctionType type = FunctionType.parse(token.getText());
          checkNull(type, "error.custommodel.parse.invalidop", token);
          listFunc.add(type);
@@ -86,7 +86,7 @@ public class ExpressionParser {
       return this.makeInfixFunc(listExpr, listFunc);
    }
 
-   private IExpression makeInfixFunc(List listExpr, List listFunc) throws ParseException {
+   private IExpression makeInfixFunc(List<IExpression> listExpr, List<FunctionType> listFunc) throws ParseException {
       if (listExpr.size() != listFunc.size() + 1) {
          throw new TranslatableException("error.custommodel.parse.invalidinfix", listExpr.size(), listFunc.size());
       } else if (listExpr.size() == 1) {
@@ -96,8 +96,8 @@ public class ExpressionParser {
          int maxPrecedence = Integer.MIN_VALUE;
 
          FunctionType type;
-         for(Iterator it = listFunc.iterator(); it.hasNext(); maxPrecedence = Math.max(type.getPrecedence(), maxPrecedence)) {
-            type = (FunctionType)it.next();
+         for(Iterator<FunctionType> it = listFunc.iterator(); it.hasNext(); maxPrecedence = Math.max(type.getPrecedence(), maxPrecedence)) {
+            type = it.next();
             minPrecedence = Math.min(type.getPrecedence(), minPrecedence);
          }
 
@@ -107,7 +107,7 @@ public class ExpressionParser {
             }
 
             if (listExpr.size() == 1 && listFunc.size() == 0) {
-               return (IExpression)listExpr.get(0);
+               return listExpr.get(0);
             } else {
                throw new TranslatableException("error.custommodel.parse.mergeop", listExpr.size(), listFunc.size());
             }
@@ -117,13 +117,13 @@ public class ExpressionParser {
       }
    }
 
-   private void mergeOperators(List listExpr, List listFuncs, int precedence) throws ParseException {
+   private void mergeOperators(List<IExpression> listExpr, List<FunctionType> listFuncs, int precedence) throws ParseException {
       for(int i = 0; i < listFuncs.size(); ++i) {
-         FunctionType type = (FunctionType)listFuncs.get(i);
+         FunctionType type = listFuncs.get(i);
          if (type.getPrecedence() == precedence) {
             listFuncs.remove(i);
-            IExpression expr1 = (IExpression)listExpr.remove(i);
-            IExpression expr2 = (IExpression)listExpr.remove(i);
+            IExpression expr1 = listExpr.remove(i);
+            IExpression expr2 = listExpr.remove(i);
             IExpression exprOper = makeFunction(type, new IExpression[]{expr1, expr2});
             listExpr.add(i, exprOper);
             --i;
@@ -132,8 +132,8 @@ public class ExpressionParser {
 
    }
 
-   private IExpression parseExpression(Deque deque) throws ParseException {
-      Token token = (Token)deque.poll();
+   private IExpression parseExpression(Deque<Token> deque) throws ParseException {
+      Token token = deque.poll();
       checkNull(token, "error.custommodel.parse.missexpr");
       switch(token.getType()) {
       case NUMBER:
@@ -189,8 +189,8 @@ public class ExpressionParser {
       }
    }
 
-   private FunctionType getFunctionType(Token token, Deque deque) throws ParseException {
-      Token tokenNext = (Token)deque.peek();
+   private FunctionType getFunctionType(Token token, Deque<Token> deque) throws ParseException {
+      Token tokenNext = deque.peek();
       FunctionType type;
       if (tokenNext != null && tokenNext.getType() == TokenType.BRACKET_OPEN) {
          type = FunctionType.parse(token.getText());
@@ -208,26 +208,26 @@ public class ExpressionParser {
       }
    }
 
-   private IExpression makeFunction(FunctionType type, Deque deque) throws ParseException {
+   private IExpression makeFunction(FunctionType type, Deque<Token> deque) throws ParseException {
       Token tokenNext;
       if (type.getParameterCount(new IExpression[0]) == 0) {
-         tokenNext = (Token)deque.peek();
+         tokenNext = deque.peek();
          if (tokenNext == null || tokenNext.getType() != TokenType.BRACKET_OPEN) {
             return makeFunction(type, new IExpression[0]);
          }
       }
 
-      tokenNext = (Token)deque.poll();
-      Deque dequeBracketed = getGroup(deque, TokenType.BRACKET_CLOSE, true);
+      tokenNext = deque.poll();
+      Deque<Token> dequeBracketed = getGroup(deque, TokenType.BRACKET_CLOSE, true);
       IExpression[] exprs = this.parseExpressions(dequeBracketed);
       return makeFunction(type, exprs);
    }
 
-   private IExpression[] parseExpressions(Deque deque) throws ParseException {
-      ArrayList list = new ArrayList();
+   private IExpression[] parseExpressions(Deque<Token> deque) throws ParseException {
+      ArrayList<IExpression> list = new ArrayList<IExpression>();
 
       while(true) {
-         Deque dequeArg = getGroup(deque, TokenType.COMMA, false);
+         Deque<Token> dequeArg = getGroup(deque, TokenType.COMMA, false);
          IExpression expr = this.parseInfix(dequeArg);
          if (expr == null) {
             IExpression[] exprs = (IExpression[]) list.toArray(new IExpression[list.size()]);
@@ -275,18 +275,18 @@ public class ExpressionParser {
       }
    }
 
-   private IExpression makeBracketed(Token token, Deque deque) throws ParseException {
-      Deque dequeBracketed = getGroup(deque, TokenType.BRACKET_CLOSE, true);
+   private IExpression makeBracketed(Token token, Deque<Token> deque) throws ParseException {
+      Deque<Token> dequeBracketed = getGroup(deque, TokenType.BRACKET_CLOSE, true);
       return this.parseInfix(dequeBracketed);
    }
 
-   private static Deque getGroup(Deque deque, TokenType tokenTypeEnd, boolean tokenEndRequired) throws ParseException {
-      Deque dequeGroup = new ArrayDeque();
+   private static Deque<Token> getGroup(Deque<Token> deque, TokenType tokenTypeEnd, boolean tokenEndRequired) throws ParseException {
+      Deque<Token> dequeGroup = new ArrayDeque<Token>();
       int level = 0;
-      Iterator it = deque.iterator();
+      Iterator<Token> it = deque.iterator();
 
       while(it.hasNext()) {
-         Token token = (Token)it.next();
+         Token token = it.next();
          it.remove();
          if (level == 0 && token.getType() == tokenTypeEnd) {
             return dequeGroup;

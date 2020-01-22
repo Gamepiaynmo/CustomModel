@@ -1,9 +1,8 @@
 package com.github.gamepiaynmo.custommodel.expression;
 
-import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.mixin.PlayerStatureHandler;
-import com.github.gamepiaynmo.custommodel.render.RenderContext;
-import com.github.gamepiaynmo.custommodel.render.RenderParameter;
+import com.github.gamepiaynmo.custommodel.client.render.RenderContext;
+import com.github.gamepiaynmo.custommodel.client.render.RenderParameter;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.MathHelper;
@@ -51,16 +50,14 @@ public enum RenderEntityParameterFloat implements IExpressionFloat {
    }
 
    public static RenderEntityParameterFloat parse(String str) {
-      if (str == null) {
-         return null;
-      } else {
+      if (str != null) {
          for (RenderEntityParameterFloat type : VALUES) {
             if (type.getName().equals(str)) {
                return type;
             }
          }
 
-         return null;
       }
+      return null;
    }
 }

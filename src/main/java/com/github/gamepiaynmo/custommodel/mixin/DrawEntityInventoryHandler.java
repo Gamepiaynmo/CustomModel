@@ -1,7 +1,7 @@
 package com.github.gamepiaynmo.custommodel.mixin;
 
 import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
-import com.github.gamepiaynmo.custommodel.render.EntityParameter;
+import com.github.gamepiaynmo.custommodel.client.render.EntityParameter;
 import net.minecraft.entity.EntityLivingBase;
 
 public class DrawEntityInventoryHandler {

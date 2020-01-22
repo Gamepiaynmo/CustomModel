@@ -1,7 +1,7 @@
 package com.github.gamepiaynmo.custommodel.expression;
 
-import com.github.gamepiaynmo.custommodel.render.RenderContext;
-import com.github.gamepiaynmo.custommodel.render.model.IBone;
+import com.github.gamepiaynmo.custommodel.client.render.RenderContext;
+import com.github.gamepiaynmo.custommodel.client.render.model.IBone;
 
 public class ModelVariableFloat implements IExpressionFloat {
    private String name;

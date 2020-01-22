@@ -3,11 +3,8 @@ package com.github.gamepiaynmo.custommodel.server;
 import com.github.gamepiaynmo.custommodel.entity.NpcHelper;
 import com.github.gamepiaynmo.custommodel.util.LoadModelException;
 import com.github.gamepiaynmo.custommodel.util.ModelNotFoundException;
-import com.google.common.collect.Lists;
-import net.minecraft.client.Minecraft;
 import net.minecraft.command.*;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
@@ -15,18 +12,21 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.fml.common.Loader;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 public class ServerCommand extends CommandBase {
     @Override
     public String getName() {
         return CustomModel.MODID;
+    }
+
+    @Override
+    public boolean checkPermission(MinecraftServer server, ICommandSender sender) {
+        return true;
     }
 
     @Override
@@ -40,7 +40,7 @@ public class ServerCommand extends CommandBase {
     }
 
     private void checkPermission(ICommandSender sender, int level) throws CommandException {
-        if (!sender.canUseCommand(level, getName()))
+        if (level > 0 && !sender.canUseCommand(level, getName()))
             throw new CommandException("commands.generic.permission");
     }
 
@@ -63,15 +63,15 @@ public class ServerCommand extends CommandBase {
 
             if (args[0].equals("refresh")) {
                 checkPermission(sender, ModConfig.getListModelsPermission());
-                CustomModel.refreshModelList();
-                sender.sendMessage(new TextComponentTranslation("command.custommodel.listmodels", CustomModel.models.size()));
+                CustomModel.manager.refreshModelList();
+                sender.sendMessage(new TextComponentTranslation("command.custommodel.listmodels", CustomModel.manager.models.size()));
                 return;
             }
 
             if (args[0].equals("list")) {
                 checkPermission(sender, ModConfig.getListModelsPermission());
-                sender.sendMessage(new TextComponentTranslation("command.custommodel.listmodels", CustomModel.models.size()));
-                for (ITextComponent text : CustomModel.getModelInfoList())
+                sender.sendMessage(new TextComponentTranslation("command.custommodel.listmodels", CustomModel.manager.models.size()));
+                for (ITextComponent text : CustomModel.manager.getServerModelInfoList())
                     sender.sendMessage(text);
                 return;
             }
@@ -81,11 +81,11 @@ public class ServerCommand extends CommandBase {
                     checkPermission(sender, ModConfig.getReloadOthersPermission());
                     Collection<EntityPlayerMP> players = getPlayers(server, sender, args[1]);
                     for (EntityPlayerMP player : players)
-                        CustomModel.reloadModel(player, true);
+                        CustomModel.manager.reloadModel(player, true);
                     notifyCommandListener(sender, this, "command.custommodel.reload", players.size());
                 } else {
                     checkPermission(sender, ModConfig.getReloadSelfPermission());
-                    CustomModel.reloadModel(getCommandSenderAsPlayer(sender), true);
+                    CustomModel.manager.reloadModel(getCommandSenderAsPlayer(sender), true);
                     notifyCommandListener(sender, this, "command.custommodel.reload", 1);
                 }
                 return;
@@ -96,11 +96,11 @@ public class ServerCommand extends CommandBase {
                     checkPermission(sender, ModConfig.getSelectOthersPermission());
                     Collection<EntityPlayerMP> players = getPlayers(server, sender, args[1]);
                     for (EntityPlayerMP player : players)
-                        CustomModel.clearModel(player);
+                        CustomModel.manager.clearModel(player);
                     notifyCommandListener(sender, this, "command.custommodel.clear", players.size());
                 } else {
                     checkPermission(sender, ModConfig.getSelectSelfPermission());
-                    CustomModel.clearModel(getCommandSenderAsPlayer(sender));
+                    CustomModel.manager.clearModel(getCommandSenderAsPlayer(sender));
                     notifyCommandListener(sender, this, "command.custommodel.clear", 1);
                 }
                 return;
@@ -114,11 +114,11 @@ public class ServerCommand extends CommandBase {
                     checkPermission(sender, ModConfig.getSelectOthersPermission());
                     Collection<EntityPlayerMP> players = getPlayers(server, sender, args[2]);
                     for (EntityPlayerMP player : players)
-                        CustomModel.selectModel(player, args[1]);
+                        CustomModel.manager.selectModel(getCommandSenderAsPlayer(sender), player, args[1]);
                     notifyCommandListener(sender, this, "command.custommodel.select", players.size(), args[1]);
                 } else {
                     checkPermission(sender, ModConfig.getSelectSelfPermission());
-                    CustomModel.selectModel(getCommandSenderAsPlayer(sender), args[1]);
+                    CustomModel.manager.selectModel(getCommandSenderAsPlayer(sender), getCommandSenderAsPlayer(sender), args[1]);
                     notifyCommandListener(sender, this, "command.custommodel.select", 1, args[1]);
                 }
                 return;
@@ -158,10 +158,10 @@ public class ServerCommand extends CommandBase {
             case "clear":
                 return args.length == 2 ? getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames()) : Collections.emptyList();
             case "select":
-                return args.length == 2 ? getListOfStringsMatchingLastWord(args, CustomModel.getModelIdList()) :
+                return args.length == 2 ? getListOfStringsMatchingLastWord(args, CustomModel.manager.getServerModelIdList()) :
                 args.length == 3 ? getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames()) : Collections.emptyList();
             case "npc":
-                return getListOfStringsMatchingLastWord(args, CustomModel.getModelIdList());
+                return getListOfStringsMatchingLastWord(args, CustomModel.manager.getServerModelIdList());
         }
 
         return Collections.emptyList();

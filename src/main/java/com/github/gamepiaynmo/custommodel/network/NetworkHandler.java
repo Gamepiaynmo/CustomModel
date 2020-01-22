@@ -8,9 +8,15 @@ import net.minecraftforge.fml.relauncher.Side;
 public class NetworkHandler {
     public static final SimpleNetworkWrapper CHANNEL = NetworkRegistry.INSTANCE.newSimpleChannel(CustomModel.MODID);
 
+    private static int id = 0;
+
     public static void init() {
-        CHANNEL.registerMessage(PacketQuery.class, PacketQuery.class, 0, Side.SERVER);
-        CHANNEL.registerMessage(PacketModel.class, PacketModel.class, 1, Side.CLIENT);
-        CHANNEL.registerMessage(PacketReplyConfig.class, PacketReplyConfig.class, 2, Side.CLIENT);
+        CHANNEL.registerMessage(PacketQuery.Server.class, PacketQuery.class, id++, Side.SERVER);
+        CHANNEL.registerMessage(PacketQuery.Client.class, PacketQuery.class, id++, Side.CLIENT);
+        CHANNEL.registerMessage(PacketModel.Server.class, PacketModel.class, id++, Side.SERVER);
+        CHANNEL.registerMessage(PacketModel.Client.class, PacketModel.class, id++, Side.CLIENT);
+        CHANNEL.registerMessage(PacketConfig.class, PacketConfig.class, id++, Side.CLIENT);
+        CHANNEL.registerMessage(PacketList.class, PacketList.class, id++, Side.SERVER);
+        CHANNEL.registerMessage(PacketInfo.Client.class, PacketInfo.class, id++, Side.CLIENT);
     }
 }

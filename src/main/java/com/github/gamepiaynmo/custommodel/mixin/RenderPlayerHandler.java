@@ -3,12 +3,12 @@ package com.github.gamepiaynmo.custommodel.mixin;
 import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.client.ModelPack;
 import com.github.gamepiaynmo.custommodel.entity.CustomModelNpc;
-import com.github.gamepiaynmo.custommodel.entity.NpcHelper;
-import com.github.gamepiaynmo.custommodel.render.*;
-import com.github.gamepiaynmo.custommodel.render.feature.*;
+import com.github.gamepiaynmo.custommodel.client.render.*;
+import com.github.gamepiaynmo.custommodel.client.render.feature.*;
 import com.github.gamepiaynmo.custommodel.util.Matrix4;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
+import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.model.ModelPlayer;
@@ -27,6 +27,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.client.event.RenderPlayerEvent;
+import net.minecraftforge.client.event.RenderSpecificHandEvent;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
@@ -36,7 +37,7 @@ public abstract class RenderPlayerHandler {
     public static void customize(RenderPlayer renderer) {
         List<LayerRenderer<EntityLivingBase>> features = ObfuscationReflectionHelper.getPrivateValue(RenderLivingBase.class, renderer, 4);
         for (int i = 0; i < features.size(); i++) {
-            LayerRenderer feature = features.get(i);
+            LayerRenderer<? extends EntityLivingBase> feature = features.get(i);
             if (feature instanceof LayerBipedArmor)
                 feature = new CustomBipedArmor(renderer, context);
             if (feature instanceof LayerHeldItem)
@@ -51,7 +52,7 @@ public abstract class RenderPlayerHandler {
                 feature = new CustomElytra(renderer, context);
             if (feature instanceof LayerEntityOnShoulder)
                 feature = new CustomEntityOnShoulder(Minecraft.getMinecraft().getRenderManager(), context);
-            features.set(i, feature);
+            features.set(i, (LayerRenderer<EntityLivingBase>) feature);
         }
 
         features.add(new CustomEmissive(context));
@@ -63,10 +64,10 @@ public abstract class RenderPlayerHandler {
     }
 
     private static ModelPlayer getModel(EntityLivingBase entityLivingBase) {
-        Render render = Minecraft.getMinecraft().getRenderManager().getEntityRenderObject(entityLivingBase);
+        Render<? extends EntityLivingBase> render = Minecraft.getMinecraft().getRenderManager().getEntityRenderObject(entityLivingBase);
         if (entityLivingBase instanceof AbstractClientPlayer) {
             if (render instanceof RenderLivingBase) {
-                ModelBase model = ((RenderLivingBase) render).getMainModel();
+                ModelBase model = ((RenderLivingBase<? extends EntityLivingBase>) render).getMainModel();
                 if (model instanceof ModelPlayer)
                     return (ModelPlayer) model;
             }
@@ -88,7 +89,7 @@ public abstract class RenderPlayerHandler {
             }
 
             ModelPack model = null;
-            model = CustomModelClient.getModelForEntity(context.currentEntity);
+            model = CustomModelClient.manager.getModelForEntity(context.currentEntity);
             if (model != null) {
                 context.currentModel.setVisible(true);
                 if (context.isPlayer())
@@ -139,8 +140,8 @@ public abstract class RenderPlayerHandler {
     }
 
     public static boolean renderRightArm(AbstractClientPlayer abstractClientPlayerEntity) {
-        ModelPack pack = CustomModelClient.getModelForPlayer(abstractClientPlayerEntity);
-        if (pack != null && pack.getModel().getFirstPersonList(EnumHandSide.RIGHT) != null) {
+        ModelPack pack = CustomModelClient.manager.getModelForPlayer(abstractClientPlayerEntity);
+        if (pack != null && !pack.getModel().getFirstPersonList(EnumHandSide.RIGHT).isEmpty()) {
             CustomModelClient.isRenderingFirstPerson = true;
             CustomJsonModel model = pack.getModel();
             partial = CustomModelClient.getPartial();
@@ -177,8 +178,8 @@ public abstract class RenderPlayerHandler {
     }
 
     public static boolean renderLeftArm(AbstractClientPlayer abstractClientPlayerEntity) {
-        ModelPack pack = CustomModelClient.getModelForPlayer(abstractClientPlayerEntity);
-        if (pack != null && pack.getModel().getFirstPersonList(EnumHandSide.LEFT) != null) {
+        ModelPack pack = CustomModelClient.manager.getModelForPlayer(abstractClientPlayerEntity);
+        if (pack != null && !pack.getModel().getFirstPersonList(EnumHandSide.LEFT).isEmpty()) {
             CustomModelClient.isRenderingFirstPerson = true;
             CustomJsonModel model = pack.getModel();
             partial = CustomModelClient.getPartial();
@@ -214,10 +215,58 @@ public abstract class RenderPlayerHandler {
         return false;
     }
 
+    @SubscribeEvent
+    public static void renderFirstPerson(RenderSpecificHandEvent event) {
+        Minecraft mc = Minecraft.getMinecraft();
+        EntityPlayerSP player = mc.player;
+        ModelPack pack = CustomModelClient.manager.getModelForPlayer(player);
+
+        boolean flag = mc.getRenderViewEntity() instanceof EntityLivingBase && ((EntityLivingBase)mc.getRenderViewEntity()).isPlayerSleeping();
+        if (mc.gameSettings.thirdPersonView == 0 && !flag && !mc.gameSettings.hideGUI && !mc.playerController.isSpectator()) {
+            GlStateManager.pushMatrix();
+            if (pack != null && !pack.getModel().getFirstPersonList().isEmpty()) {
+                CustomModelClient.isRenderingFirstPerson = true;
+                CustomJsonModel model = pack.getModel();
+                partial = CustomModelClient.getPartial();
+                context.currentJsonModel = model;
+                context.currentModel = getModel(player);
+                context.currentModel.isSneak = player.isSneaking();
+                context.currentParameter = calculateTransform(player);
+                context.isInvisible = false;
+                context.setPlayer(player);
+
+                GlStateManager.color(1.0F, 1.0F, 1.0F);
+                ModelPlayer playerModel = getModel(player);
+                GlStateManager.enableBlend();
+                float yaw = (float) MathHelper.clampedLerp(player.prevRotationYaw, player.rotationYaw, partial);
+                float pitch = (float) MathHelper.clampedLerp(player.prevRotationPitch, player.rotationPitch, partial);
+                yaw -= (float) MathHelper.clampedLerp(player.prevRenderYawOffset, player.renderYawOffset, partial);
+                float armYaw = (float) MathHelper.clampedLerp(player.prevRenderArmYaw, player.renderArmYaw, partial);
+                float armPitch = (float) MathHelper.clampedLerp(player.prevRenderArmPitch, player.renderArmPitch, partial);
+                GlStateManager.rotate(-(player.rotationYaw - armYaw) * 0.1F, 0.0F, 1.0F, 0.0F);
+                GlStateManager.rotate(-(player.rotationPitch - armPitch) * 0.1F, 1.0F, 0.0F, 0.0F);
+                GlStateManager.scale(-1, -1, 1);
+                GlStateManager.translate(0.0F, 1.501F, 0.0F);
+                GlStateManager.scale(0.9375F, 0.9375F, 0.9375F);
+                GlStateManager.translate(0.0F, -1.501F, 0.0F);
+                GlStateManager.rotate(-pitch, 1, 0, 0);
+                GlStateManager.rotate(-yaw, 0, 1, 0);
+
+                model.clearTransform();
+                model.update(transform, context);
+                model.renderFp(model.getTransform(PlayerBone.NONE.getBone()), context);
+
+                GlStateManager.disableBlend();
+                CustomModelClient.isRenderingFirstPerson = false;
+            }
+            GlStateManager.popMatrix();
+        }
+    }
+
     public static void tick(EntityLivingBase playerEntity) {
         ModelPack model = null;
         context.setEntity(playerEntity);
-        model = CustomModelClient.getModelForEntity(context.currentEntity);
+        model = CustomModelClient.manager.getModelForEntity(context.currentEntity);
         ModelPlayer playerModel = getModel(playerEntity);
         if (model != null) {
             playerModel.swingProgress = playerEntity.getSwingProgress(1);
@@ -239,19 +288,36 @@ public abstract class RenderPlayerHandler {
 
     @SubscribeEvent
     public static void renderPre(RenderPlayerEvent.Pre event) {
-        context.setPlayer((AbstractClientPlayer) event.getEntityPlayer());
-        context.currentModel = getModel(event.getEntityPlayer());
-        context.currentModel.isSneak = context.getPlayer().isSneaking();
-        ModelPack model = CustomModelClient.getModelForPlayer(context.getPlayer());
-        partial = CustomModelClient.getPartial();
+        EntityLivingBase entity = event.getEntityLiving();
+        renderPre(entity, getModel(entity), event.getX(), event.getY(), event.getZ(), event.getPartialRenderTick(), null);
+    }
+
+    @SubscribeEvent
+    public static void renderPost(RenderPlayerEvent.Post event) {
+        renderPost();
     }
 
     public static void renderPre(EntityLivingBase entity, ModelPlayer model) {
         context.setEntity(entity);
         context.currentModel = model;
         context.currentModel.isSneak = entity.isSneaking();
-        ModelPack pack = CustomModelClient.getModelForEntity(entity);
-        partial = CustomModelClient.getPartial();
+        RenderPlayerHandler.partial = CustomModelClient.getPartial();
+    }
+
+    public static void renderPre(EntityLivingBase entity, ModelPlayer model, double x, double y, double z, float partial, EntityParameter params) {
+        context.setEntity(entity);
+        context.currentModel = model;
+        context.currentModel.isSneak = entity.isSneaking();
+        RenderPlayerHandler.partial = partial;
+
+        if (x == 0 && y == 0 && z == 0 && partial == 1 && !CustomModelClient.isRenderingInventory) {
+            CustomModelClient.isRenderingInventory = true;
+            CustomModelClient.inventoryEntityParameter = params;
+        }
+    }
+
+    public static void renderPost() {
+        CustomModelClient.isRenderingInventory = false;
     }
 
     public static void resetSkeleton() {

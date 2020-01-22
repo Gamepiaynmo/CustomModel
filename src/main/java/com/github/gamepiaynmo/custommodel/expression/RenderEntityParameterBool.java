@@ -1,11 +1,9 @@
 package com.github.gamepiaynmo.custommodel.expression;
 
 import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
-import com.github.gamepiaynmo.custommodel.render.RenderContext;
+import com.github.gamepiaynmo.custommodel.client.render.RenderContext;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 
 import java.util.function.Function;
 
@@ -43,16 +41,14 @@ public enum RenderEntityParameterBool implements IExpressionBool {
    }
 
    public static RenderEntityParameterBool parse(String str) {
-      if (str == null) {
-         return null;
-      } else {
+      if (str != null) {
          for (RenderEntityParameterBool type : VALUES) {
             if (type.getName().equals(str)) {
                return type;
             }
          }
 
-         return null;
       }
+      return null;
    }
 }

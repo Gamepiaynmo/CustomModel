@@ -59,7 +59,7 @@ public class TransformRenderPlayer implements IClassTransformer {
             AbstractInsnNode startNode = ASMHelper.findFirstInstruction(methodNode);
             InsnList insn = new InsnList();
             insn.add(new VarInsnNode(Opcodes.ALOAD, 1));
-            insn.add(new MethodInsnNode(Opcodes.INVOKESTATIC, RENDER_PLAYER_HANDLER_CLASS, "renderRightArm", RENDER_HAND_METHOD));
+            insn.add(new MethodInsnNode(Opcodes.INVOKESTATIC, RENDER_PLAYER_HANDLER_CLASS, "renderRightArm", RENDER_HAND_METHOD, false));
             LabelNode retNode = new LabelNode();
             insn.add(new JumpInsnNode(Opcodes.IFEQ, retNode));
             insn.add(new InsnNode(Opcodes.RETURN));
@@ -70,7 +70,7 @@ public class TransformRenderPlayer implements IClassTransformer {
             startNode = ASMHelper.findFirstInstruction(methodNode);
             insn.clear();
             insn.add(new VarInsnNode(Opcodes.ALOAD, 1));
-            insn.add(new MethodInsnNode(Opcodes.INVOKESTATIC, RENDER_PLAYER_HANDLER_CLASS, "renderLeftArm", RENDER_HAND_METHOD));
+            insn.add(new MethodInsnNode(Opcodes.INVOKESTATIC, RENDER_PLAYER_HANDLER_CLASS, "renderLeftArm", RENDER_HAND_METHOD, false));
             retNode = new LabelNode();
             insn.add(new JumpInsnNode(Opcodes.IFEQ, retNode));
             insn.add(new InsnNode(Opcodes.RETURN));

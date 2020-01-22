@@ -55,7 +55,7 @@ public class ParametersVariable implements IParameters {
          ++countRepeat;
       }
 
-      List list = new ArrayList();
+      List<ExpressionType> list = new ArrayList<ExpressionType>();
       list.addAll(Arrays.asList(this.first));
 
       for(int i = 0; i < countRepeat; ++i) {

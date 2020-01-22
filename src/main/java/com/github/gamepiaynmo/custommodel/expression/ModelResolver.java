@@ -1,20 +1,16 @@
 package com.github.gamepiaynmo.custommodel.expression;
 
-import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.client.ModelPack;
 import com.github.gamepiaynmo.custommodel.entity.NpcHelper;
-import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
-import com.github.gamepiaynmo.custommodel.render.EntityPose;
-import com.github.gamepiaynmo.custommodel.render.TickVariable;
-import com.github.gamepiaynmo.custommodel.render.model.IBone;
-import net.minecraft.entity.player.InventoryPlayer;
+import com.github.gamepiaynmo.custommodel.client.render.CustomJsonModel;
+import com.github.gamepiaynmo.custommodel.client.render.EntityPose;
+import com.github.gamepiaynmo.custommodel.client.render.TickVariable;
+import com.github.gamepiaynmo.custommodel.client.render.model.IBone;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.Item;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.ResourceLocation;
-
-import java.util.Map;
 
 public class ModelResolver implements IExpressionResolver {
    final ModelPack pack;

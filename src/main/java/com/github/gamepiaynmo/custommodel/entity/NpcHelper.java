@@ -36,7 +36,8 @@ public class NpcHelper {
     }
 
     public static EntityCustomNpc getParent(CustomModelNpc entity) {
-        return entity.world.getEntities(EntityCustomNpc.class, npc -> getCustomModelEntity(npc) == entity).get(0);
+        List<EntityCustomNpc> result =  entity.world.getEntities(EntityCustomNpc.class, npc -> getCustomModelEntity(npc) == entity);
+        return result.size() > 0 ? result.get(0) : null;
     }
 
     public static EntityLivingBase getParent(EntityLivingBase entity) {

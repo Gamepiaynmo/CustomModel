@@ -2,20 +2,20 @@ package com.github.gamepiaynmo.custommodel.mixin;
 
 import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.client.ModelPack;
-import com.github.gamepiaynmo.custommodel.render.EntityDimensions;
-import com.github.gamepiaynmo.custommodel.render.EntityPose;
+import com.github.gamepiaynmo.custommodel.client.render.EntityDimensions;
+import com.github.gamepiaynmo.custommodel.client.render.EntityPose;
 import com.github.gamepiaynmo.custommodel.server.CustomModel;
 import com.github.gamepiaynmo.custommodel.server.ModConfig;
 import com.github.gamepiaynmo.custommodel.server.ModelInfo;
 import com.google.common.collect.Maps;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.MoverType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.relauncher.Side;
 
 import java.util.Map;
 
@@ -45,9 +45,9 @@ public class PlayerStatureHandler {
         EntityPlayer player = event.player;
         EntityPose pose = getPose(player);
 
-        if (player instanceof AbstractClientPlayer) {
+        if (event.side == Side.CLIENT) {
             AbstractClientPlayer clientPlayer = (AbstractClientPlayer) player;
-            ModelPack pack = CustomModelClient.getModelForPlayer(clientPlayer);
+            ModelPack pack = CustomModelClient.manager.getModelForPlayer(clientPlayer);
             if (pack != null) {
                 if (CustomModelClient.serverConfig.customEyeHeight && event.phase == TickEvent.Phase.START) {
                     Float eyeHeight = pack.getModel().getModelInfo().eyeHeightMap.get(pose);
@@ -62,11 +62,9 @@ public class PlayerStatureHandler {
                         setSize(player, dimensions);
                 }
             }
-        }
-
-        if (player instanceof EntityPlayerMP) {
+        } else {
             EntityPlayerMP serverPlayer = (EntityPlayerMP) player;
-            ModelInfo pack = CustomModel.getBoundingBoxForPlayer(serverPlayer);
+            ModelInfo pack = CustomModel.manager.getModelForPlayer(serverPlayer);
             if (pack != null) {
                 if (ModConfig.isCustomEyeHeight() && event.phase == TickEvent.Phase.START) {
                     Float eyeHeight = pack.eyeHeightMap.get(pose);

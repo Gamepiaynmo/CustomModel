@@ -1,7 +1,6 @@
 package com.github.gamepiaynmo.custommodel.mixin.asm;
 
 import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
-import com.github.gamepiaynmo.custommodel.render.EntityParameter;
 import net.minecraft.launchwrapper.IClassTransformer;
 import org.apache.commons.io.FileUtils;
 import org.objectweb.asm.ClassWriter;

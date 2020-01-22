@@ -2,10 +2,15 @@ package com.github.gamepiaynmo.custommodel.network;
 
 import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.client.ModelPack;
+import com.github.gamepiaynmo.custommodel.expression.ParseException;
 import com.github.gamepiaynmo.custommodel.server.CustomModel;
+import com.github.gamepiaynmo.custommodel.server.ModConfig;
+import com.github.gamepiaynmo.custommodel.server.ModelInfo;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
 import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -19,7 +24,7 @@ import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-public class PacketModel implements IMessage, IMessageHandler<PacketModel, IMessage> {
+public class PacketModel implements IMessage {
     private UUID uuid;
     private byte[] data;
     public boolean success;
@@ -62,8 +67,13 @@ public class PacketModel implements IMessage, IMessageHandler<PacketModel, IMess
     }
 
     public PacketModel(UUID name) {
+        this(name, new byte[0]);
+    }
+
+    public PacketModel(UUID name, byte[] data) {
         this.uuid = name;
-        this.data = new byte[0];
+        this.data = data;
+        success = true;
     }
 
     public PacketModel() {}
@@ -94,27 +104,46 @@ public class PacketModel implements IMessage, IMessageHandler<PacketModel, IMess
             buf.writeBytes(data);
     }
 
-    @Override
-    public IMessage onMessage(PacketModel message, MessageContext ctx) {
-        Minecraft.getMinecraft().addScheduledTask(() -> {
-            ModelPack pack = null;
-            try {
-                if (message.getData().length > 0) {
-                    TextureManager textureManager = Minecraft.getMinecraft().renderEngine;
-                    pack = ModelPack.fromZipMemory(textureManager, message.getUuid(), message.getData());
-                    if (pack != null && pack.successfulLoaded())
-                        CustomModelClient.addModel(message.getUuid(), pack);
-                } else {
-                    CustomModelClient.clearModel(message.getUuid());
+    public static class Server implements IMessageHandler<PacketModel, IMessage> {
+        @Override
+        public IMessage onMessage(PacketModel message, MessageContext ctx) {
+            EntityPlayerMP sender = ctx.getServerHandler().player;
+            sender.getServerWorld().addScheduledTask(() -> {
+                try {
+                    ModelInfo info = ModelInfo.fromZipMemory(message.getData());
+                    info.sender = sender.getUniqueID();
+                    CustomModel.manager.addModelInfo(info, sender, message.getUuid());
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            } catch (Exception e) {
-                TextComponentTranslation text = new TextComponentTranslation("error.custommodel.loadmodelpack", "", e.getMessage());
-                text.getStyle().setColor(TextFormatting.RED);
-                Minecraft.getMinecraft().ingameGUI.addChatMessage(ChatType.CHAT, text);
-                CustomModelClient.LOGGER.warn(e.getMessage(), e);
-                CustomModelClient.clearModel(message.getUuid());
-            }
-        });
-        return null;
+            });
+            return null;
+        }
+    }
+
+    public static class Client implements IMessageHandler<PacketModel, IMessage> {
+        @Override
+        public IMessage onMessage(PacketModel message, MessageContext ctx) {
+            Minecraft.getMinecraft().addScheduledTask(() -> {
+                ModelPack pack = null;
+                try {
+                    if (message.getData().length > 0) {
+                        TextureManager textureManager = Minecraft.getMinecraft().renderEngine;
+                        pack = ModelPack.fromZipMemory(textureManager, message.getUuid(), message.getData());
+                        if (pack != null && pack.successfulLoaded())
+                            CustomModelClient.manager.addModel(message.getUuid(), pack);
+                    } else {
+                        CustomModelClient.manager.clearModel(message.getUuid());
+                    }
+                } catch (Exception e) {
+                    TextComponentTranslation text = new TextComponentTranslation("error.custommodel.loadmodelpack", "", e.getMessage());
+                    text.getStyle().setColor(TextFormatting.RED);
+                    Minecraft.getMinecraft().ingameGUI.addChatMessage(ChatType.CHAT, text);
+                    CustomModelClient.LOGGER.warn(e.getMessage(), e);
+                    CustomModelClient.manager.clearModel(message.getUuid());
+                }
+            });
+            return null;
+        }
     }
 }
