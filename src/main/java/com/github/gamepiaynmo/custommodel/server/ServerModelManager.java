@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 
 public class ServerModelManager {
     private final Map<UUID, ModelInfo> modelMap = Maps.newHashMap();
-    private int clearCounter = 0;
     public final Map<String, ModelLoadInfo> models = Maps.newHashMap();
 
     private final IModelSelector defaultSelector = new DefaultModelSelector();
@@ -226,18 +225,5 @@ public class ServerModelManager {
     }
 
     public void tick() {
-        if (clearCounter++ > 1000) {
-            clearCounter = 0;
-            Set<UUID> uuids = Sets.newHashSet();
-            for (EntityPlayerMP playerEntity : CustomModel.server.getPlayerList().getPlayers())
-                uuids.add(playerEntity.getUniqueID());
-            if (CustomModel.hasnpc)
-                for (WorldServer worldServer : CustomModel.server.worlds)
-                    uuids.addAll(NpcHelper.getNpcUUIDs(worldServer));
-            for (Iterator<Map.Entry<UUID, ModelInfo>> iter = modelMap.entrySet().iterator(); iter.hasNext(); ) {
-                if (!uuids.contains(iter.next().getKey()))
-                    iter.remove();
-            }
-        }
     }
 }
