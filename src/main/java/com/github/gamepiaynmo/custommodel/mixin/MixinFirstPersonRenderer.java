@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(FirstPersonRenderer.class)
 public class MixinFirstPersonRenderer {
-    @Inject(method = "renderFirstPersonItem(F)V", at = @At(value = "INVOKE", target = "disableRescaleNormal"))
+    @Inject(method = "renderFirstPersonItem(F)V", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;disableRescaleNormal()V"))
     public void renderFirstPersonItem(float f, CallbackInfo info) {
         ClientPlayerEntity playerEntity = MinecraftClient.getInstance().player;
         PlayerEntityRenderer renderer = MinecraftClient.getInstance().getEntityRenderManager().getRenderer(playerEntity);
