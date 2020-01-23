@@ -69,12 +69,8 @@ public class CustomModelClient {
 
         MinecraftForge.EVENT_BUS.register(CustomModelClient.class);
         MinecraftForge.EVENT_BUS.register(RenderPlayerHandler.class);
-        ClientRegistry.registerKeyBinding(selectModelKey);
-    }
 
-    public static void initPlayerRenderer() {
-        for (RenderPlayer renderer : Minecraft.getMinecraft().getRenderManager().getSkinMap().values())
-            RenderPlayerHandler.customize(renderer);
+        ClientRegistry.registerKeyBinding(selectModelKey);
         if (CustomModel.hasnpc) {
             RenderingRegistry.registerEntityRenderingHandler(CustomModelMaleNpc.class, manager ->
                     new RenderNpc(manager, new ModelPlayer(0, false), false));
@@ -82,6 +78,13 @@ public class CustomModelClient {
                     new RenderNpc(manager, new ModelPlayer(0, true), true));
         }
     }
+
+    public static void initPlayerRenderer() {
+        for (RenderPlayer renderer : Minecraft.getMinecraft().getRenderManager().getSkinMap().values())
+            RenderPlayerHandler.customize(renderer);
+    }
+
+    private static WorldClient lastWorld = null;
 
     @SubscribeEvent
     public static void onWorldTick(TickEvent.ClientTickEvent event) {
@@ -105,15 +108,16 @@ public class CustomModelClient {
                 else mc.displayGuiScreen(new GuiModelSelection());
             }
         }
+
+        if (lastWorld != null && world == null) {
+            initServerStatus();
+            manager.clearModels();
+        }
+
+        lastWorld = world;
     }
 
     public static void showModelSelectionGui(List<ModelPackInfo> infoList) {
         Minecraft.getMinecraft().displayGuiScreen(new GuiModelSelection(infoList));
-    }
-
-    @SubscribeEvent
-    public static void onWorldUnload(WorldEvent.Unload event) {
-        initServerStatus();
-        manager.clearModels();
     }
 }

@@ -60,6 +60,10 @@ public class ClientModelManager {
         EntityPlayer entityPlayer = Minecraft.getMinecraft().world.getPlayerEntityByUUID(uuid);
         if (entityPlayer != null)
             CustomModel.manager.getModelSelector().clearModelForPlayer(entityPlayer.getGameProfile());
+        releaseModel(uuid);
+    }
+
+    public void releaseModel(UUID uuid) {
         ModelPack old = modelPacks.remove(uuid);
         if (old != null)
             old.release();
@@ -163,7 +167,7 @@ public class ClientModelManager {
 
             List<UUID> toClear = modelPacks.entrySet().stream().map(entry -> entry.getKey())
                     .filter(uuid -> !uuids.contains(uuid)).collect(Collectors.toList());
-            toClear.forEach(this::clearModel);
+            toClear.forEach(this::releaseModel);
         }
     }
 }

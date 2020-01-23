@@ -140,7 +140,6 @@ public class PacketModel implements IMessage {
                     text.getStyle().setColor(TextFormatting.RED);
                     Minecraft.getMinecraft().ingameGUI.addChatMessage(ChatType.CHAT, text);
                     CustomModelClient.LOGGER.warn(e.getMessage(), e);
-                    CustomModelClient.manager.clearModel(message.getUuid());
                 }
             });
             return null;
