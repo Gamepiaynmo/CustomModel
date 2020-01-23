@@ -1,8 +1,7 @@
 package com.github.gamepiaynmo.custommodel.expression;
 
-import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
-import com.github.gamepiaynmo.custommodel.render.RenderContext;
-import com.github.gamepiaynmo.custommodel.render.RenderParameter;
+import com.github.gamepiaynmo.custommodel.client.render.RenderContext;
+import com.github.gamepiaynmo.custommodel.client.render.RenderParameter;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.MathHelper;

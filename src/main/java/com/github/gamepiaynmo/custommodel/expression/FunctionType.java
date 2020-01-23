@@ -1,13 +1,12 @@
 package com.github.gamepiaynmo.custommodel.expression;
 
 import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
-import com.github.gamepiaynmo.custommodel.render.RenderContext;
+import com.github.gamepiaynmo.custommodel.client.render.RenderContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.MathHelper;
 
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 public enum FunctionType {
    PLUS(10, ExpressionType.FLOAT, "+", (args, context) -> evalFloat(args, 0, context) + evalFloat(args, 1, context), ExpressionType.FLOAT, ExpressionType.FLOAT),

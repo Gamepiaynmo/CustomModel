@@ -1,18 +1,36 @@
 package com.github.gamepiaynmo.custommodel.api;
 
 public class ModelPackInfo {
-    public final String fileName;
-
+    /**
+     * Id of the model, a string start with [a-z] and compose of [a-z0-9].
+     */
     public final String modelId;
+
+    /**
+     * Name of the model, a non-empty unicode string.
+     */
     public final String modelName;
+
+    /**
+     * Version of the model, a unicode string.
+     */
     public final String version;
+
+    /**
+     * Author of the model, a unicode string.
+     */
     public final String author;
 
-    public ModelPackInfo(String... params) {
-        fileName = params[0];
-        modelId = params[1];
-        modelName = params[2];
-        version = params[3];
-        author = params[4];
+    /**
+     * Does this model come from one of the clients.
+     */
+    public final boolean fromClient;
+
+    public ModelPackInfo(String id, String name, String ver, String auth, boolean client) {
+        modelId = id;
+        modelName = name;
+        version = ver;
+        author = auth;
+        fromClient = client;
     }
 }

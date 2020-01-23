@@ -3,18 +3,20 @@
   "package": "com.github.gamepiaynmo.custommodel.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "MixinServerPlayerEntity"
+    "MixinServerPlayerEntity",
+    "MixinPlayerManager"
   ],
   "client": [
-    "MixinEntityRenderDispatcher",
-    "MixinPlayerEntityRenderer",
-    "MixinParticleManager",
-    "MixinEntitySelector",
-    "MixinInventoryScreen",
-    "MixinClientCommandSource",
-    "MixinNetworkHandler",
+    "MixinAbstractClientPlayerEntity",
     "MixinClientPlayerEntity",
-    "MixinMinecraftClient"
+    "MixinOtherClientPlayerEntity",
+    "MixinEntityRenderDispatcher",
+    "MixinInventoryScreen",
+    "MixinMinecraftClient",
+    "MixinParticleManager",
+    "MixinPlayerEntityRenderer",
+    "MixinLivingRenderer",
+    "MixinFirstPersonRenderer"
   ],
   "server": [
   ],

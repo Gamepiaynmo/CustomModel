@@ -44,7 +44,6 @@ public class DefaultModelSelector implements IModelSelector {
     public String getModelForPlayer(GameProfile profile) {
         if (models.contains(profile)) {
             String modelId = models.get(profile).getModelPack();
-            if (CustomModelApi.getModelPackInfo(modelId) != null)
                 return modelId;
         }
 

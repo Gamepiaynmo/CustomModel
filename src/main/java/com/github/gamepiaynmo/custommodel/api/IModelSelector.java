@@ -39,7 +39,7 @@ public interface IModelSelector {
      * @param modelSelector New Model Selector.
      */
     public static void setModelSelector(IModelSelector modelSelector) {
-        CustomModel.setModelSelector(modelSelector);
+        CustomModel.manager.setModelSelector(modelSelector);
     }
 
     /**
@@ -47,6 +47,6 @@ public interface IModelSelector {
      * @return Current Model Selector.
      */
     public static IModelSelector getModelSelector() {
-        return CustomModel.getModelSelector();
+        return CustomModel.manager.getModelSelector();
     }
 }

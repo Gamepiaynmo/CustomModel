@@ -2,12 +2,13 @@ package com.github.gamepiaynmo.custommodel.mixin;
 
 import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.client.ModelPack;
-import com.github.gamepiaynmo.custommodel.render.*;
-import com.github.gamepiaynmo.custommodel.render.feature.*;
+import com.github.gamepiaynmo.custommodel.client.render.*;
+import com.github.gamepiaynmo.custommodel.client.render.feature.*;
 import com.github.gamepiaynmo.custommodel.util.Matrix4;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
@@ -66,36 +67,32 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
         features.add(new CustomEmissive(this, context));
     }
 
-    public boolean disableSetModelPose;
     private static RenderContext context = new RenderContext();
 
-    @Inject(method = "setModelPose(Lnet/minecraft/client/network/AbstractClientPlayerEntity;)V", at = @At("HEAD"), cancellable = true)
-    private void setModelPose(AbstractClientPlayerEntity playerEntity, CallbackInfo info) {
-        if (disableSetModelPose)
-            info.cancel();
-    }
-
     @Override
-    protected void render(AbstractClientPlayerEntity playerEntity, float float_1, float float_2, float float_3, float float_4, float float_5, float float_6) {
+    public boolean renderModel(AbstractClientPlayerEntity playerEntity, float float_1, float float_2, float float_3, float float_4, float float_5, float float_6) {
         boolean boolean_1 = this.method_4056(playerEntity);
         boolean boolean_2 = !boolean_1 && !playerEntity.canSeePlayer(MinecraftClient.getInstance().player);
         if (boolean_1 || boolean_2) {
-            if (!this.bindEntityTexture(playerEntity)) {
-                return;
-            }
-
             if (boolean_2) {
                 GlStateManager.setProfile(GlStateManager.RenderMode.TRANSPARENT_MODEL);
             }
 
+            ModelPack model = CustomModelClient.manager.getModelForPlayer(playerEntity);
+            if (model != null) {
+                setModelPose(playerEntity, model.getModel());
+            }
+
+            if (!this.bindEntityTexture(playerEntity))
+                return false;
             this.model.render(playerEntity, float_1, float_2, float_3, float_4, float_5, float_6);
 
-            ModelPack model = CustomModelClient.getModelForPlayer(playerEntity);
             if (model != null) {
                 context.isInvisible = boolean_2;
                 context.currentJsonModel = model.getModel();
                 context.currentJsonModel.clearTransform();
                 if (CustomModelClient.isRenderingInventory) {
+                    partial = 1;
                     EntityParameter currentParameter = new EntityParameter(playerEntity);
                     CustomModelClient.inventoryEntityParameter.apply(playerEntity);
                     context.currentParameter = calculateTransform(playerEntity);
@@ -117,12 +114,13 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
         }
 
         this.setModelPose_c(playerEntity);
+        return true;
     }
 
     @Inject(method = "renderRightArm", at = @At("HEAD"), cancellable = true)
     public void renderRightArm(AbstractClientPlayerEntity abstractClientPlayerEntity, CallbackInfo info) {
-        ModelPack pack = CustomModelClient.getModelForPlayer(abstractClientPlayerEntity);
-        if (pack != null && pack.getModel().getFirstPersonList(Arm.RIGHT) != null) {
+        ModelPack pack = CustomModelClient.manager.getModelForPlayer(abstractClientPlayerEntity);
+        if (pack != null && !pack.getModel().getFirstPersonList(Arm.RIGHT).isEmpty()) {
             CustomModelClient.isRenderingFirstPerson = true;
             CustomJsonModel model = pack.getModel();
             partial = CustomModelClient.getPartial();
@@ -160,8 +158,8 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
 
     @Inject(method = "renderLeftArm", at = @At("HEAD"), cancellable = true)
     public void renderLeftArm(AbstractClientPlayerEntity abstractClientPlayerEntity, CallbackInfo info) {
-        ModelPack pack = CustomModelClient.getModelForPlayer(abstractClientPlayerEntity);
-        if (pack != null && pack.getModel().getFirstPersonList(Arm.LEFT) != null) {
+        ModelPack pack = CustomModelClient.manager.getModelForPlayer(abstractClientPlayerEntity);
+        if (pack != null && !pack.getModel().getFirstPersonList(Arm.LEFT).isEmpty()) {
             CustomModelClient.isRenderingFirstPerson = true;
             CustomJsonModel model = pack.getModel();
             partial = CustomModelClient.getPartial();
@@ -198,11 +196,52 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
     }
 
     @Override
+    public void renderFirstPerson(ClientPlayerEntity player) {
+        ModelPack pack = CustomModelClient.manager.getModelForPlayer(player);
+        GlStateManager.pushMatrix();
+        if (pack != null && !pack.getModel().getFirstPersonList().isEmpty()) {
+            CustomModelClient.isRenderingFirstPerson = true;
+            CustomJsonModel model = pack.getModel();
+            partial = CustomModelClient.getPartial();
+            context.currentJsonModel = model;
+            context.currentModel = getModel();
+            context.currentModel.isSneaking = player.isSneaking();
+            context.currentParameter = calculateTransform(player);
+            context.setPlayer(player);
+            context.isInvisible = false;
+
+            GlStateManager.color3f(1.0F, 1.0F, 1.0F);
+            PlayerEntityModel playerModel = getModel();
+            GlStateManager.enableBlend();
+            float yaw = (float) MathHelper.clampedLerp(player.prevYaw, player.yaw, partial);
+            float pitch = (float) MathHelper.clampedLerp(player.prevPitch, player.pitch, partial);
+            yaw -= (float) MathHelper.clampedLerp(player.field_6220, player.field_6283, partial);
+            float armYaw = (float) MathHelper.clampedLerp(player.lastRenderYaw, player.renderYaw, partial);
+            float armPitch = (float) MathHelper.clampedLerp(player.lastRenderPitch, player.renderPitch, partial);
+            GlStateManager.rotatef(-(player.yaw - armYaw) * 0.1F, 0.0F, 1.0F, 0.0F);
+            GlStateManager.rotatef(-(player.pitch - armPitch) * 0.1F, 1.0F, 0.0F, 0.0F);
+            GlStateManager.scalef(-1, -1, 1);
+            GlStateManager.translatef(0.0F, 1.501F, 0.0F);
+            GlStateManager.scalef(0.9375F, 0.9375F, 0.9375F);
+            GlStateManager.translatef(0.0F, -1.501F, 0.0F);
+            GlStateManager.rotatef(-pitch, 1, 0, 0);
+            GlStateManager.rotatef(-yaw, 0, 1, 0);
+
+            model.clearTransform();
+            model.update(transform, context);
+            model.renderFp(model.getTransform(PlayerBone.NONE.getBone()), context);
+
+            GlStateManager.disableBlend();
+            CustomModelClient.isRenderingFirstPerson = false;
+        }
+        GlStateManager.popMatrix();
+    }
+
+    @Override
     public void tick(LivingEntity livingEntity) {
-        ModelPack model = null;
         context.setEntity(livingEntity);
         if (context.isPlayer()) {
-            model = CustomModelClient.getModelForPlayer(context.getPlayer());
+            ModelPack model = CustomModelClient.manager.getModelForPlayer(context.getPlayer());
             AbstractClientPlayerEntity playerEntity = context.getPlayer();
 
             if (model != null) {
@@ -214,7 +253,6 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
                 context.currentModel = getModel();
                 context.currentModel.isSneaking = playerEntity.isInSneakingPose();
                 context.currentParameter = calculateTransform(playerEntity);
-
                 context.currentJsonModel = model.getModel();
                 context.currentInvTransform = transform.cpy().inv();
 
@@ -228,15 +266,10 @@ public abstract class MixinPlayerEntityRenderer extends LivingEntityRenderer<Abs
     @Inject(method = "method_4215(Lnet/minecraft/client/network/AbstractClientPlayerEntity;DDDFF)V",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/PlayerEntityRenderer;setModelPose(Lnet/minecraft/client/network/AbstractClientPlayerEntity;)V"))
     public void render(AbstractClientPlayerEntity playerEntity, double offX, double offY, double offZ, float rotYaw, float partial, CallbackInfo info) {
-        ModelPack model = CustomModelClient.getModelForPlayer(playerEntity);
+        ModelPack model = CustomModelClient.manager.getModelForPlayer(playerEntity);
         context.setPlayer(playerEntity);
         context.currentModel = getModel();
         context.currentModel.isSneaking = playerEntity.isInSneakingPose();
-
-        disableSetModelPose = model != null;
-        if (disableSetModelPose) {
-            this.setModelPose(playerEntity, model.getModel());
-        }
         this.partial = partial;
     }
 

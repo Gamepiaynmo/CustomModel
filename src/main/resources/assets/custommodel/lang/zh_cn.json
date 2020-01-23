@@ -6,12 +6,16 @@
 
   "text.autoconfig.custommodel.option.client.hideNearParticles": "隐藏过近的粒子",
   "text.autoconfig.custommodel.option.client.hideNearParticles.@Tooltip": "隐藏过于靠近玩家摄像机的粒子以免遮挡视野",
+  "text.autoconfig.custommodel.option.client.sendModels": "发送模型",
+  "text.autoconfig.custommodel.option.client.sendModels.@Tooltip": "自动向服务端发送服务端没有的模型",
   "text.autoconfig.custommodel.option.server.customEyeHeight": "允许改变视角高度",
   "text.autoconfig.custommodel.option.server.customEyeHeight.@Tooltip": "允许自定义模型改变视角高度，若服务端未允许则仅在客户端生效",
   "text.autoconfig.custommodel.option.server.customBoundingBox": "允许改变碰撞体积",
   "text.autoconfig.custommodel.option.server.customBoundingBox.@Tooltip": "允许自定义模型改变碰撞体积，若服务端未允许或服务端未安装模组则无效",
   "text.autoconfig.custommodel.option.server.defaultModel": "默认加载模型",
   "text.autoconfig.custommodel.option.server.defaultModel.@Tooltip": "未给玩家指定模型时，默认选择的模型",
+  "text.autoconfig.custommodel.option.server.receiveModels": "接收模型",
+  "text.autoconfig.custommodel.option.server.receiveModels.@Tooltip": "接收客户端发送的服务端没有的模型",
   "text.autoconfig.custommodel.option.permission.reloadSelfPermission": "重载自己的模型",
   "text.autoconfig.custommodel.option.permission.reloadSelfPermission.@Tooltip": "重载自己的模型所需要的权限等级",
   "text.autoconfig.custommodel.option.permission.reloadOthersPermission": "重载他人的模型",
@@ -27,6 +31,10 @@
   "text.custommodel.modelinfo.name": "名称：%s",
   "text.custommodel.modelinfo.version": "版本：%s",
   "text.custommodel.modelinfo.author": "作者：%s",
+  "text.custommodel.modelinfo.client": "客户端模型",
+  "text.custommodel.modelinfo.otherclient": "客户端上传模型",
+
+  "key.custommodel.selectmodel": "自定义模型选择界面",
 
   "error.custommodel.loadmodelpack": "加载模型包%s失败：%s",
   "error.custommodel.loadmodelpack.nomodel": "未找到model.json",

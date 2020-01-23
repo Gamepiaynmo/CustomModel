@@ -1,8 +1,17 @@
 package com.github.gamepiaynmo.custommodel.network;
 
+import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
+import com.github.gamepiaynmo.custommodel.client.ModelPack;
 import com.github.gamepiaynmo.custommodel.server.CustomModel;
+import com.github.gamepiaynmo.custommodel.server.ModelInfo;
+import net.fabricmc.fabric.api.network.PacketContext;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.network.MessageType;
 import net.minecraft.network.Packet;
 import net.minecraft.network.listener.ClientPlayPacketListener;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.PacketByteBuf;
 
@@ -11,7 +20,7 @@ import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-public class PacketModel implements Packet<ClientPlayPacketListener> {
+public class PacketModel implements IPacket {
     public static final Identifier ID = new Identifier(CustomModel.MODID, "packet_model");
     private UUID uuid;
     private byte[] data;
@@ -54,9 +63,14 @@ public class PacketModel implements Packet<ClientPlayPacketListener> {
         }
     }
 
-    public PacketModel(UUID uuid) {
-        this.uuid = uuid;
-        this.data = new byte[0];
+    public PacketModel(UUID name) {
+        this(name, new byte[0]);
+    }
+
+    public PacketModel(UUID name, byte[] data) {
+        this.uuid = name;
+        this.data = data;
+        success = true;
     }
 
     public PacketModel() {}
@@ -78,16 +92,44 @@ public class PacketModel implements Packet<ClientPlayPacketListener> {
             buf.writeBytes(data);
     }
 
-    @Override
-    public void apply(ClientPlayPacketListener var1) {
-
-    }
-
     public UUID getUuid() {
         return uuid;
     }
 
     public byte[] getData() {
         return data;
+    }
+
+    public static class Server implements IPacketHandler<PacketModel> {
+        @Override
+        public void apply(PacketModel packet, PacketContext context) {
+            try {
+                ModelInfo info = ModelInfo.fromZipMemory(packet.getData());
+                info.sender = context.getPlayer().getUuid();
+                CustomModel.manager.addModelInfo(info, (ServerPlayerEntity) context.getPlayer(), packet.getUuid());
+            } catch (Exception e) {
+                CustomModel.LOGGER.warn(e.getMessage(), e);
+            }
+        }
+    }
+
+    public static class Client implements IPacketHandler<PacketModel> {
+        @Override
+        public void apply(PacketModel packet, PacketContext context) {
+            ModelPack pack = null;
+            try {
+                if (packet.getData().length > 0) {
+                    pack = ModelPack.fromZipMemory(CustomModelClient.textureManager, packet.getUuid(), packet.getData());
+                    if (pack != null && pack.successfulLoaded())
+                        CustomModelClient.manager.addModel(packet.getUuid(), pack);
+                } else {
+                    CustomModelClient.manager.clearModel(packet.getUuid());
+                }
+            } catch (Exception e) {
+                MinecraftClient.getInstance().inGameHud.addChatMessage(MessageType.CHAT,
+                        new TranslatableText("error.custommodel.loadmodelpack", "", e.getMessage()).formatted(Formatting.RED));
+                CustomModelClient.LOGGER.warn(e.getMessage(), e);
+            }
+        }
     }
 }

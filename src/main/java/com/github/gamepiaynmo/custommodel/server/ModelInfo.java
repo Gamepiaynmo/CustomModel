@@ -2,11 +2,11 @@ package com.github.gamepiaynmo.custommodel.server;
 
 import com.github.gamepiaynmo.custommodel.api.ModelPackInfo;
 import com.github.gamepiaynmo.custommodel.expression.ParseException;
-import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
+import com.github.gamepiaynmo.custommodel.client.render.CustomJsonModel;
+import com.github.gamepiaynmo.custommodel.network.PacketModel;
 import com.github.gamepiaynmo.custommodel.util.Json;
 import com.github.gamepiaynmo.custommodel.util.TranslatableException;
 import com.google.common.collect.Maps;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.minecraft.entity.EntityDimensions;
@@ -15,6 +15,7 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 import java.util.Map;
+import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
@@ -27,25 +28,42 @@ public class ModelInfo {
         else return fromZipFile(file);
     }
 
-    private static ModelInfo fromZipFile(File file) throws IOException, ParseException {
-        ZipInputStream zip = new ZipInputStream(new BufferedInputStream(new FileInputStream(file)));
-        ZipFile zf = new ZipFile(file);
+    private static ModelInfo fromZip(InputStream stream) throws IOException, ParseException {
+        ZipInputStream zip = new ZipInputStream(stream);
         ZipEntry entry;
+        InputStream modelInputStream = null;
 
         while ((entry = zip.getNextEntry()) != null) {
             if (entry.isDirectory())
                 continue;
-            if (entry.getName().equals("model.json"))
+            if (entry.getName().equals("model.json")) {
+                byte[] buffer = new byte[1024];
+                ByteArrayOutputStream array = new ByteArrayOutputStream();
+                int cnt = 0;
+                while ((cnt = zip.read(buffer, 0, 1024)) > 0)
+                    array.write(buffer, 0, cnt);
+                array.close();
+                modelInputStream = new ByteArrayInputStream(array.toByteArray());
                 break;
+            }
         }
 
         if (entry == null)
             throw new TranslatableException("error.custommodel.loadmodelpack.nomodel");
-        InputStream modelInputStream = zf.getInputStream(entry);
         JsonObject jsonObj = new JsonParser().parse(new InputStreamReader(modelInputStream)).getAsJsonObject();
         IOUtils.closeQuietly(modelInputStream);
         ModelInfo info = fromJson(jsonObj);
-        info.fileName = file.getName();
+        info.fileName = "";
+        return info;
+    }
+
+    private static ModelInfo fromZipFile(File file) throws IOException, ParseException {
+        return fromZip(new BufferedInputStream(new FileInputStream(file)));
+    }
+
+    public static ModelInfo fromZipMemory(byte[] data) throws IOException, ParseException {
+        ModelInfo info = fromZip(new ByteArrayInputStream(data));
+        info.data = data;
         return info;
     }
 
@@ -106,11 +124,18 @@ public class ModelInfo {
         return res;
     }
 
-    public ModelPackInfo getInfo() {
-        return new ModelPackInfo(fileName, modelId, modelName, version, author);
+    public PacketModel getPacket(UUID uuid) {
+        if (data != null) return new PacketModel(uuid, data);
+        else return new PacketModel(getModelFile(), uuid);
+    }
+
+    public File getModelFile() {
+        return new File(CustomModel.MODEL_DIR + "/" + fileName);
     }
 
     public String fileName;
+    public byte[] data = null;
+    public UUID sender = null;
 
     public String modelId;
     public String modelName;

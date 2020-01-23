@@ -25,7 +25,7 @@ public abstract class MixinServerPlayerEntity extends PlayerEntity {
 
     @Inject(method = "tick()V", at = @At("TAIL"))
     public void updateBoundingBox(CallbackInfo info) {
-        ModelInfo bb = CustomModel.getBoundingBoxForPlayer(this);
+        ModelInfo bb = CustomModel.manager.getModelForPlayer(this);
         if (bb != currentModel) {
             currentModel = bb;
             calculateDimensions();

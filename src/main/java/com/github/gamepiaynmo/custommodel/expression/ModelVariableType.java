@@ -1,10 +1,9 @@
 package com.github.gamepiaynmo.custommodel.expression;
 
-import com.github.gamepiaynmo.custommodel.render.RenderContext;
-import com.github.gamepiaynmo.custommodel.render.model.IBone;
+import com.github.gamepiaynmo.custommodel.client.render.RenderContext;
+import com.github.gamepiaynmo.custommodel.client.render.model.IBone;
 
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 public enum ModelVariableType {
    POS_X("tx", (bone, context) -> (float) bone.getPosition(context).x),

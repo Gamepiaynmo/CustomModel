@@ -3,10 +3,11 @@ package com.github.gamepiaynmo.custommodel.client;
 import com.github.gamepiaynmo.custommodel.expression.ConstantFloat;
 import com.github.gamepiaynmo.custommodel.expression.IExpressionFloat;
 import com.github.gamepiaynmo.custommodel.expression.ParseException;
-import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
-import com.github.gamepiaynmo.custommodel.render.CustomTexture;
-import com.github.gamepiaynmo.custommodel.render.RenderContext;
+import com.github.gamepiaynmo.custommodel.client.render.CustomJsonModel;
+import com.github.gamepiaynmo.custommodel.client.render.CustomTexture;
+import com.github.gamepiaynmo.custommodel.client.render.RenderContext;
 import com.github.gamepiaynmo.custommodel.server.CustomModel;
+import com.github.gamepiaynmo.custommodel.server.ModelInfo;
 import com.github.gamepiaynmo.custommodel.util.TranslatableException;
 import com.github.gamepiaynmo.custommodel.util.Vec2d;
 import com.google.common.collect.Lists;
@@ -28,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
@@ -45,6 +45,17 @@ public class ModelPack {
     private Map<Identifier, Vec2d> textureSizes = Maps.newHashMap();
 
     private ModelPack() {}
+
+    public static ModelPack fromModelInfo(TextureManager textureManager, ModelInfo info, UUID uuid) throws IOException, ParseException {
+        if (info.data != null)
+            return fromZipMemory(textureManager, uuid, info.data);
+        File modelFile = info.getModelFile();
+        if (modelFile.isDirectory())
+            return fromDirectory(textureManager, modelFile, uuid);
+        if (modelFile.isFile())
+            return fromZipFile(textureManager, modelFile, uuid);
+        return null;
+    }
 
     public static ModelPack fromDirectory(TextureManager textureManager, File dir, UUID uuid) throws IOException, ParseException {
         IModelResource modelFile = null;
@@ -242,10 +253,6 @@ public class ModelPack {
         for (Texture texture : texList)
             TextureUtil.releaseTextureId(texture.getGlId());
         model.release();
-    }
-
-    public interface TextureGetter {
-        Identifier getTexture(AbstractClientPlayerEntity player);
     }
 
     public interface IModelResource {

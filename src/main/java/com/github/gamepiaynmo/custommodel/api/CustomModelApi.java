@@ -2,6 +2,7 @@ package com.github.gamepiaynmo.custommodel.api;
 
 import com.github.gamepiaynmo.custommodel.server.CustomModel;
 import com.github.gamepiaynmo.custommodel.server.ModelInfo;
+import com.github.gamepiaynmo.custommodel.server.ModelLoadInfo;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.server.network.ServerPlayerEntity;
 
@@ -13,7 +14,7 @@ public interface CustomModelApi {
      * @param player Specified player.
      */
     public static void reloadModelForPlayer(ServerPlayerEntity player) {
-        CustomModel.reloadModel(player, true);
+        CustomModel.manager.reloadModel(player, true);
     }
 
     /**
@@ -22,7 +23,7 @@ public interface CustomModelApi {
      * @param modelId Model ID of the model pack.
      */
     public static void selectModelForPlayer(ServerPlayerEntity player, String modelId) {
-        CustomModel.selectModel(player, modelId);
+        CustomModel.manager.selectModel(player, modelId);
     }
 
     /**
@@ -32,7 +33,8 @@ public interface CustomModelApi {
      */
     public static void selectModelForOfflinePlayer(String playerName, String modelId) {
         GameProfile profile = CustomModel.server.getUserCache().findByName(playerName);
-        CustomModel.getModelSelector().setModelForPlayer(profile, modelId);
+        if (profile != null)
+            CustomModel.manager.getModelSelector().setModelForPlayer(profile, modelId);
     }
 
     /**
@@ -41,7 +43,9 @@ public interface CustomModelApi {
      * @return Model ID of the model pack.
      */
     public static String getCurrentModelOfPlayer(ServerPlayerEntity player) {
-        return CustomModel.getModelSelector().getModelForPlayer(player.getGameProfile());
+        ModelInfo info = CustomModel.manager.getModelForPlayer(player);
+        return info != null ? info.modelId :
+                CustomModel.manager.getModelSelector().getModelForPlayer(player.getGameProfile());
     }
 
     /**
@@ -51,14 +55,19 @@ public interface CustomModelApi {
      */
     public static String getCurrentModelOfOfflinePlayer(String playerName) {
         GameProfile profile = CustomModel.server.getUserCache().findByName(playerName);
-        return CustomModel.getModelSelector().getModelForPlayer(profile);
+        if (profile != null) {
+            ModelInfo info = CustomModel.manager.getModelForPlayer(profile);
+            if (info != null)
+                return info.modelId;
+        }
+        return CustomModel.manager.getModelSelector().getModelForPlayer(profile);
     }
 
     /**
      * Refresh the model list from disk files.
      */
     public static void refreshModelList() {
-        CustomModel.refreshModelList();
+        CustomModel.manager.refreshModelList();
     }
 
     /**
@@ -66,7 +75,7 @@ public interface CustomModelApi {
      * @return Model ID of loaded model packs.
      */
     public static Collection<String> getModelIdList() {
-        return CustomModel.getModelIdList();
+        return CustomModel.manager.getServerModelIdList();
     }
 
     /**
@@ -75,7 +84,7 @@ public interface CustomModelApi {
      * @return Basic information of the model pack.
      */
     public static ModelPackInfo getModelPackInfo(String modelId) {
-        ModelInfo model = CustomModel.models.get(modelId);
+        ModelLoadInfo model = CustomModel.manager.models.get(modelId);
         return model == null ? null : model.getInfo();
     }
 }

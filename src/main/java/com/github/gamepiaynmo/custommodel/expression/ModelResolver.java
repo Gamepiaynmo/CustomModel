@@ -1,16 +1,13 @@
 package com.github.gamepiaynmo.custommodel.expression;
 
-import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.client.ModelPack;
-import com.github.gamepiaynmo.custommodel.render.CustomJsonModel;
-import com.github.gamepiaynmo.custommodel.render.TickVariable;
-import com.github.gamepiaynmo.custommodel.render.model.IBone;
+import com.github.gamepiaynmo.custommodel.client.render.CustomJsonModel;
+import com.github.gamepiaynmo.custommodel.client.render.TickVariable;
+import com.github.gamepiaynmo.custommodel.client.render.model.IBone;
 import com.google.common.collect.Maps;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.potion.Potion;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 

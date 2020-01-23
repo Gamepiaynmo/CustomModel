@@ -1,8 +1,5 @@
 package com.github.gamepiaynmo.custommodel.server;
 
-import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
-import com.github.gamepiaynmo.custommodel.client.command.ArgumentBuilders;
-import com.github.gamepiaynmo.custommodel.client.command.Command;
 import com.github.gamepiaynmo.custommodel.util.LoadModelException;
 import com.github.gamepiaynmo.custommodel.util.ModelNotFoundException;
 import com.google.common.collect.Lists;
@@ -43,7 +40,7 @@ public class ServerCommand {
             dispatcher.register(CommandManager.literal(CustomModel.MODID
             ).then(CommandManager.literal("reload").requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(ModConfig.getReloadSelfPermission())).executes(context -> {
                 try {
-                    CustomModel.reloadModel(context.getSource().getPlayer(), true);
+                    CustomModel.manager.reloadModel(context.getSource().getPlayer(), true);
                     context.getSource().sendFeedback(new TranslatableText("command.custommodel.reload", 1), true);
                 } catch (LoadModelException e) {
                     context.getSource().sendFeedback(new TranslatableText("error.custommodel.loadmodelpack", e.getFileName(), e.getMessage()).formatted(Formatting.RED), false);
@@ -55,7 +52,7 @@ public class ServerCommand {
                 Collection<ServerPlayerEntity> players = EntityArgumentType.getPlayers(context, "targets");
                 try {
                     for (ServerPlayerEntity player : players)
-                        CustomModel.reloadModel(player, true);
+                        CustomModel.manager.reloadModel(player, true);
                     context.getSource().sendFeedback(new TranslatableText("command.custommodel.reload", players.size()), true);
                 } catch (LoadModelException e) {
                     context.getSource().sendFeedback(new TranslatableText("error.custommodel.loadmodelpack", e.getFileName(), e.getMessage()).formatted(Formatting.RED), false);
@@ -64,7 +61,7 @@ public class ServerCommand {
                 }
                 return players.size();
             }))).then(CommandManager.literal("list").requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(ModConfig.getListModelsPermission())).executes(context -> {
-                Collection<Text> info = CustomModel.getModelInfoList();
+                Collection<Text> info = CustomModel.manager.getServerModelInfoList();
                 context.getSource().sendFeedback(new TranslatableText("command.custommodel.listmodels", info.size()), false);
                 for (Text str : info)
                     context.getSource().sendFeedback(str, false);
@@ -72,7 +69,8 @@ public class ServerCommand {
             })).then(CommandManager.literal("select").then(CommandManager.argument("model", new ModelArgumentType()).requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(ModConfig.getSelectSelfPermission())).executes(context -> {
                 String model = context.getArgument("model", String.class);
                 try {
-                    CustomModel.selectModel(context.getSource().getPlayer(), model);
+                    ServerPlayerEntity sender = context.getSource().getPlayer();
+                    CustomModel.manager.selectModel(sender, sender, model);
                     context.getSource().sendFeedback(new TranslatableText("command.custommodel.select", 1, model), true);
                 } catch (LoadModelException e) {
                     context.getSource().sendFeedback(new TranslatableText("error.custommodel.loadmodelpack", e.getFileName(), e.getMessage()).formatted(Formatting.RED), false);
@@ -84,8 +82,9 @@ public class ServerCommand {
                 Collection<ServerPlayerEntity> players = EntityArgumentType.getPlayers(context, "targets");
                 String model = context.getArgument("model", String.class);
                 try {
+                    ServerPlayerEntity sender = context.getSource().getPlayer();
                     for (ServerPlayerEntity player : players)
-                        CustomModel.selectModel(player, model);
+                        CustomModel.manager.selectModel(sender, player, model);
                     context.getSource().sendFeedback(new TranslatableText("command.custommodel.select", players.size(), model), true);
                 } catch (LoadModelException e) {
                     context.getSource().sendFeedback(new TranslatableText("error.custommodel.loadmodelpack", e.getFileName(), e.getMessage()).formatted(Formatting.RED), false);
@@ -94,17 +93,17 @@ public class ServerCommand {
                 }
                 return players.size();
             })))).then(CommandManager.literal("refresh").requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(ModConfig.getListModelsPermission())).executes(context -> {
-                CustomModel.refreshModelList();
-                context.getSource().sendFeedback(new TranslatableText("command.custommodel.listmodels", CustomModel.models.size()), false);
+                CustomModel.manager.refreshModelList();
+                context.getSource().sendFeedback(new TranslatableText("command.custommodel.listmodels", CustomModel.manager.models.size()), false);
                 return 1;
             })).then(CommandManager.literal("clear").requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(ModConfig.getSelectSelfPermission())).executes(context -> {
-                CustomModel.clearModel(context.getSource().getPlayer());
+                CustomModel.manager.clearModel(context.getSource().getPlayer());
                 context.getSource().sendFeedback(new TranslatableText("command.custommodel.clear", 1), true);
                 return 1;
             }).then(CommandManager.argument("targets", EntityArgumentType.players()).requires(serverCommandSource -> serverCommandSource.hasPermissionLevel(ModConfig.getSelectOthersPermission())).executes(context -> {
                 Collection<ServerPlayerEntity> players = EntityArgumentType.getPlayers(context, "targets");
                 for (ServerPlayerEntity player : players)
-                    CustomModel.clearModel(player);
+                    CustomModel.manager.clearModel(player);
                 context.getSource().sendFeedback(new TranslatableText("command.custommodel.clear", players.size()), true);
                 return players.size();
             }))));
@@ -121,7 +120,7 @@ public class ServerCommand {
         public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
             S source = context.getSource();
             if (source instanceof ServerCommandSource) {
-                return CommandSource.suggestMatching(CustomModel.getModelIdList(), builder);
+                return CommandSource.suggestMatching(CustomModel.manager.getServerModelIdList(), builder);
             } else if (source instanceof CommandSource) {
                 return ((CommandSource) source).getCompletions((CommandContext<CommandSource>) context, builder);
             } else return Suggestions.empty();

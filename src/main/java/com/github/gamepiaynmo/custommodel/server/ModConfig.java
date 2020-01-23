@@ -24,6 +24,9 @@ public class ModConfig implements ConfigData {
     public static class ClientConfig implements ConfigData {
         @ConfigEntry.Gui.Tooltip
         public boolean hideNearParticles = true;
+
+        @ConfigEntry.Gui.Tooltip
+        public boolean sendModels = true;
     }
 
     @Config(name = "server")
@@ -36,6 +39,9 @@ public class ModConfig implements ConfigData {
 
         @ConfigEntry.Gui.Tooltip
         public String defaultModel = "default";
+
+        @ConfigEntry.Gui.Tooltip
+        public boolean receiveModels = true;
     }
 
     @Config(name = "permission")
@@ -59,10 +65,12 @@ public class ModConfig implements ConfigData {
     public static ModConfig getConfig() { return AutoConfig.getConfigHolder(ModConfig.class).getConfig(); }
 
     public static boolean isHideNearParticles() { return getConfig().client.hideNearParticles; }
+    public static boolean isSendModels() { return getConfig().client.sendModels; }
 
     public static boolean isCustomEyeHeight() { return getConfig().server.customEyeHeight; }
     public static boolean isCustomBoundingBox() { return getConfig().server.customBoundingBox; }
     public static String getDefaultModel() { return getConfig().server.defaultModel; }
+    public static boolean isReceiveModels() { return getConfig().server.receiveModels; }
 
     public static int getReloadSelfPermission() { return getConfig().permission.reloadSelfPermission; }
     public static int getReloadOthersPermission() { return getConfig().permission.reloadOthersPermission; }

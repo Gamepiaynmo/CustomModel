@@ -1,10 +1,9 @@
 package com.github.gamepiaynmo.custommodel.expression;
 
 import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
-import com.github.gamepiaynmo.custommodel.render.RenderContext;
+import com.github.gamepiaynmo.custommodel.client.render.RenderContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
 
 import java.util.function.Function;
 

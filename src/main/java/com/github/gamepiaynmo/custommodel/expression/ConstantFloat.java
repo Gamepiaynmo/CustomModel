@@ -1,6 +1,6 @@
 package com.github.gamepiaynmo.custommodel.expression;
 
-import com.github.gamepiaynmo.custommodel.render.RenderContext;
+import com.github.gamepiaynmo.custommodel.client.render.RenderContext;
 
 public class ConstantFloat implements IExpressionFloat {
    private float value;

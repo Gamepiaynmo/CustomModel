@@ -1,8 +1,8 @@
 package com.github.gamepiaynmo.custommodel.mixin;
 
 import com.github.gamepiaynmo.custommodel.server.ModConfig;
-import com.github.gamepiaynmo.custommodel.render.model.CustomParticle;
-import com.github.gamepiaynmo.custommodel.render.model.CustomSheet;
+import com.github.gamepiaynmo.custommodel.client.render.model.CustomParticle;
+import com.github.gamepiaynmo.custommodel.client.render.model.CustomSheet;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleManager;
