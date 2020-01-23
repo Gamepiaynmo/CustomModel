@@ -229,7 +229,6 @@ public class CustomJsonModel {
     public Collection<Bone> getFirstPersonList(EnumHandSide arm) {
         return fpArmList.get(arm);
     }
-
     public Collection<Bone> getFirstPersonList() {
         return fpList;
     }

@@ -92,7 +92,7 @@ public class GuiModelSelection extends GuiScreen {
         itemCount = entryHeight / itemHeight;
 
         searchInput = new GuiTextField(0, mc.fontRenderer, left, bottom + 2, entryWidth + scrollWidth, itemHeight);
-        searchInput.setMaxStringLength(64);
+        searchInput.setMaxStringLength(256);
         searchInput.setFocused(true);
         searchInput.setCanLoseFocus(false);
 

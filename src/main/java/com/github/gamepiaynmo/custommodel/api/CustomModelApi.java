@@ -34,7 +34,8 @@ public interface CustomModelApi {
      */
     public static void selectModelForOfflinePlayer(String playerName, String modelId) {
         GameProfile profile = CustomModel.server.getPlayerProfileCache().getGameProfileForUsername(playerName);
-        CustomModel.manager.getModelSelector().setModelForPlayer(profile, modelId);
+        if (profile != null)
+            CustomModel.manager.getModelSelector().setModelForPlayer(profile, modelId);
     }
 
     /**
@@ -55,9 +56,12 @@ public interface CustomModelApi {
      */
     public static String getCurrentModelOfOfflinePlayer(String playerName) {
         GameProfile profile = CustomModel.server.getPlayerProfileCache().getGameProfileForUsername(playerName);
-        ModelInfo info = CustomModel.manager.getModelForEntity(EntityPlayer.getUUID(profile));
-        return info != null ? info.modelId :
-                CustomModel.manager.getModelSelector().getModelForPlayer(profile);
+        if (profile != null) {
+            ModelInfo info = CustomModel.manager.getModelForEntity(EntityPlayer.getUUID(profile));
+            if (info != null)
+                return info.modelId;
+        }
+        return CustomModel.manager.getModelSelector().getModelForPlayer(profile);
     }
 
     /**

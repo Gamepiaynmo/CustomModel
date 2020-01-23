@@ -59,6 +59,7 @@ public class PacketQuery implements IMessage {
                 try {
                     CustomModel.manager.reloadModel(ctx.getServerHandler().player, message.getPlayerUuid(), false);
                 } catch (LoadModelException e) {
+                    CustomModel.LOGGER.warn(e.getMessage(), e);
                 }
             });
             return null;
@@ -72,6 +73,7 @@ public class PacketQuery implements IMessage {
                 try {
                     CustomModelClient.manager.loadModel(message.getPlayerUuid(), message.getModelId());
                 } catch (ModelNotFoundException e) {
+                    CustomModelClient.LOGGER.warn(e.getMessage(), e);
                 }
             });
             return null;

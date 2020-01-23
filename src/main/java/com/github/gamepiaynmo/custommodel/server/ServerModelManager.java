@@ -35,9 +35,9 @@ public class ServerModelManager {
     private IModelSelector modelSelector = defaultSelector;
 
     public void setModelSelector(IModelSelector modelSelector) {
-        modelSelector = modelSelector;
+        this.modelSelector = modelSelector;
         if (modelSelector == null)
-            modelSelector = defaultSelector;
+            this.modelSelector = defaultSelector;
     }
 
     public IModelSelector getModelSelector() {
@@ -54,16 +54,14 @@ public class ServerModelManager {
 
     public void refreshModelList() {
         models.clear();
-        if (FMLCommonHandler.instance().getSide() == Side.CLIENT) {
-            for (File file : new File(CustomModel.MODEL_DIR).listFiles()) {
-                try {
-                    ModelInfo info = ModelInfo.fromFile(file);
-                    ModelLoadInfo old = models.get(info.modelId);
-                    if (old == null || info.version.compareTo(old.info.version) > 0)
-                        models.put(info.modelId, new ModelLoadInfo(info, false));
-                } catch (Exception e) {
-                    CustomModel.LOGGER.warn(e.getMessage(), e);
-                }
+        for (File file : new File(CustomModel.MODEL_DIR).listFiles()) {
+            try {
+                ModelInfo info = ModelInfo.fromFile(file);
+                ModelLoadInfo old = models.get(info.modelId);
+                if (old == null || info.version.compareTo(old.info.version) > 0)
+                    models.put(info.modelId, new ModelLoadInfo(info, false));
+            } catch (Exception e) {
+                CustomModel.LOGGER.warn(e.getMessage(), e);
             }
         }
 
@@ -199,8 +197,8 @@ public class ServerModelManager {
     public void selectModel(EntityPlayerMP sender, EntityLivingBase entity, String model) throws LoadModelException {
         UUID uuid = entity.getUniqueID();
         ModelLoadInfo info = models.get(model);
-        if (info == null && sender != null) {
-            if (ModConfig.isReceiveModels()) {
+        if (info == null) {
+            if (ModConfig.isReceiveModels() && sender != null) {
                 NetworkHandler.CHANNEL.sendTo(new PacketQuery(uuid, model), sender);
                 return;
             }

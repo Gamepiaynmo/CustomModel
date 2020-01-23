@@ -4,6 +4,7 @@ import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.server.ModConfig;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
@@ -27,12 +28,14 @@ public class PacketConfig implements IMessage, IMessageHandler<PacketConfig, IMe
     public void fromBytes(ByteBuf buf) {
         config.customEyeHeight = buf.readBoolean();
         config.customBoundingBox = buf.readBoolean();
+        config.receiveModels = buf.readBoolean();
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
         buf.writeBoolean(config.customEyeHeight);
         buf.writeBoolean(config.customBoundingBox);
+        buf.writeBoolean(config.receiveModels);
     }
 
     @Override

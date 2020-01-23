@@ -61,21 +61,11 @@ public class CustomModel {
         }
     }
 
-    static private List<EntityPlayerMP> toSendConfigList = Lists.newArrayList();
-
-    @SubscribeEvent
-    public static void onPlayerUpdate(TickEvent.PlayerTickEvent event) {
-        if (event.side == Side.SERVER && event.phase == TickEvent.Phase.END) {
-            if (toSendConfigList.contains(event.player)) {
-                NetworkHandler.CHANNEL.sendTo(new PacketConfig(), (EntityPlayerMP) event.player);
-                toSendConfigList.remove(event.player);
-            }
-        }
-    }
-
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
-        toSendConfigList.add((EntityPlayerMP) event.player);
+        server.addScheduledTask(() -> {
+            NetworkHandler.CHANNEL.sendTo(new PacketConfig(), (EntityPlayerMP) event.player);
+        });
     }
 
     @SubscribeEvent

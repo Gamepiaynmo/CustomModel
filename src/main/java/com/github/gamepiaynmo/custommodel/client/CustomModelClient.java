@@ -85,8 +85,9 @@ public class CustomModelClient {
 
     @SubscribeEvent
     public static void onWorldTick(TickEvent.ClientTickEvent event) {
-        WorldClient world = Minecraft.getMinecraft().world;
-        if (world != null && !Minecraft.getMinecraft().isGamePaused() && event.phase == TickEvent.Phase.END) {
+        Minecraft mc = Minecraft.getMinecraft();
+        WorldClient world = mc.world;
+        if (world != null && !mc.isGamePaused() && event.phase == TickEvent.Phase.END) {
             for (AbstractClientPlayer player : world.getPlayers(AbstractClientPlayer.class, player -> true)) {
                 RenderPlayerHandler.tick(player);
             }
@@ -98,10 +99,10 @@ public class CustomModelClient {
             }
 
             manager.tick();
-            if (selectModelKey.isPressed()) {
+            if (selectModelKey.isPressed() && mc.currentScreen == null) {
                 if (isServerModded)
                     NetworkHandler.CHANNEL.sendToServer(new PacketList());
-                else Minecraft.getMinecraft().displayGuiScreen(new GuiModelSelection());
+                else mc.displayGuiScreen(new GuiModelSelection());
             }
         }
     }

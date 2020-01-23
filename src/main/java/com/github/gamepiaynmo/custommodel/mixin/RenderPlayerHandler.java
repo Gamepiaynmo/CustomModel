@@ -221,8 +221,7 @@ public abstract class RenderPlayerHandler {
         EntityPlayerSP player = mc.player;
         ModelPack pack = CustomModelClient.manager.getModelForPlayer(player);
 
-        boolean flag = mc.getRenderViewEntity() instanceof EntityLivingBase && ((EntityLivingBase)mc.getRenderViewEntity()).isPlayerSleeping();
-        if (mc.gameSettings.thirdPersonView == 0 && !flag && !mc.gameSettings.hideGUI && !mc.playerController.isSpectator()) {
+        if (player.getActiveHand() == event.getHand()) {
             GlStateManager.pushMatrix();
             if (pack != null && !pack.getModel().getFirstPersonList().isEmpty()) {
                 CustomModelClient.isRenderingFirstPerson = true;
@@ -264,9 +263,8 @@ public abstract class RenderPlayerHandler {
     }
 
     public static void tick(EntityLivingBase playerEntity) {
-        ModelPack model = null;
         context.setEntity(playerEntity);
-        model = CustomModelClient.manager.getModelForEntity(context.currentEntity);
+        ModelPack model = CustomModelClient.manager.getModelForEntity(context.currentEntity);
         ModelPlayer playerModel = getModel(playerEntity);
         if (model != null) {
             playerModel.swingProgress = playerEntity.getSwingProgress(1);

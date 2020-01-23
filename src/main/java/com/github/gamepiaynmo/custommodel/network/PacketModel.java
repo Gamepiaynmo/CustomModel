@@ -114,7 +114,7 @@ public class PacketModel implements IMessage {
                     info.sender = sender.getUniqueID();
                     CustomModel.manager.addModelInfo(info, sender, message.getUuid());
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    CustomModel.LOGGER.warn(e.getMessage(), e);
                 }
             });
             return null;
