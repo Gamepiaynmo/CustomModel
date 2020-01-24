@@ -49,8 +49,15 @@ public class PlayerStatureHandler {
             AbstractClientPlayer clientPlayer = (AbstractClientPlayer) player;
             ModelPack pack = CustomModelClient.manager.getModelForPlayer(clientPlayer);
             if (pack != null) {
-                if (CustomModelClient.serverConfig.customEyeHeight && event.phase == TickEvent.Phase.START) {
+                //changed event phase to END, because START feels "delayed by 1 tick"
+                //possibly because entity state is updated at phase "MIDDLE"?
+                //also in vanilla, when you are not standing ON THE GROUND, sneaking will not change eye height,
+                //but sneaking do change the "pose"
+                if (CustomModelClient.serverConfig.customEyeHeight && event.phase == TickEvent.Phase.END) {
                     Float eyeHeight = pack.getModel().getModelInfo().eyeHeightMap.get(pose);
+                    if (pose == EntityPose.SNEAKING && !player.onGround) {
+                        eyeHeight = pack.getModel().getModelInfo().eyeHeightMap.get(EntityPose.STANDING);
+                    }
                     if (eyeHeight != null)
                         player.eyeHeight = eyeHeight;
                     else player.eyeHeight = player.getDefaultEyeHeight();
@@ -66,8 +73,15 @@ public class PlayerStatureHandler {
             EntityPlayerMP serverPlayer = (EntityPlayerMP) player;
             ModelInfo pack = CustomModel.manager.getModelForPlayer(serverPlayer);
             if (pack != null) {
-                if (ModConfig.isCustomEyeHeight() && event.phase == TickEvent.Phase.START) {
+                //changed event phase to END, because START feels "delayed by 1 tick"
+                //possibly because entity state is updated at phase "MIDDLE"?
+                //also in vanilla, when you are not standing ON THE GROUND, sneaking will not change eye height,
+                //but sneaking do change the "pose"
+                if (ModConfig.isCustomEyeHeight() && event.phase == TickEvent.Phase.END) {
                     Float eyeHeight = pack.eyeHeightMap.get(pose);
+                    if (pose == EntityPose.SNEAKING && !player.onGround) {
+                        eyeHeight = pack.eyeHeightMap.get(EntityPose.STANDING);
+                    }
                     if (eyeHeight != null)
                         player.eyeHeight = eyeHeight;
                     else player.eyeHeight = player.getDefaultEyeHeight();
