@@ -2,6 +2,8 @@ package com.github.gamepiaynmo.custommodel.expression;
 
 import com.github.gamepiaynmo.custommodel.client.CustomModelClient;
 import com.github.gamepiaynmo.custommodel.client.render.RenderContext;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 
@@ -21,7 +23,13 @@ public enum RenderEntityParameterBool implements IExpressionBool {
    IS_SPRINTING("is_sprinting", Entity::isSprinting),
    IS_WET("is_wet", Entity::isWet),
    IS_INVENTORY("is_inventory", entity -> CustomModelClient.isRenderingInventory),
-   IS_FIRST_PERSON("is_first_person", entity -> CustomModelClient.isRenderingFirstPerson);
+   IS_FIRST_PERSON("is_first_person", entity -> CustomModelClient.isRenderingFirstPerson),
+   //this expression is added in order to handle the need to render particles only in third person view
+   //for example putting particles on model's fist
+   //seems that this will only be called on client side, so boldly writing "getMinecraft" won't crash the server
+   IS_CAMERA_FIRST_PERSON("is_camera_first_person",
+           entity -> Minecraft.getMinecraft().gameSettings.thirdPersonView == 0
+                   && entity.equals(Minecraft.getMinecraft().player));
 
    private String name;
    private static final RenderEntityParameterBool[] VALUES = values();
