@@ -32,6 +32,8 @@ public class ParticleEmitter {
     private IExpressionFloat[] sizeExpr;
     private IExpressionFloat gravityExpr;
     private IExpressionBool collideExpr;
+    //controls the progress of shining, for now only supports linear changing
+    private IExpressionFloat[] brightnessExpr;
 
     protected Vector3 posRange = Vector3.Zero.cpy();
     protected float dirRange;
@@ -45,6 +47,8 @@ public class ParticleEmitter {
     protected float[] size = new float[2];
     protected float gravity;
     protected boolean collide;
+    //controls the progress of shining, for now only supports linear changing
+    protected float[] brightness = new float[2];
 
     protected double timer;
     private Random random = new Random();
@@ -77,6 +81,8 @@ public class ParticleEmitter {
         emitter.sizeExpr = Json.parseFloatExpressionArray(jsonObj.get(CustomJsonModel.SIZE), 2, new float[] {1, 1}, parser);
         emitter.gravityExpr = Json.getFloatExpression(jsonObj, CustomJsonModel.GRAVITY, 0, parser);
         emitter.collideExpr = Json.getBooleanExpression(jsonObj, CustomJsonModel.COLLIDE, false, parser);
+        //controls the progress of shining, for now only supports linear changing
+        emitter.brightnessExpr = Json.parseFloatExpressionArray(jsonObj.get(CustomJsonModel.BRIGHTNESS), 2, new float[] {1, 1}, parser);
 
         return emitter;
     }
@@ -111,6 +117,8 @@ public class ParticleEmitter {
                 evalFloatArray(size, sizeExpr, context);
                 gravity = gravityExpr.eval(context);
                 collide = collideExpr.eval(context);
+                //controls the progress of shining, for now only supports linear changing
+                evalFloatArray(brightness, brightnessExpr, context);
 
                 Vector3 epos = new Vector3();
                 epos.x = transform.val[12] + context.currentEntity.posX;
@@ -150,6 +158,10 @@ public class ParticleEmitter {
                     particle.setGravity(gravity);
                     particle.setCollide(collide);
                     particle.setTexture(bone.getTexture(context).apply(context));
+                    //whether the particles shall glow in the dark, and how the brightness changes over time
+                    particle.setEmissive(bone.isEmissive());
+                    particle.setBrightnessStart(brightness[0]);
+                    particle.setBrightnessEnd(brightness[1]);
 
                     manager.addEffect(particle);
                 }
