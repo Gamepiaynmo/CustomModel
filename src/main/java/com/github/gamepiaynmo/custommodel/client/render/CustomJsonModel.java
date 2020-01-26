@@ -80,6 +80,8 @@ public class CustomJsonModel {
     public static final String SIZE = "size";
     public static final String GRAVITY = "gravity";
     public static final String COLLIDE = "collide";
+    //added brightness control of particles
+    public static final String BRIGHTNESS = "brightness";
     public static final String ITEM_ID = "itemId";
     public static final String ENCHANTED = "enchanted";
 
