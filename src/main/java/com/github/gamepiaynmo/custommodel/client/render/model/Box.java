@@ -18,7 +18,7 @@ public class Box {
     public final float yMax;
     public final float zMax;
 
-    private Box(int int_1, int int_2, float float_1, float float_2, float float_3, float int_3, float int_4, float int_5, float float_4, float texWidth, float texHeight, boolean mirror) {
+    private Box(float int_1, float int_2, float float_1, float float_2, float float_3, float int_3, float int_4, float int_5, float float_4, float texWidth, float texHeight, boolean mirror) {
         this.xMin = float_1 - int_3 - float_4;
         this.yMin = float_2 - int_4 - float_4;
         this.zMin = float_3 - int_5 - float_4;
@@ -85,12 +85,11 @@ public class Box {
     }
 
     public static Box getBoxFromJson(Bone bone, JsonObject jsonObj, RenderContext context) {
-        int uMin = 0, vMin = 0;
-        float xMin = 0, yMin = 0, zMin = 0, width = 0, height = 0, depth = 0, size = 0;
+        float uMin = 0, vMin = 0, xMin = 0, yMin = 0, zMin = 0, width = 0, height = 0, depth = 0, size = 0;
 
         JsonElement uvArray = jsonObj.get(CustomJsonModel.TEXTURE_OFFSET);
         if (uvArray != null) {
-            int[] arr = Json.parseIntArray(uvArray, 2);
+            float[] arr = Json.parseFloatArray(uvArray, 2);
             uMin = arr[0];
             vMin = arr[1];
         }

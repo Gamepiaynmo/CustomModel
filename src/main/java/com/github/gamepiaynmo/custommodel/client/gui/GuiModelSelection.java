@@ -50,7 +50,7 @@ public class GuiModelSelection extends GuiScreen {
             modelIds.add(info.modelId);
 
         serverModelCount = modelIds.size();
-        if (ModConfig.isSendModels() && CustomModelClient.serverConfig.receiveModels) {
+        if (!CustomModelClient.isServerModded || (ModConfig.isSendModels() && CustomModelClient.serverConfig.receiveModels)) {
             CustomModel.manager.refreshModelList();
             for (ModelLoadInfo info : CustomModel.manager.models.values())
                 if (modelIds.add(info.info.modelId))
@@ -183,7 +183,10 @@ public class GuiModelSelection extends GuiScreen {
 
     private void setSelected(int index) {
         if (index >= 0 && index != selected) {
-            sendChatMessage("/" + CustomModel.MODID + " select " + infoList.get(entries.get(index)).modelId);
+            String modelId = infoList.get(entries.get(index)).modelId;
+            if (CustomModelClient.isServerModded)
+                sendChatMessage("/" + CustomModel.MODID + " select " + modelId);
+            else CustomModelClient.manager.selectModel(Minecraft.getMinecraft().player.getGameProfile(), modelId);
         }
 
         selected = index;

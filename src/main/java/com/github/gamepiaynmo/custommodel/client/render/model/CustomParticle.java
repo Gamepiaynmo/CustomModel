@@ -79,7 +79,7 @@ public class CustomParticle extends Particle {
         int cur = Math.min(cnt - 1, particleAge * cnt / particleMaxAge);
 
         int x = cur % emitter.animation[0];
-        int y = cur / emitter.animation[1];
+        int y = cur / emitter.animation[0];
         minU = x * width;
         maxU = minU + width;
         minV = y * height;

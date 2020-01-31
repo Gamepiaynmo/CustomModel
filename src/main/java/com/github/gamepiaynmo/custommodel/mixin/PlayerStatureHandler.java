@@ -24,7 +24,7 @@ public class PlayerStatureHandler {
         if (!entity.isEntityAlive()) return EntityPose.DYING;
         if (entity.isElytraFlying()) return EntityPose.FALL_FLYING;
         if (entity.isPlayerSleeping()) return EntityPose.SLEEPING;
-        if (entity.isSneaking()) return EntityPose.SNEAKING;
+        if (entity.isSneaking() && entity.onGround) return EntityPose.SNEAKING;
         return EntityPose.STANDING;
     }
 
@@ -45,52 +45,48 @@ public class PlayerStatureHandler {
         EntityPlayer player = event.player;
         EntityPose pose = getPose(player);
 
-        if (event.side == Side.CLIENT) {
-            AbstractClientPlayer clientPlayer = (AbstractClientPlayer) player;
-            ModelPack pack = CustomModelClient.manager.getModelForPlayer(clientPlayer);
-            if (pack != null) {
-                //changed event phase to END, because START feels "delayed by 1 tick"
-                //possibly because entity state is updated at phase "MIDDLE"?
-                //also in vanilla, when you are not standing ON THE GROUND, sneaking will not change eye height,
-                //but sneaking do change the "pose"
-                if (CustomModelClient.serverConfig.customEyeHeight && event.phase == TickEvent.Phase.END) {
-                    Float eyeHeight = pack.getModel().getModelInfo().eyeHeightMap.get(pose);
-                    if (pose == EntityPose.SNEAKING && !player.onGround) {
-                        eyeHeight = pack.getModel().getModelInfo().eyeHeightMap.get(EntityPose.STANDING);
+        if (event.phase == TickEvent.Phase.END) {
+            if (event.side == Side.CLIENT) {
+                AbstractClientPlayer clientPlayer = (AbstractClientPlayer) player;
+                ModelPack pack = CustomModelClient.manager.getModelForPlayer(clientPlayer);
+                if (pack != null) {
+                    //changed event phase to END, because START feels "delayed by 1 tick"
+                    //possibly because entity state is updated at phase "MIDDLE"?
+                    //also in vanilla, when you are not standing ON THE GROUND, sneaking will not change eye height,
+                    //but sneaking do change the "pose"
+                    if (CustomModelClient.serverConfig.customEyeHeight) {
+                        Float eyeHeight = pack.getModel().getModelInfo().eyeHeightMap.get(pose);
+                        if (eyeHeight != null)
+                            player.eyeHeight = eyeHeight;
+                        else player.eyeHeight = player.getDefaultEyeHeight();
                     }
-                    if (eyeHeight != null)
-                        player.eyeHeight = eyeHeight;
-                    else player.eyeHeight = player.getDefaultEyeHeight();
-                }
 
-                if (CustomModelClient.serverConfig.customBoundingBox && event.phase == TickEvent.Phase.END) {
-                    EntityDimensions dimensions = pack.getModel().getModelInfo().dimensionsMap.get(pose);
-                    if (dimensions != null)
-                        setSize(player, dimensions);
-                }
-            }
-        } else {
-            EntityPlayerMP serverPlayer = (EntityPlayerMP) player;
-            ModelInfo pack = CustomModel.manager.getModelForPlayer(serverPlayer);
-            if (pack != null) {
-                //changed event phase to END, because START feels "delayed by 1 tick"
-                //possibly because entity state is updated at phase "MIDDLE"?
-                //also in vanilla, when you are not standing ON THE GROUND, sneaking will not change eye height,
-                //but sneaking do change the "pose"
-                if (ModConfig.isCustomEyeHeight() && event.phase == TickEvent.Phase.END) {
-                    Float eyeHeight = pack.eyeHeightMap.get(pose);
-                    if (pose == EntityPose.SNEAKING && !player.onGround) {
-                        eyeHeight = pack.eyeHeightMap.get(EntityPose.STANDING);
+                    if (CustomModelClient.serverConfig.customBoundingBox) {
+                        EntityDimensions dimensions = pack.getModel().getModelInfo().dimensionsMap.get(pose);
+                        if (dimensions != null)
+                            setSize(player, dimensions);
                     }
-                    if (eyeHeight != null)
-                        player.eyeHeight = eyeHeight;
-                    else player.eyeHeight = player.getDefaultEyeHeight();
                 }
+            } else {
+                EntityPlayerMP serverPlayer = (EntityPlayerMP) player;
+                ModelInfo pack = CustomModel.manager.getModelForPlayer(serverPlayer);
+                if (pack != null) {
+                    //changed event phase to END, because START feels "delayed by 1 tick"
+                    //possibly because entity state is updated at phase "MIDDLE"?
+                    //also in vanilla, when you are not standing ON THE GROUND, sneaking will not change eye height,
+                    //but sneaking do change the "pose"
+                    if (ModConfig.isCustomEyeHeight()) {
+                        Float eyeHeight = pack.eyeHeightMap.get(pose);
+                        if (eyeHeight != null)
+                            player.eyeHeight = eyeHeight;
+                        else player.eyeHeight = player.getDefaultEyeHeight();
+                    }
 
-                if (ModConfig.isCustomBoundingBox() && event.phase == TickEvent.Phase.END) {
-                    EntityDimensions dimensions = pack.dimensionsMap.get(pose);
-                    if (dimensions != null)
-                        setSize(player, dimensions);
+                    if (ModConfig.isCustomBoundingBox()) {
+                        EntityDimensions dimensions = pack.dimensionsMap.get(pose);
+                        if (dimensions != null)
+                            setSize(player, dimensions);
+                    }
                 }
             }
         }

@@ -27,7 +27,7 @@ public class ModelInfo {
         else return fromZipFile(file);
     }
 
-    private static ModelInfo fromZip(InputStream stream) throws IOException, ParseException {
+    private static ModelInfo fromZip(InputStream stream, String filename) throws IOException, ParseException {
         ZipInputStream zip = new ZipInputStream(stream);
         ZipEntry entry;
         InputStream modelInputStream = null;
@@ -52,16 +52,16 @@ public class ModelInfo {
         JsonObject jsonObj = new JsonParser().parse(new InputStreamReader(modelInputStream)).getAsJsonObject();
         IOUtils.closeQuietly(modelInputStream);
         ModelInfo info = fromJson(jsonObj);
-        info.fileName = "";
+        info.fileName = filename;
         return info;
     }
 
     private static ModelInfo fromZipFile(File file) throws IOException, ParseException {
-        return fromZip(new BufferedInputStream(new FileInputStream(file)));
+        return fromZip(new BufferedInputStream(new FileInputStream(file)), file.getName());
     }
 
     public static ModelInfo fromZipMemory(byte[] data) throws IOException, ParseException {
-        ModelInfo info = fromZip(new ByteArrayInputStream(data));
+        ModelInfo info = fromZip(new ByteArrayInputStream(data), "");
         info.data = data;
         return info;
     }
