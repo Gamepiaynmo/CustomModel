@@ -438,7 +438,7 @@ public class CustomJsonModel {
                     Vector3 lastEnd = lastTrans.getTranslation(new Vector3());
                     Vector3 targetEnd = curTrans.getTranslation(new Vector3());
 
-                    Vector3 curEnd = lastEnd.cpy().add(bone.velocity.cpy());
+                    Vector3 curEnd = lastEnd.cpy().add(bone.velocity);
                     curEnd.sub(curStart).nor().scl(bone.getLength()).add(curStart);
 
                     bone.velocity.add(targetEnd.cpy().sub(curEnd).scl(bone.getPhysicsParams()[0]));
@@ -448,7 +448,7 @@ public class CustomJsonModel {
                     bone.velocity.scl(bone.getPhysicsParams()[2]);
 
                     Quaternion direction = new Quaternion().setFromCross(lastEnd.cpy().sub(lastStart).nor(), curEnd.cpy().sub(curStart).nor());
-                    direction.mul(lastTrans.cpy().getRotation(new Quaternion())).nor();
+                    direction.mul(lastTrans.getRotation(new Quaternion())).nor();
                     curTrans = new Matrix4(curStart, direction.slerp(curTrans.getRotation(new Quaternion()), bone.getPhysicsParams()[1]), bone.getScale(context));
                     curTrans.translate(bone.getPosition(context).scl(0.0625));
                 }

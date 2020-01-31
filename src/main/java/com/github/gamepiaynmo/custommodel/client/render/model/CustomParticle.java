@@ -71,7 +71,7 @@ public class CustomParticle extends BillboardParticle {
         }
 
         float width = 1.0f / emitter.animation[0];
-        float height = 1.0f / emitter.animation[1];
+        float height = 1.0f / emitter.animation[0];
         int cur = Math.min(cnt - 1, age * cnt / maxAge);
 
         int x = cur % emitter.animation[0];

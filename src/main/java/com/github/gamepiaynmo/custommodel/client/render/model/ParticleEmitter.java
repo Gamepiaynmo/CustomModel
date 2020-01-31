@@ -96,13 +96,12 @@ public class ParticleEmitter {
             timer += 1;
             density = densityExpr.eval(context);
             if (density > EPS && timer > 0) {
-                posRange = Vector3.Zero.set(posRangeExpr[0].eval(context), posRangeExpr[1].eval(context), posRangeExpr[2].eval(context));
+                posRange = new Vector3(posRangeExpr[0].eval(context), posRangeExpr[1].eval(context), posRangeExpr[2].eval(context));
                 dirRange = dirRangeExpr.eval(context);
                 evalFloatArray(angle, angleExpr, context);
                 evalFloatArray(speed, speedExpr, context);
                 evalFloatArray(rotSpeed, rotSpeedExpr, context);
                 evalFloatArray(lifeSpan, lifeSpanExpr, context);
-                density = densityExpr.eval(context);
                 for (int i = 0; i < 4; i++)
                     evalFloatArray(color[i], colorExpr[i], context);
                 evalFloatArray(size, sizeExpr, context);
