@@ -85,14 +85,13 @@ public class ClientModelManager {
                 if (packetModel.success)
                     NetworkHandler.CHANNEL.sendToServer(packetModel);
             }
-        } catch (ModelNotFoundException e) {
-            if (!model.equals(ModConfig.getDefaultModel()))
-                throw e;
         } catch (Exception e) {
-            ITextComponent text = new TextComponentTranslation("error.custommodel.loadmodelpack", model, e.getMessage());
-            text.getStyle().setColor(TextFormatting.RED);
-            Minecraft.getMinecraft().ingameGUI.addChatMessage(ChatType.CHAT, text);
-            CustomModelClient.LOGGER.warn(e.getMessage(), e);
+            if (!(e instanceof ModelNotFoundException && model.equals(ModConfig.getDefaultModel()))) {
+                ITextComponent text = new TextComponentTranslation("error.custommodel.loadmodelpack", model, e.getMessage());
+                text.getStyle().setColor(TextFormatting.RED);
+                Minecraft.getMinecraft().ingameGUI.addChatMessage(ChatType.CHAT, text);
+                CustomModelClient.LOGGER.warn(e.getMessage(), e);
+            }
         }
 
         if (pack != null && pack.successfulLoaded()) {
