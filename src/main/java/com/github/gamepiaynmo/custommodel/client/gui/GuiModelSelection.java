@@ -96,6 +96,7 @@ public class GuiModelSelection extends Screen {
 
         searchInput = new TextFieldWidget(minecraft.textRenderer, left, bottom + 2, entryWidth + scrollWidth, itemHeight, "");
         searchInput.setMaxLength(256);
+        searchInput.changeFocus(true);
 
         updateSearchEntry();
     }
@@ -163,6 +164,12 @@ public class GuiModelSelection extends Screen {
     public boolean keyPressed(int i, int j, int k) {
         searchInput.keyPressed(i, j, k);
         return super.keyPressed(i, j, k);
+    }
+
+    @Override
+    public boolean charTyped(char c, int i) {
+        searchInput.charTyped(c, i);
+        return super.charTyped(c, i);
     }
 
     @Override
