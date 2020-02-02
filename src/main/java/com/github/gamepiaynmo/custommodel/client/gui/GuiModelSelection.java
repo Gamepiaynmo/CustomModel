@@ -15,6 +15,9 @@ import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
@@ -60,18 +63,23 @@ public class GuiModelSelection extends GuiScreen {
         for (int i = 0; i < infoList.size(); i++) {
             ModelPackInfo info = infoList.get(i);
             List<String> str = Lists.newArrayListWithCapacity(5);
-            str.add("§6" + I18n.format("text.custommodel.modelinfo.id", info.modelId));
-            str.add("§e" + I18n.format("text.custommodel.modelinfo.name", info.modelName));
+            str.add(setColor(new TextComponentTranslation("text.custommodel.modelinfo.id", info.modelId), TextFormatting.GOLD));
+            str.add(setColor(new TextComponentTranslation("text.custommodel.modelinfo.name", info.modelName), TextFormatting.YELLOW));
             if (!info.version.isEmpty())
-                str.add("§a" + I18n.format("text.custommodel.modelinfo.version", info.version));
+                str.add(setColor(new TextComponentTranslation("text.custommodel.modelinfo.version", info.version), TextFormatting.GREEN));
             if (!info.author.isEmpty())
-                str.add("§9" + I18n.format("text.custommodel.modelinfo.author", info.author));
+                str.add(setColor(new TextComponentTranslation("text.custommodel.modelinfo.author", info.author), TextFormatting.BLUE));
             if (i >= serverModelCount)
-                str.add("§7" + I18n.format("text.custommodel.modelinfo.client"));
+                str.add(setColor(new TextComponentTranslation("text.custommodel.modelinfo.client"), TextFormatting.GRAY));
             else if (info.fromClient)
-                str.add("§7" + I18n.format("text.custommodel.modelinfo.otherclient"));
+                str.add(setColor(new TextComponentTranslation("text.custommodel.modelinfo.otherclient"), TextFormatting.GRAY));
             infoStr.add(str);
         }
+    }
+
+    private String setColor(ITextComponent text, TextFormatting color) {
+        text.getStyle().setColor(color);
+        return text.getFormattedText();
     }
 
     @Override

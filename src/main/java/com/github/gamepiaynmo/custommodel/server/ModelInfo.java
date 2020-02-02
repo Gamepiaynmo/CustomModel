@@ -125,7 +125,10 @@ public class ModelInfo {
 
     public PacketModel getPacket(UUID uuid) {
         if (data != null) return new PacketModel(uuid, data);
-        else return new PacketModel(getModelFile(), uuid);
+        else {
+            File modelFile = getModelFile();
+            return modelFile.exists() ? new PacketModel(modelFile, uuid) : new PacketModel(uuid);
+        }
     }
 
     public File getModelFile() {

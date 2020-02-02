@@ -30,6 +30,11 @@ public class ModConfig {
         @Config.LangKey("text.autoconfig.custommodel.option.client.sendModels")
         @Config.Name("SendModels")
         public boolean sendModels = true;
+
+        @Config.Comment("Hide armors of custom models.")
+        @Config.LangKey("text.autoconfig.custommodel.option.client.hideArmors")
+        @Config.Name("HideArmors")
+        public boolean hideArmors = false;
     }
 
     public static class ServerConfig {
@@ -83,6 +88,7 @@ public class ModConfig {
 
     public static boolean isHideNearParticles() { return client.hideNearParticles; }
     public static boolean isSendModels() { return client.sendModels; }
+    public static boolean isHideArmors() { return client.hideArmors; }
 
     public static boolean isCustomEyeHeight() { return server.customEyeHeight; }
     public static boolean isCustomBoundingBox() { return server.customBoundingBox; }
