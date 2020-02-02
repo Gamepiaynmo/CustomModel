@@ -8,6 +8,8 @@
   "text.autoconfig.custommodel.option.client.hideNearParticles.@Tooltip": "隐藏过于靠近玩家摄像机的粒子以免遮挡视野",
   "text.autoconfig.custommodel.option.client.sendModels": "发送模型",
   "text.autoconfig.custommodel.option.client.sendModels.@Tooltip": "自动向服务端发送服务端没有的模型",
+  "text.autoconfig.custommodel.option.client.hideArmors": "隐藏护甲",
+  "text.autoconfig.custommodel.option.client.hideArmors.@Tooltip": "不显示自定义模型的护甲",
   "text.autoconfig.custommodel.option.server.customEyeHeight": "允许改变视角高度",
   "text.autoconfig.custommodel.option.server.customEyeHeight.@Tooltip": "允许自定义模型改变视角高度，若服务端未允许则仅在客户端生效",
   "text.autoconfig.custommodel.option.server.customBoundingBox": "允许改变碰撞体积",

@@ -16,6 +16,8 @@ import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.NarratorManager;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Formatting;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -61,16 +63,16 @@ public class GuiModelSelection extends Screen {
         for (int i = 0; i < infoList.size(); i++) {
             ModelPackInfo info = infoList.get(i);
             List<String> str = Lists.newArrayListWithCapacity(5);
-            str.add("§6" + I18n.translate("text.custommodel.modelinfo.id", info.modelId));
-            str.add("§e" + I18n.translate("text.custommodel.modelinfo.name", info.modelName));
+            str.add(new TranslatableText("text.custommodel.modelinfo.id", info.modelId).formatted(Formatting.GOLD).asFormattedString());
+            str.add(new TranslatableText("text.custommodel.modelinfo.name", info.modelName).formatted(Formatting.YELLOW).asFormattedString());
             if (!info.version.isEmpty())
-                str.add("§a" + I18n.translate("text.custommodel.modelinfo.version", info.version));
+                str.add(new TranslatableText("text.custommodel.modelinfo.version", info.version).formatted(Formatting.GREEN).asFormattedString());
             if (!info.author.isEmpty())
-                str.add("§9" + I18n.translate("text.custommodel.modelinfo.author", info.author));
+                str.add(new TranslatableText("text.custommodel.modelinfo.author", info.author).formatted(Formatting.BLUE).asFormattedString());
             if (i >= serverModelCount)
-                str.add("§7" + I18n.translate("text.custommodel.modelinfo.client"));
+                str.add(new TranslatableText("text.custommodel.modelinfo.client").formatted(Formatting.GRAY).asFormattedString());
             else if (info.fromClient)
-                str.add("§7" + I18n.translate("text.custommodel.modelinfo.otherclient"));
+                str.add(new TranslatableText("text.custommodel.modelinfo.otherclient").formatted(Formatting.GRAY).asFormattedString());
             infoStr.add(str);
         }
     }

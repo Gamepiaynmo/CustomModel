@@ -6,6 +6,7 @@ import com.github.gamepiaynmo.custommodel.client.render.CustomJsonModel;
 import com.github.gamepiaynmo.custommodel.client.render.PlayerFeature;
 import com.github.gamepiaynmo.custommodel.client.render.RenderContext;
 import com.github.gamepiaynmo.custommodel.client.render.model.IBone;
+import com.github.gamepiaynmo.custommodel.server.ModConfig;
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.model.Cuboid;
@@ -33,10 +34,19 @@ public class CustomArmorBiped<T extends AbstractClientPlayerEntity, M extends Bi
 
     @Override
     public void render(T livingEntity_1, float float_1, float float_2, float float_3, float float_4, float float_5, float float_6, float float_7) {
-        this.renderArmor(livingEntity_1, float_1, float_2, float_3, float_4, float_5, float_6, float_7, EquipmentSlot.CHEST);
-        this.renderArmor(livingEntity_1, float_1, float_2, float_3, float_4, float_5, float_6, float_7, EquipmentSlot.LEGS);
-        this.renderArmor(livingEntity_1, float_1, float_2, float_3, float_4, float_5, float_6, float_7, EquipmentSlot.FEET);
-        this.renderArmor(livingEntity_1, float_1, float_2, float_3, float_4, float_5, float_6, float_7, EquipmentSlot.HEAD);
+        ModelPack pack = CustomModelClient.manager.getModelForPlayer(livingEntity_1);
+        CustomJsonModel model = pack == null ? null : pack.getModel();
+        if (model == null) {
+            super.method_17157(livingEntity_1, float_1, float_2, float_3, float_4, float_5, float_6, float_7);
+            return;
+        }
+
+        if (!ModConfig.isHideArmors()) {
+            this.renderArmor(livingEntity_1, float_1, float_2, float_3, float_4, float_5, float_6, float_7, EquipmentSlot.CHEST);
+            this.renderArmor(livingEntity_1, float_1, float_2, float_3, float_4, float_5, float_6, float_7, EquipmentSlot.LEGS);
+            this.renderArmor(livingEntity_1, float_1, float_2, float_3, float_4, float_5, float_6, float_7, EquipmentSlot.FEET);
+            this.renderArmor(livingEntity_1, float_1, float_2, float_3, float_4, float_5, float_6, float_7, EquipmentSlot.HEAD);
+        }
     }
 
     private void renderArmor(T livingEntity_1, float float_1, float float_2, float float_3, float float_4, float float_5, float float_6, float float_7, EquipmentSlot equipmentSlot_1) {

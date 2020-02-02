@@ -406,6 +406,7 @@ public class CustomJsonModel {
             }
 
             for (Bone bone : bones) {
+                bone.update(context);
                 Matrix4 trans = boneMats.get(bone.getParent().getId()).cpy().mul(bone.getTransform(context));
                 boneMats.put(bone.getId(), trans);
                 lastBoneMats.put(bone.getId(), trans.cpy());

@@ -27,6 +27,9 @@ public class ModConfig implements ConfigData {
 
         @ConfigEntry.Gui.Tooltip
         public boolean sendModels = true;
+
+        @ConfigEntry.Gui.Tooltip
+        public boolean hideArmors = false;
     }
 
     @Config(name = "server")
@@ -66,6 +69,7 @@ public class ModConfig implements ConfigData {
 
     public static boolean isHideNearParticles() { return getConfig().client.hideNearParticles; }
     public static boolean isSendModels() { return getConfig().client.sendModels; }
+    public static boolean isHideArmors() { return getConfig().client.hideArmors; }
 
     public static boolean isCustomEyeHeight() { return getConfig().server.customEyeHeight; }
     public static boolean isCustomBoundingBox() { return getConfig().server.customBoundingBox; }
