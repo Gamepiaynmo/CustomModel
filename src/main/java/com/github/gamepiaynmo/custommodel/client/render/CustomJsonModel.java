@@ -201,6 +201,7 @@ public class CustomJsonModel {
     private Map<String, Matrix4> boneMats = Maps.newHashMap();
     private Map<String, Matrix4> lastBoneMats = Maps.newHashMap();
     private Map<String, Matrix4> tmpBoneMats = Maps.newHashMap();
+    private boolean carryon = false;
 
     private final ExpressionParser parser;
 
@@ -209,6 +210,10 @@ public class CustomJsonModel {
             visibleBones.put(bone, true);
         this.pack = pack;
         parser = new ExpressionParser(new ModelResolver(pack, this));
+    }
+
+    public void Setcarryon(boolean carryon) {
+        this.carryon = carryon;
     }
 
     public ModelInfo getModelInfo() {
@@ -274,8 +279,17 @@ public class CustomJsonModel {
             if (bone != PlayerBone.NONE) {
                 IExpressionFloat[] vec = skeleton.get(bone);
                 if (vec != null) {
-                    bone.getCuboid(context.currentModel).setRotationPoint(
-                            (float) -vec[0].eval(context), (float) -vec[1].eval(context), (float) vec[2].eval(context));
+                    if(carryon) {
+                        if (bone == PlayerBone.LEFT_ARM) {
+                            bone.getCuboid(context.currentModel).rotateAngleX = -1.0F;
+                            bone.getCuboid(context.currentModel).rotateAngleY = 0.45F;
+                        } else if (bone == PlayerBone.RIGHT_ARM) {
+                            bone.getCuboid(context.currentModel).rotateAngleX = -1.0F;
+                            bone.getCuboid(context.currentModel).rotateAngleY = -0.45F;
+                        }
+                    }
+                        bone.getCuboid(context.currentModel).setRotationPoint(
+                                (float) -vec[0].eval(context), (float) -vec[1].eval(context), (float) vec[2].eval(context));
                 }
             }
         }
