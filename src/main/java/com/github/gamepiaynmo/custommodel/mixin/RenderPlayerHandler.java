@@ -59,6 +59,7 @@ public abstract class RenderPlayerHandler {
     }
 
     private static RenderContext context = new RenderContext();
+
     public static RenderContext getContext() {
         return context;
     }
@@ -97,6 +98,7 @@ public abstract class RenderPlayerHandler {
                 for (PlayerBone bone : model.getModel().getHiddenBones()) {
                     if (bone != PlayerBone.NONE)
                         bone.getCuboid(context.currentModel).showModel = false;
+
                 }
             }
 
@@ -342,6 +344,8 @@ public abstract class RenderPlayerHandler {
         model.bipedLeftLegwear.setRotationPoint(1.9F, 12.0F, 0.0F);
         model.bipedRightLegwear.setRotationPoint(-1.9F, 12.0F, 0.0F);
         model.bipedBodyWear.setRotationPoint(0.0F, 0.0F, 0.0F);
+
+        //model.bipedRightArm.offsetX = 1.0F;
     }
 
     private static float partial;
@@ -357,24 +361,19 @@ public abstract class RenderPlayerHandler {
     private static void setupTransforms_c(EntityLivingBase entityLiving, float float_1, float float_2, float float_3) {
         transform.rotate(0.0F, 1.0F, 0.0F, 180.0F - float_2);
 
-        if (entityLiving.deathTime > 0)
-        {
-            float f = ((float)entityLiving.deathTime + partial - 1.0F) / 20.0F * 1.6F;
+        if (entityLiving.deathTime > 0) {
+            float f = ((float) entityLiving.deathTime + partial - 1.0F) / 20.0F * 1.6F;
             f = MathHelper.sqrt(f);
 
-            if (f > 1.0F)
-            {
+            if (f > 1.0F) {
                 f = 1.0F;
             }
 
             transform.rotate(0.0F, 0.0F, 1.0F, f * 90);
-        }
-        else
-        {
+        } else {
             String s = TextFormatting.getTextWithoutFormattingCodes(entityLiving.getName());
 
-            if (s != null && ("Dinnerbone".equals(s) || "Grumm".equals(s)) && (!(entityLiving instanceof EntityPlayer) || ((EntityPlayer)entityLiving).isWearing(EnumPlayerModelParts.CAPE)))
-            {
+            if (s != null && ("Dinnerbone".equals(s) || "Grumm".equals(s)) && (!(entityLiving instanceof EntityPlayer) || ((EntityPlayer) entityLiving).isWearing(EnumPlayerModelParts.CAPE))) {
                 transform.translate(0.0F, entityLiving.height + 0.1F, 0.0F);
                 transform.rotate(0.0F, 0.0F, 1.0F, 180.0F);
             }
@@ -382,33 +381,27 @@ public abstract class RenderPlayerHandler {
     }
 
     private static void method_4212_c(EntityLivingBase abstractClientPlayerEntity_1, float float_1, float float_2, float float_3) {
-        if (context.isPlayer() && abstractClientPlayerEntity_1.isEntityAlive() && abstractClientPlayerEntity_1.isPlayerSleeping())
-        {
+        if (context.isPlayer() && abstractClientPlayerEntity_1.isEntityAlive() && abstractClientPlayerEntity_1.isPlayerSleeping()) {
             transform.rotate(0.0F, 1.0F, 0.0F, ((AbstractClientPlayer) abstractClientPlayerEntity_1).getBedOrientationInDegrees());
             transform.rotate(0.0F, 0.0F, 1.0F, 90);
             transform.rotate(0.0F, 1.0F, 0.0F, 270);
-        }
-        else if (abstractClientPlayerEntity_1.isElytraFlying())
-        {
+        } else if (abstractClientPlayerEntity_1.isElytraFlying()) {
             setupTransforms_c(abstractClientPlayerEntity_1, float_1, float_2, float_3);
-            float f = (float)abstractClientPlayerEntity_1.getTicksElytraFlying() + partial;
+            float f = (float) abstractClientPlayerEntity_1.getTicksElytraFlying() + partial;
             float f1 = MathHelper.clamp(f * f / 100.0F, 0.0F, 1.0F);
             transform.rotate(1.0F, 0.0F, 0.0F, f1 * (-90.0F - abstractClientPlayerEntity_1.rotationPitch));
             Vec3d vec3d = abstractClientPlayerEntity_1.getLook(partial);
             double d0 = abstractClientPlayerEntity_1.motionX * abstractClientPlayerEntity_1.motionX + abstractClientPlayerEntity_1.motionZ * abstractClientPlayerEntity_1.motionZ;
             double d1 = vec3d.x * vec3d.x + vec3d.z * vec3d.z;
 
-            if (d0 > 0.0D && d1 > 0.0D)
-            {
+            if (d0 > 0.0D && d1 > 0.0D) {
                 double d2 = (abstractClientPlayerEntity_1.motionX * vec3d.x + abstractClientPlayerEntity_1.motionZ * vec3d.z) / (Math.sqrt(d0) * Math.sqrt(d1));
                 double d3 = abstractClientPlayerEntity_1.motionX * vec3d.z - abstractClientPlayerEntity_1.motionZ * vec3d.x;
-                float angle = (float)(Math.signum(d3) * Math.acos(d2)) * 180.0F / (float)Math.PI;
+                float angle = (float) (Math.signum(d3) * Math.acos(d2)) * 180.0F / (float) Math.PI;
                 if (!Float.isNaN(angle))
                     transform.rotate(0.0F, 1.0F, 0.0F, angle);
             }
-        }
-        else
-        {
+        } else {
             setupTransforms_c(abstractClientPlayerEntity_1, float_1, float_2, float_3);
         }
     }
@@ -422,7 +415,7 @@ public abstract class RenderPlayerHandler {
 
     protected static float interpolateRotation(float prevYawOffset, float yawOffset, float partialTicks) {
         float f;
-        for (f = yawOffset - prevYawOffset; f < -180.0F; f += 360.0F);
+        for (f = yawOffset - prevYawOffset; f < -180.0F; f += 360.0F) ;
         while (f >= 180.0F)
             f -= 360.0F;
         return prevYawOffset + partialTicks * f;
