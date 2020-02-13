@@ -21,6 +21,10 @@ public class CustomParticle extends Particle {
     protected ResourceLocation texture;
 
     private float minU, maxU, minV, maxV;
+    //added an option, making the particle glow in the dark, and controls the brightness
+    private boolean emissive;
+    private float brightnessStart;
+    private float brightnessEnd;
 
     protected CustomParticle(World world_1, ParticleEmitter emitter, Vector3 pos, Vector3 dir) {
         super(world_1, pos.x, pos.y, pos.z);
@@ -60,11 +64,43 @@ public class CustomParticle extends Particle {
     public void setSize(float size) { this.particleScale = size; }
     public void setAlpha(float alpha) { this.setAlphaF(alpha); }
     public void setTexture(ResourceLocation texture) { this.texture = texture; }
+    //added an option, making the particle glow in the dark, and controls the brightness
+    public void setEmissive(boolean emissive) {
+        this.emissive = emissive;
+    }
+    public void setBrightnessStart(float brightnessStart) {
+        this.brightnessStart = brightnessStart;
+    }
+    public void setBrightnessEnd(float brightnessEnd) {
+        this.brightnessEnd = brightnessEnd;
+    }
 
     public ResourceLocation getTexture() { return texture; }
     public Vec3d getPos() { return new Vec3d(posX, posY, posZ); }
 
     public boolean isReleased() { return emitter.released; }
+
+    //if the particle is not emissive, then use the normal brightness
+    //otherwise, use the brightness of flame particles, but adjusted to control the brightness
+    @Override
+    public int getBrightnessForRender(float p_getBrightnessForRender_1_) {
+        if (!this.emissive) {
+            return super.getBrightnessForRender(p_getBrightnessForRender_1_);
+        }
+        float lvt_2_1_ = ((float)this.particleAge + p_getBrightnessForRender_1_) / (float)this.particleMaxAge;
+        lvt_2_1_ = MathHelper.clamp(lvt_2_1_, 0.0F, 1.0F);
+        //adjusted to control the brightness
+        lvt_2_1_ = (float) MathHelper.clampedLerp(this.brightnessStart, this.brightnessEnd, lvt_2_1_);
+        int lvt_3_1_ = super.getBrightnessForRender(p_getBrightnessForRender_1_);
+        int lvt_4_1_ = lvt_3_1_ & 255;
+        int lvt_5_1_ = lvt_3_1_ >> 16 & 255;
+        lvt_4_1_ += (int)(lvt_2_1_ * 15.0F * 16.0F);
+        if (lvt_4_1_ > 240) {
+            lvt_4_1_ = 240;
+        }
+
+        return lvt_4_1_ | lvt_5_1_ << 16;
+    }
 
     private void calcUV() {
         int cnt = emitter.animation[0] * emitter.animation[1];
