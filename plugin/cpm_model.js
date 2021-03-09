@@ -1,13 +1,13 @@
 (function() {
-	let import_action, export_action;
+	let /* import_action, */ export_action;
 	let options = {};
 
 	Plugin.register('cpm_model', {
 		title: 'CPM Model Format',
 		icon: 'star',
-		author: 'Gamepiaynmo',
-		description: 'Import and export models of Minecraft mod Custom Player Model (CPM).',
-		version: '0.1.1',
+		author: 'Gamepiaynmo, LaysDragon and V972',
+		description: 'Import* and export models of Minecraft mod Custom Player Model (CPM).',
+		version: '0.1.3',
 		variant: 'desktop',
 
 		onload() {
@@ -387,31 +387,31 @@
 				}
 			})
 
-			import_action = new Action('import_cpm_model', {
-				name: 'Import CPM Model',
-				description: '',
-				icon: 'star',
-				category: 'file',
-				click() {
-					ElecDialogs.showOpenDialog(
-					    currentwindow,
-					    {
-					        title: 'Import CPM Mpdel',
-					        dontAddToRecent: true,
-					        filters: [{
-					            name: '',
-					            extensions: ['json']
-					        }]
-					    },
-					function (files) {
-					    if (!files) return
-					    fs.readFile(files[0], (err, data) => {
-					        if (err) return
-					        codec.parse(data, files[0])
-					    });
-					});
-				}
-			})
+			// import_action = new Action('import_cpm_model', {
+			// 	name: 'Import CPM Model',
+			// 	description: '',
+			// 	icon: 'star',
+			// 	category: 'file',
+			// 	click() {
+			// 		ElecDialogs.showOpenDialog(
+			// 		    currentwindow,
+			// 		    {
+			// 		        title: 'Import CPM Mpdel',
+			// 		        dontAddToRecent: true,
+			// 		        filters: [{
+			// 		            name: '',
+			// 		            extensions: ['json']
+			// 		        }]
+			// 		    },
+			// 		function (files) {
+			// 		    if (!files) return
+			// 		    fs.readFile(files[0], (err, data) => {
+			// 		        if (err) return
+			// 		        codec.parse(data, files[0])
+			// 		    });
+			// 		});
+			// 	}
+			// })
 
 			export_action = new Action('export_cpm_model', {
 				name: 'Export CPM Model',
@@ -422,31 +422,31 @@
 					let dialog = new Dialog({
 						title: "CPM Model Export",
 						id: "cpm_export",
-						lines: [
-							'<p>Scale: <input type="number" id="scale" value=1 style="background-color:var(--color-back)"></p>',
-							'<p>Helmet: <input type="checkbox" checked=true id="helmet"></p>',
-							'<p>Hat: <input type="checkbox" checked=true id="hat"></p>',
-							'<p>Chestplate: <input type="checkbox" checked=true id="chestplate"></p>',
-							'<p>Leggings: <input type="checkbox" checked=true id="leggings"></p>',
-							'<p>Boots: <input type="checkbox" checked=true id="boots"></p>',
-							'<p>Parrots: <input type="checkbox" checked=true id="parrots"></p>',
-							'<p>Items: <input type="checkbox" checked=true id="items"></p>',
-							'<p>Cape: <input type="checkbox" checked=true id="cape"></p>',
-							'<p>Elytra: <input type="checkbox" checked=true id="elytra"></p>',
-						],
 						draggable: true,
-						onConfirm() {
-							dialog.hide();
-							options.scale = parseFloat($('.dialog#cpm_export input#scale').val());
-							options.helmet = $('.dialog#cpm_export input#helmet').is(':checked');
-							options.hat = $('.dialog#cpm_export input#hat').is(':checked');
-							options.chestplate = $('.dialog#cpm_export input#chestplate').is(':checked');
-							options.leggings = $('.dialog#cpm_export input#leggings').is(':checked');
-							options.boots = $('.dialog#cpm_export input#boots').is(':checked');
-							options.parrots = $('.dialog#cpm_export input#parrots').is(':checked');
-							options.items = $('.dialog#cpm_export input#items').is(':checked');
-							options.cape = $('.dialog#cpm_export input#cape').is(':checked');
-							options.elytra = $('.dialog#cpm_export input#elytra').is(':checked');
+						form: {
+							scale: {label: 'Export Scale', type: 'number', value: 1, step: 0.01},
+							helmet: {label: 'Attach Helmet', type: 'checkbox', value: true},
+							hat: {label: 'Attach Hat', type: 'checkbox', value: true},
+							chestplate: {label: 'Attach Chestplate', type: 'checkbox', value: true},
+							leggings: {label: 'Attach Leggings', type: 'checkbox', value: true},
+							boots: {label: 'Attach Boots', type: 'checkbox', value: true},
+							parrots: {label: 'Attach Parrots', type: 'checkbox', value: true},
+							items: {label: 'Attach Items', type: 'checkbox', value: true},
+							cape: {label: 'Attach Cape', type: 'checkbox', value: true},
+							elytra: {label: 'Attach Elytra', type: 'checkbox', value: true},
+						},
+						onConfirm: function(formData) {
+							this.hide()
+							options.scale =			formData.scale;			console.log(options.scale);
+							options.helmet =		formData.helmet;		console.log(options.helmet);
+							options.hat =			formData.hat;			console.log(options.hat);
+							options.chestplate =	formData.chestplate;	console.log(options.chestplate);
+							options.leggings =		formData.leggings;		console.log(options.leggings);
+							options.boots =			formData.boots;			console.log(options.boots);
+							options.parrots =		formData.parrots;		console.log(options.parrots);
+							options.items =			formData.items;			console.log(options.items);
+							options.cape =			formData.cape;			console.log(options.cape);
+							options.elytra =		formData.elytra;		console.log(options.elytra);
 							codec.export();
 						}
 					});
@@ -459,7 +459,7 @@
 		},
 
 		onunload() {
-			import_action.delete();
+			// import_action.delete();
 			export_action.delete();
 		}
 	});
