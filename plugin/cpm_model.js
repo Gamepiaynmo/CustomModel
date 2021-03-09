@@ -261,17 +261,57 @@
 
 						let boxes = [];
 						for (let child of group.children) {
-							if (child instanceof Cube) {
-								boxes.push(processCube(child, group.origin, bone.position));
+							if (child instanceof Cube && child.export) {
+								if (child.rotation && !root) {
+									// bones.push(processCubeBoneWrapper(child, group, bone));
+									processCubeBoneWrapper(child, group, bone,parent_root)
+								} else {
+									boxes.push(processCube(child, group.origin, bone.position));
+								}
+								// boxes.push(processCube(child, group.origin, bone.position));
 							}
 						}
 						bone.boxes = boxes;
 
 						for (let child of group.children) {
-							if (child instanceof Group) {
+							if (child instanceof Group && child.export) {
 								processGroup(child, group, root);
 							}
 						}
+					}
+
+					function processCubeBoneWrapper(cube, group, bone, parent_root) {
+						let box = processCube(cube, group.origin, bone.position);
+						let bone_position = bone.position;
+						if (!bone_position){
+							bone_position = [0, 0, 0];
+						}
+						let wrapper_group = {
+							id: group.name + '_' + cube.name + '_wrapper_bone',
+							parent: bone.id,
+							position:[cube.origin[0]-group.origin[0]-bone_position[0],cube.origin[1]-group.origin[1]-bone_position[1],cube.origin[2]-group.origin[2]-bone_position[2]],
+							boxes:[],
+						}
+						let name_counter = 1;
+						while (true) {
+							if (bones.find(b => b.id === wrapper_group.id) !== undefined) {
+								wrapper_group.id = group.name + '_' + cube.name + '_wrapper_bone_' + (++name_counter);
+							} else {
+								break;
+							}
+						}
+						let rotation_group = {
+							id: wrapper_group.id + "_pivot_point",
+							parent: wrapper_group.id,
+							rotation: [-cube.rotation[1], -cube.rotation[0], cube.rotation[2]],
+
+						}
+						box.coordinates = [-cube.origin[0]+cube.from[0],-cube.origin[1]+cube.from[1],-cube.origin[2]+cube.from[2]+box.coordinates[5],box.coordinates[3],box.coordinates[4],box.coordinates[5]];
+						rotation_group.boxes = [
+							box,
+						]
+						bones.push(wrapper_group);
+						bones.push(rotation_group);
 					}
 
 					function processCube(cube, pos, orin) {
