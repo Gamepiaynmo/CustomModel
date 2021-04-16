@@ -262,7 +262,7 @@
 						let boxes = [];
 						for (let child of group.children) {
 							if (child instanceof Cube && child.export) {
-								if (child.rotation && !root) {
+								if (Format.rotate_cubes && (!child.rotation.allEqual(0)) && !root) {
 									// bones.push(processCubeBoneWrapper(child, group, bone));
 									processCubeBoneWrapper(child, group, bone,parent_root)
 								} else {
